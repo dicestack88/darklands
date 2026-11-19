@@ -9,3 +9,14 @@
 
 /* Google-only authentication */
 .google-button{position:relative;justify-content:center;gap:12px;cursor:pointer}.google-button .google-g{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#fff;color:#4285f4;font:700 15px Arial,sans-serif}.google-button:disabled{opacity:.6;cursor:wait;transform:none}
+
+.account-media-preview{display:grid;grid-template-columns:76px minmax(0,1fr);gap:14px;align-items:center;margin:18px 0 22px}
+.account-media-preview>img{width:76px;height:76px;object-fit:cover;border-radius:18px;border:1px solid var(--line);background:#111827}
+.account-banner-preview{height:76px;border:1px solid var(--line);border-radius:10px;background:linear-gradient(115deg,#202b4a,#111827);background-size:cover;background-position:center;display:grid;place-items:center;color:#9daac0;font-size:10px}
+.account-banner-preview.has-banner{color:transparent}
+.account-customize-form{margin:0 0 24px;padding:18px;border:1px solid var(--line);border-radius:12px;background:rgba(8,12,20,.45)}
+.account-customize-form label{display:block;color:#c7cedc;font-size:11px;font-weight:600;margin:12px 0 7px}
+.account-customize-form input[type=text],.account-customize-form input[type=file]{width:100%;min-height:43px;padding:10px 12px;border:1px solid rgba(177,191,219,.17);border-radius:8px;background:#0c111b;color:var(--text);font:12px var(--font)}
+.account-field-hint{display:block;color:#8491a8;font-size:10px;font-weight:400;line-height:1.6;margin-top:5px}
+.account-customize-form .button{margin-top:7px;cursor:pointer}
+.account-customize-form .button:disabled{opacity:.6;cursor:wait}

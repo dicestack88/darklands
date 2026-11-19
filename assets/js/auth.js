@@ -103,7 +103,7 @@
 
           const { data: profile, error: profileError } = await client
             .from("profiles")
-            .select("username, display_name, bio, avatar_url")
+            .select("username, display_name, bio, avatar_url, banner_url")
             .eq("id", user.id)
             .single();
 
@@ -114,6 +114,7 @@
 
           const displayName = document.getElementById("app-display-name");
           const username = document.getElementById("app-username");
+          const displayNameNode = displayName;
           const bioPreview = document.getElementById("profile-bio-preview");
           const bioInput = document.getElementById("profile-bio");
           const bioCount = document.getElementById("bio-count");
@@ -132,6 +133,58 @@
             });
           }
 
+
+          const customizeForm=document.getElementById("account-customize-form");
+          if(customizeForm){
+            const nameInput=document.getElementById("account-display-name");
+            const avatarInput=document.getElementById("account-avatar-file");
+            const bannerInput=document.getElementById("account-banner-file");
+            const customizeMessage=document.getElementById("account-customize-message");
+            const avatarPreview=document.getElementById("account-avatar-preview");
+            const bannerPreview=document.getElementById("account-banner-preview");
+            nameInput.value=profile.display_name||"";
+            if(profile.avatar_url){avatarPreview.src=profile.avatar_url;avatarPreview.hidden=false;}
+            if(profile.banner_url){bannerPreview.style.backgroundImage="linear-gradient(90deg,rgba(5,8,15,.18),rgba(5,8,15,.05)),url("+JSON.stringify(profile.banner_url)+")";bannerPreview.classList.add("has-banner");bannerPreview.textContent="";}
+            customizeForm.addEventListener("submit",async event=>{
+              event.preventDefault();
+              customizeMessage.textContent="";
+              const displayName=nameInput.value.trim();
+              const avatarFile=avatarInput.files[0];
+              const bannerFile=bannerInput.files[0];
+              if(displayName.length<1||displayName.length>32){customizeMessage.textContent="Display name must be 1–32 characters.";return;}
+              const allowed=["image/jpeg","image/png","image/webp"];
+              for(const file of [avatarFile,bannerFile]){
+                if(file&&(!allowed.includes(file.type)||file.size>5*1024*1024)){customizeMessage.textContent="Choose a JPG, PNG or WebP image no larger than 5 MB.";return;}
+              }
+              const save=customizeForm.querySelector('button[type="submit"]');
+              save.disabled=true;save.textContent="Saving…";
+              const uploaded=[];
+              try{
+                const updates={display_name:displayName};
+                const upload=async(file,kind)=>{
+                  if(!file)return null;
+                  const ext=({"image/jpeg":"jpg","image/png":"png","image/webp":"webp"})[file.type];
+                  const path=user.id+"/"+kind+"-"+crypto.randomUUID()+"."+ext;
+                  const {error:uploadError}=await client.storage.from("darklands-profile-media").upload(path,file,{contentType:file.type,upsert:false});
+                  if(uploadError)throw uploadError;
+                  uploaded.push(path);
+                  return client.storage.from("darklands-profile-media").getPublicUrl(path).data.publicUrl;
+                };
+                if(avatarFile)updates.avatar_url=await upload(avatarFile,"avatar");
+                if(bannerFile)updates.banner_url=await upload(bannerFile,"banner");
+                const {error:updateError}=await client.from("profiles").update(updates).eq("id",user.id);
+                if(updateError)throw updateError;
+                if(displayName)displayNameNode.textContent=displayName;
+                if(avatarPreview&&updates.avatar_url){avatarPreview.src=updates.avatar_url;avatarPreview.hidden=false;}
+                if(bannerPreview&&updates.banner_url){bannerPreview.style.backgroundImage="linear-gradient(90deg,rgba(5,8,15,.18),rgba(5,8,15,.05)),url("+JSON.stringify(updates.banner_url)+")";bannerPreview.classList.add("has-banner");bannerPreview.textContent="";}
+                customizeMessage.textContent="Your account appearance has been saved.";
+                avatarInput.value="";bannerInput.value="";
+              }catch(error){
+                if(uploaded.length)await client.storage.from("darklands-profile-media").remove(uploaded);
+                customizeMessage.textContent="We couldn't save your changes. Please try again.";
+              }finally{save.disabled=false;save.innerHTML='Save account appearance <span aria-hidden="true">↗</span>';}
+            });
+          }
           if (profileForm && bioInput && profileMessage) {
             profileForm.addEventListener("submit", async event => {
               event.preventDefault();
