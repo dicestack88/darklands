@@ -18,7 +18,7 @@
   <header class="site-header clips-topbar">
     <a class="brand" href="./"><span class="brand-mark">D</span><span>DARKLANDS</span></a>
     <nav class="clips-header-nav">
-      <a class="text-link" id="clips-own-profile" href="app.html">Your profile</a><a class="text-link" href="app.html">Your account</a>
+      <a class="text-link" href="#clips-discover">Discover</a><a class="text-link" id="clips-own-profile" href="app.html">My profile</a><a class="text-link" href="app.html">My account</a>
       <button class="button button-small" id="clips-logout" type="button">Log out</button>
     </nav>
   </header>
@@ -32,6 +32,15 @@
       </div>
     </div>
     <p id="clips-status" class="clips-status" role="status" aria-live="polite">Checking your sign-in…</p>
+    <section class="clips-discover" id="clips-discover" aria-label="Search Darklands">
+      <div class="clips-discover-copy"><span class="clips-kicker">FIND YOUR PEOPLE</span><h2>Discover Darklands</h2><p>Search creators and clips from across the community.</p></div>
+      <form id="clips-search-form" class="clips-search-form" role="search">
+        <span class="clips-search-icon" aria-hidden="true">⌕</span>
+        <input id="clips-search-input" type="search" maxlength="60" placeholder="Search creators or clips…" autocomplete="off" aria-label="Search creators or clips">
+        <button type="submit">Search</button>
+      </form>
+      <div id="clips-search-results" class="clips-search-results" hidden aria-live="polite"></div>
+    </section>
 
     <section class="clips-panel clips-upload-panel" id="clips-upload-panel" hidden>
       <div class="clips-panel-heading">
