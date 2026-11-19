@@ -32,64 +32,6 @@
       $("creator-cover").classList.add("has-custom-banner");
     }
     const ownProfile=auth.user.id===profile.id;
-    const editPanel=$("creator-edit-panel");
-    if(ownProfile){
-      editPanel.hidden=false;
-      $("creator-edit-name").value=profile.display_name||"";
-      const editForm=$("creator-edit-form");
-      const editMessage=$("creator-edit-message");
-      const saveButton=$("creator-edit-save");
-      const imageTypes=["image/jpeg","image/png","image/webp"];
-      const maxImageBytes=5*1024*1024;
-      editForm.addEventListener("submit",async event=>{
-        event.preventDefault();
-        editMessage.textContent="";
-        const displayName=$("creator-edit-name").value.trim();
-        const avatarFile=$("creator-edit-avatar").files[0];
-        const bannerFile=$("creator-edit-banner").files[0];
-        if(displayName.length<1||displayName.length>32){editMessage.textContent="Display name must be 1–32 characters.";return;}
-        for(const file of [avatarFile,bannerFile]){
-          if(file&&(!imageTypes.includes(file.type)||file.size>maxImageBytes)){
-            editMessage.textContent="Choose a JPG, PNG or WebP image no larger than 5 MB.";
-            return;
-          }
-        }
-        saveButton.disabled=true;saveButton.textContent="Saving…";
-        const uploadedPaths=[];
-        try{
-          const updates={display_name:displayName};
-          const uploadImage=async(file,kind)=>{
-            if(!file)return null;
-            const extension=({"image/jpeg":"jpg","image/png":"png","image/webp":"webp"})[file.type];
-            const path=auth.user.id+"/"+kind+"-"+crypto.randomUUID()+"."+extension;
-            const {error:uploadError}=await client.storage.from("darklands-profile-media").upload(path,file,{contentType:file.type,upsert:false});
-            if(uploadError)throw uploadError;
-            uploadedPaths.push(path);
-            const {data}=client.storage.from("darklands-profile-media").getPublicUrl(path);
-            return data.publicUrl;
-          };
-          if(avatarFile)updates.avatar_url=await uploadImage(avatarFile,"avatar");
-          if(bannerFile)updates.banner_url=await uploadImage(bannerFile,"banner");
-          const {error:updateError}=await client.from("profiles").update(updates).eq("id",auth.user.id);
-          if(updateError)throw updateError;
-          $("creator-name").textContent=displayName;
-          if(updates.avatar_url){
-            const image=document.createElement("img");image.src=updates.avatar_url;image.alt="";
-            $("creator-avatar").replaceChildren(image);
-          }
-          if(updates.banner_url){
-            $("creator-cover").style.backgroundImage="linear-gradient(90deg,rgba(5,8,15,.18),rgba(5,8,15,.05)),url("+JSON.stringify(updates.banner_url)+")";
-            $("creator-cover").classList.add("has-custom-banner");
-          }
-          editMessage.textContent="Your profile has been updated!";
-          $("creator-edit-avatar").value="";$("creator-edit-banner").value="";
-          document.title=displayName+" (@"+profile.username+") — Darklands";
-        }catch(saveError){
-          if(uploadedPaths.length)await client.storage.from("darklands-profile-media").remove(uploadedPaths);
-          editMessage.textContent="We couldn't save your changes. Please check the image and try again.";
-        }finally{saveButton.disabled=false;saveButton.textContent="Save profile changes ↗";}
-      });
-    }
     const followButton=$("creator-follow-button");
     $("creator-own-label").hidden=!ownProfile;
     const [{count:followerCount,error:followerError},{count:followingCount,error:followingError}]=await Promise.all([
