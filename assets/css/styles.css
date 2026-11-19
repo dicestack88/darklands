@@ -70,3 +70,58 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 @media(max-width:620px){.settings-shell{width:calc(100% - 28px);padding-top:32px}.profile-card{padding:20px}.profile-card .clips-account-link{align-items:stretch;flex-direction:column}.profile-card .clips-account-link .button{width:100%}}
 
 .notification-nav-link{display:inline-flex;align-items:center;gap:7px}.notification-nav-count{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:20px;background:#ff7898;color:#1a0b13;font:700 9px var(--font)}.notification-nav-count[hidden]{display:none}
+
+
+/* Shared navigation alignment: consistent spacing across account and content pages. */
+.site-header {
+  width: min(100%, 1320px);
+  padding-inline: clamp(18px, 3.2vw, 40px);
+  gap: 24px;
+}
+.header-nav {
+  justify-content: flex-end;
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  gap: clamp(12px, 1.8vw, 22px);
+  white-space: nowrap;
+}
+.header-nav .text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  line-height: 1.2;
+}
+.header-nav .button { flex: 0 0 auto; }
+.notification-nav-count {
+  min-width: 19px;
+  height: 19px;
+  padding: 0 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #ff789b;
+  color: #160912;
+  font: 700 10px var(--font);
+}
+.notification-nav-count[hidden] { display: none; }
+@media (max-width: 700px) {
+  .site-header {
+    height: auto;
+    min-height: 70px;
+    padding-block: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+    row-gap: 10px;
+  }
+  .header-nav {
+    flex: 1 1 100%;
+    justify-content: center;
+    gap: 10px 18px;
+    padding-bottom: 3px;
+  }
+}
+@media (max-width: 420px) {
+  .header-nav { gap: 9px 13px; font-size: 11px; }
+  .header-nav .button-small { min-height: 35px; padding-inline: 11px; }
+}

@@ -327,12 +327,14 @@
           const handle=document.createElement("span");handle.className="clip-comment-handle";handle.textContent="@"+(authorProfile?.username||"member")+" · "+new Date(item.created_at).toLocaleString(undefined,{dateStyle:"medium",timeStyle:"short"});
           const body=document.createElement("p");body.textContent=item.body;
           const controls=document.createElement("div");controls.className="clip-comment-controls";
-          const hearts=heartRows.filter(row=>row.comment_id===item.id);let hearted=hearts.some(row=>row.user_id===currentUser.id);
-          const heart=document.createElement("button");heart.type="button";heart.className="clip-comment-control"+(hearted?" liked":"");heart.textContent=(hearted?"♥ ":"♡ ")+hearts.length;
+          const hearts=heartRows.filter(row=>row.comment_id===item.id);let hearted=hearts.some(row=>row.user_id===currentUser.id);let heartCount=hearts.length;
+          const heart=document.createElement("button");heart.type="button";heart.className="clip-comment-control"+(hearted?" liked":"");heart.textContent=(hearted?"♥ ":"♡ ")+heartCount;
+          heart.setAttribute("aria-label",(hearted?"Remove heart":"Heart")+" on comment, "+heartCount+" hearts");
           heart.addEventListener("click",async()=>{
-            if(heart.disabled)return;const before=hearted;hearted=!hearted;heart.disabled=true;heart.classList.toggle("liked",hearted);heart.textContent=(hearted?"♥ ":"♡ ")+(hearts.length+(hearted?1:-1));
+            if(heart.disabled)return;const before=hearted;hearted=!before;heartCount=Math.max(0,heartCount+(hearted?1:-1));heart.disabled=true;heart.classList.toggle("liked",hearted);heart.textContent=(hearted?"♥ ":"♡ ")+heartCount;
+            heart.setAttribute("aria-label",(hearted?"Remove heart":"Heart")+" on comment, "+heartCount+" hearts");
             const result=before?await client.from("clip_comment_likes").delete().eq("comment_id",item.id).eq("user_id",currentUser.id):await client.from("clip_comment_likes").insert({comment_id:item.id,user_id:currentUser.id});
-            if(result.error){hearted=before;heart.classList.toggle("liked",hearted);heart.textContent=(hearted?"♥ ":"♡ ")+hearts.length;say("Couldn't update that comment heart.");}
+            if(result.error){hearted=before;heartCount=Math.max(0,heartCount+(before?1:-1));heart.classList.toggle("liked",hearted);heart.textContent=(hearted?"♥ ":"♡ ")+heartCount;heart.setAttribute("aria-label",(hearted?"Remove heart":"Heart")+" on comment, "+heartCount+" hearts");say("Couldn't update that comment heart.");}
             heart.disabled=false;
           });
           controls.append(heart);
