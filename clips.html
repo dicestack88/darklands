@@ -14,21 +14,30 @@
   <script defer src="assets/js/supabase-config.js"></script>
   <script defer src="assets/js/clips.js"></script>
 </head>
-<body class="auth-page">
-  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
-  <header class="site-header">
+<body class="auth-page clips-feed-page">
+  <header class="site-header clips-topbar">
     <a class="brand" href="./"><span class="brand-mark">D</span><span>DARKLANDS</span></a>
-    <nav class="clips-header-nav"><a class="text-link" href="app.html">Your account</a><button class="button button-small" id="clips-logout" type="button">Log out</button></nav>
+    <nav class="clips-header-nav">
+      <a class="text-link" href="app.html">Your account</a>
+      <button class="button button-small" id="clips-logout" type="button">Log out</button>
+    </nav>
   </header>
-  <main class="clips-shell" id="clips-app">
-    <div class="eyebrow"><span class="status-dot"></span> DARKLANDS / CLIPS</div>
-    <div class="clips-heading">
-      <div><h1>Clips<span>.</span></h1><p>Share a moment with the community.</p></div>
-      <div class="clips-access-label">MEMBERS ONLY</div>
+  <main class="clips-feed-shell" id="clips-app">
+    <div class="clips-feed-heading">
+      <div><span class="clips-kicker">DARKLANDS COMMUNITY</span><h1>Clips<span>.</span></h1></div>
+      <div class="clips-feed-actions">
+        <button class="clips-tab active" id="feed-tab" type="button">For you</button>
+        <button class="clips-tab" id="upload-toggle" type="button">＋ Upload</button>
+        <button class="clips-tab" id="submissions-toggle" type="button">Your clips</button>
+      </div>
     </div>
     <p id="clips-status" class="clips-status" role="status" aria-live="polite">Checking your sign-in…</p>
-    <section class="clips-panel" id="clips-upload-panel" hidden>
-      <div class="clips-panel-heading"><div><span class="clips-kicker">NEW POST</span><h2>Upload a clip</h2><p>Videos are private while they wait for review.</p></div><span class="clips-step">01 / SHARE</span></div>
+
+    <section class="clips-panel clips-upload-panel" id="clips-upload-panel" hidden>
+      <div class="clips-panel-heading">
+        <div><span class="clips-kicker">NEW POST</span><h2>Upload a clip</h2><p>Videos stay private until a moderator approves them.</p></div>
+        <button class="clips-close" id="upload-close" type="button" aria-label="Close upload panel">×</button>
+      </div>
       <form id="clip-upload-form" class="clip-form">
         <label for="clip-file">Choose a video</label>
         <input id="clip-file" name="video" type="file" accept="video/mp4,video/webm,video/quicktime" required>
@@ -39,13 +48,29 @@
         <p id="clip-upload-message" class="form-message" role="status" aria-live="polite"></p>
         <button class="button" id="clip-upload-button" type="submit">Upload for review <span aria-hidden="true">↗</span></button>
       </form>
-      <div class="clips-review-note"><span>◈</span><p><strong>Review first.</strong> Your upload starts as pending and won't appear in the community feed until approved.</p></div>
+      <div class="clips-review-note"><span>◈</span><p><strong>Review first.</strong> Your clip enters the feed only after approval.</p></div>
     </section>
+
+    <section class="clips-feed-layout" id="clips-feed-layout" aria-label="Community clips">
+      <div class="clips-feed-column">
+        <div class="clips-feed" id="clips-feed" tabindex="0" aria-label="Scroll through approved community clips">
+          <div class="clips-feed-state"><span class="clips-loader"></span><p>Loading the community…</p></div>
+        </div>
+        <button class="clips-load-more" id="clips-load-more" type="button" hidden>Load more clips</button>
+      </div>
+      <aside class="clips-side-note">
+        <span class="clips-kicker">THE COMMUNITY</span>
+        <h2>Good clips.<br>Good people.</h2>
+        <p>Scroll through moments shared by the Darklands community.</p>
+        <div class="clips-side-rule"></div>
+        <p class="clips-side-small">Only moderator-approved videos appear in this feed.</p>
+      </aside>
+    </section>
+
     <section class="clips-submissions" id="clips-submissions" hidden>
       <div class="clips-list-heading"><div><span class="clips-kicker">YOUR LIBRARY</span><h2>Your submissions</h2></div><button class="clips-refresh" id="clips-refresh" type="button">Refresh ↻</button></div>
       <div id="clips-list" class="clips-list"><p class="clips-empty">Loading your clips…</p></div>
     </section>
-    <p class="clips-footnote">The community feed, reactions and comments are still being developed.</p>
   </main>
   <footer class="site-footer"><span>© 2026 DARKLANDS</span><span>A DICESTACK88 PROJECT</span></footer>
 </body>
