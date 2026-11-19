@@ -37,7 +37,7 @@
       body.append(line,time);
       const marker=document.createElement("span");marker.className="notification-dot";marker.setAttribute("aria-hidden","true");
       item.append(avatar,body,marker);
-      item.addEventListener("click",async()=>{if(!row.read_at)await client.from("notifications").update({read_at:new Date().toISOString()}).eq("id",row.id).eq("recipient_id",user.id);});
+      item.addEventListener("click",async event=>{if(row.read_at)return;event.preventDefault();const destination=item.href;item.classList.remove("is-unread");const {error:markError}=await client.from("notifications").update({read_at:new Date().toISOString()}).eq("id",row.id).eq("recipient_id",user.id);if(markError)message("Could not mark this notification as read. Opening it anyway.");window.location.assign(destination);});
       list.append(item);
     }
     readAll.disabled=!rows.some(row=>!row.read_at);
