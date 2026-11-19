@@ -112,8 +112,62 @@
             return;
           }
 
-          document.getElementById("app-display-name").textContent = profile.display_name;
-          document.getElementById("app-username").textContent = "@" + profile.username;
+          const displayName = document.getElementById("app-display-name");
+          const username = document.getElementById("app-username");
+          const bioPreview = document.getElementById("profile-bio-preview");
+          const bioInput = document.getElementById("profile-bio");
+          const bioCount = document.getElementById("bio-count");
+          const profileForm = document.getElementById("profile-form");
+          const profileMessage = document.getElementById("profile-message");
+
+          if (displayName) displayName.textContent = profile.display_name;
+          if (username) username.textContent = "@" + profile.username;
+          if (bioPreview) bioPreview.textContent = profile.bio || "No bio added yet.";
+          if (bioInput) bioInput.value = profile.bio || "";
+          if (bioCount && bioInput) bioCount.textContent = bioInput.value.length + " / 160";
+
+          if (bioInput && bioCount) {
+            bioInput.addEventListener("input", () => {
+              bioCount.textContent = bioInput.value.length + " / 160";
+            });
+          }
+
+          if (profileForm && bioInput && profileMessage) {
+            profileForm.addEventListener("submit", async event => {
+              event.preventDefault();
+              const bio = bioInput.value.trim();
+              if (bio.length > 160) {
+                profileMessage.textContent = "Your bio must be 160 characters or fewer.";
+                return;
+              }
+
+              const saveButton = profileForm.querySelector('button[type="submit"]');
+              if (saveButton) {
+                saveButton.disabled = true;
+                saveButton.textContent = "Saving…";
+              }
+              profileMessage.textContent = "";
+
+              try {
+                const { error: updateError } = await client
+                  .from("profiles")
+                  .update({ bio })
+                  .eq("id", user.id);
+
+                if (updateError) throw updateError;
+                if (bioPreview) bioPreview.textContent = bio || "No bio added yet.";
+                profileMessage.textContent = "Your bio has been saved.";
+              } catch (saveError) {
+                profileMessage.textContent = "We couldn't save your bio. Please try again.";
+              } finally {
+                if (saveButton) {
+                  saveButton.disabled = false;
+                  saveButton.innerHTML = 'Save bio <span aria-hidden="true">↗</span>';
+                }
+              }
+            });
+          }
+
           if (content) content.hidden = false;
           setStatus("Signed in and email verified.");
         } catch (error) {

@@ -11,6 +11,18 @@
 <main class="settings-shell" id="protected-app"><div class="eyebrow"><span class="status-dot"></span> PRIVATE ACCOUNT AREA</div>
 <h1 style="font:600 clamp(42px,6vw,66px)/1 var(--display);letter-spacing:-.07em;margin:18px 0 12px">Welcome to <span style="color:#9eafff">Darklands.</span></h1>
 <p id="app-status" class="auth-subtitle" role="status" aria-live="polite">Checking your sign-in…</p>
-<section class="auth-card" id="app-content" hidden><div class="eyebrow">YOUR PROFILE</div><h2 id="app-display-name">Account</h2><p id="app-username" class="auth-subtitle"></p>
-<p class="prototype-note">Your account is connected. The community feed, clips and messaging will be built after authentication has been fully tested.</p></section></main>
+<section class="auth-card profile-card" id="app-content" hidden>
+<div class="eyebrow">YOUR PROFILE</div>
+<h2 id="app-display-name">Account</h2>
+<p id="app-username" class="auth-subtitle"></p>
+<div class="profile-summary"><span class="profile-summary-label">ABOUT YOU</span><p id="profile-bio-preview">No bio added yet.</p></div>
+<form id="profile-form" class="profile-form">
+<label for="profile-bio">Edit your bio</label>
+<textarea id="profile-bio" name="bio" maxlength="160" rows="3" placeholder="A little about yourself..."></textarea>
+<div class="profile-form-meta"><span>Maximum 160 characters. Avoid sharing private information.</span><span id="bio-count">0 / 160</span></div>
+<p id="profile-message" class="form-message" role="status" aria-live="polite"></p>
+<button class="button" type="submit">Save bio <span aria-hidden="true">↗</span></button>
+</form>
+<p class="prototype-note">This is the first live profile feature. Clips, comments, friends and messaging are still being built.</p>
+</section></main>
 <footer class="site-footer"><span>© 2026 DARKLANDS</span><span>A DICESTACK88 PROJECT</span></footer></body></html>
