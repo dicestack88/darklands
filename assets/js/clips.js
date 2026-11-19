@@ -150,8 +150,7 @@
       const { error: insertError } = await client.from("clips").insert({
         user_id: currentUser.id,
         caption,
-        storage_path: storagePath,
-        status: "pending"
+        storage_path: storagePath
       });
       if (insertError) throw insertError;
 
