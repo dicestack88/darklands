@@ -27,6 +27,20 @@ $$;
 revoke all on function public.is_darklands_moderator() from public, anon;
 grant execute on function public.is_darklands_moderator() to authenticated;
 
+drop policy if exists "Moderators can read clips for review" on storage.objects;
+
+create policy "Moderators can read clips for review"
+  on storage.objects for select to authenticated
+  using (
+    bucket_id = 'darklands-clips'
+    and (select public.is_darklands_moderator())
+    and exists (
+      select 1
+      from public.clips c
+      where c.storage_path = name
+    )
+  );
+
 -- Moderators may inspect all clips. Ordinary members retain their existing
 -- ability to see approved clips and their own submissions.
 drop policy if exists "Moderators can view all clips" on public.clips;
