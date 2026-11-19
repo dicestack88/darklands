@@ -10,6 +10,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/styles.css">
+  <script>
+    // Route accepted Supabase invitations to the password setup screen.
+    if (new URLSearchParams(window.location.hash.slice(1)).get("type") === "invite") {
+      window.location.replace("set-password.html" + window.location.search + window.location.hash);
+    }
+  </script>
   <script src="assets/js/app.js" defer></script>
 </head>
 <body>
