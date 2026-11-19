@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090b12">
+  <meta name="description" content="Manage your Darklands account preferences and security settings.">
+  <title>Account settings — Darklands</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <script src="assets/js/app.js" defer></script>
+</head>
+<body class="settings-page">
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <header class="site-header">
+    <a class="brand" href="./" aria-label="Darklands home"><span class="brand-mark">D</span><span>DARKLANDS</span></a>
+    <nav class="header-nav" aria-label="Main navigation"><a href="./">Home</a><a class="nav-login" href="login.html">Log in</a><a class="button button-small" href="register.html">Create account <span aria-hidden="true">↗</span></a></nav>
+  </header>
+  <main class="settings-shell">
+    <a class="back-link settings-back" href="./">← Back to Darklands</a>
+    <div class="settings-heading">
+      <div><div class="eyebrow">YOUR ACCOUNT</div><h1>Settings<span>.</span></h1><p>Manage your profile, preferences and account security.</p></div>
+      <div class="settings-avatar" aria-hidden="true">D</div>
+    </div>
+    <div class="settings-layout">
+      <aside class="settings-sidebar" aria-label="Settings sections">
+        <a class="settings-nav active" href="#profile">◎ <span>Profile</span></a>
+        <a class="settings-nav" href="#security">◇ <span>Security</span></a>
+        <a class="settings-nav" href="#privacy">◈ <span>Privacy</span></a>
+        <a class="settings-nav" href="#preferences">☼ <span>Preferences</span></a>
+      </aside>
+      <div class="settings-content">
+        <section class="settings-panel" id="profile">
+          <div class="settings-panel-heading"><div><div class="eyebrow">01 / IDENTITY</div><h2>Profile details</h2><p>Choose how people see you around Darklands.</p></div></div>
+          <div class="profile-preview"><div class="profile-avatar">D</div><div><strong>Your display name</strong><span>@yourusername</span></div><span class="preview-tag">PREVIEW</span></div>
+          <form class="settings-form" data-demo-form>
+            <div class="settings-field"><label for="display-name">Display name</label><input id="display-name" type="text" placeholder="Your name" autocomplete="nickname"></div>
+            <div class="settings-field"><label for="username">Username</label><input id="username" type="text" placeholder="@username" autocomplete="username"></div>
+            <div class="settings-field"><label for="bio">About you</label><textarea id="bio" rows="3" placeholder="A little about yourself..."></textarea><small>Keep personal information private. You can change this later.</small></div>
+            <div class="settings-actions"><p class="form-message" aria-live="polite"></p><button class="button" type="submit">Save changes <span aria-hidden="true">↗</span></button></div>
+          </form>
+        </section>
+        <section class="settings-panel" id="security">
+          <div class="settings-panel-heading"><div><div class="eyebrow">02 / PROTECTION</div><h2>Account security</h2><p>Control how you sign in and protect your account.</p></div><span class="settings-status">SECURITY</span></div>
+          <div class="security-row"><div class="security-symbol">✉</div><div class="security-copy"><strong>Email verification</strong><span>Your email address will need to be verified before your account is activated.</span><em class="required-label">REQUIRED FOR ALL ACCOUNTS</em></div><span class="locked-label">REQUIRED</span></div>
+          <div class="security-row security-row-toggle"><div class="security-symbol">⌑</div><div class="security-copy"><strong>Two-factor authentication</strong><span>Add an extra verification step when signing in. This is optional and can be changed at any time.</span><em class="optional-label">OPTIONAL</em><p class="toggle-feedback" data-twofa-status aria-live="polite">Currently off — sign-in will use your normal login method.</p></div><label class="switch" for="twofa-toggle"><input id="twofa-toggle" type="checkbox" aria-describedby="twofa-description"><span class="switch-track"></span><span class="sr-only">Enable two-factor authentication</span></label></div>
+          <p id="twofa-description" class="settings-footnote">This is a visual preview. Enabling the switch here does not activate real two-factor authentication yet.</p>
+          <div class="security-row"><div class="security-symbol">↻</div><div class="security-copy"><strong>Password &amp; recovery</strong><span>Change your password or recover access if you get locked out.</span></div><span class="coming-label">COMING LATER</span></div>
+        </section>
+        <section class="settings-panel" id="privacy">
+          <div class="settings-panel-heading"><div><div class="eyebrow">03 / CONTROL</div><h2>Privacy</h2><p>Decide what information is visible to other members.</p></div></div>
+          <div class="preference-row"><div><strong>Profile visibility</strong><span>Choose who can view your profile.</span></div><select aria-label="Profile visibility" disabled><option>Public (planned)</option></select></div>
+          <div class="preference-row"><div><strong>Direct messages</strong><span>Control who can send you a message.</span></div><select aria-label="Direct message permissions" disabled><option>Friends only (planned)</option></select></div>
+          <p class="settings-footnote">Privacy controls will become configurable when profiles and messaging are connected.</p>
+        </section>
+        <section class="settings-panel" id="preferences">
+          <div class="settings-panel-heading"><div><div class="eyebrow">04 / EXPERIENCE</div><h2>Preferences</h2><p>Make Darklands feel the way you want it to.</p></div></div>
+          <div class="preference-row"><div><strong>Appearance</strong><span>Choose your interface theme.</span></div><select aria-label="Appearance theme" disabled><option>Dark (current)</option><option>Light (planned)</option><option>System (planned)</option></select></div>
+          <div class="preference-row"><div><strong>Email notifications</strong><span>Updates and account-related messages.</span></div><span class="coming-label">COMING LATER</span></div>
+        </section>
+        <div class="settings-disclaimer"><span>◈</span><p><strong>Early preview</strong><br>These settings are currently a frontend prototype. No profile information is saved, and no authentication or security settings are changed yet.</p></div>
+      </div>
+    </div>
+  </main>
+  <footer class="site-footer"><span>© 2026 DARKLANDS</span><span>A DICESTACK88 PROJECT</span><a href="https://www.youtube.com/@dicestack88" target="_blank" rel="noreferrer">DICESTACK88 ↗</a></footer>
+</body>
+</html>
