@@ -463,6 +463,9 @@
         window.location.replace(page("login.html"));
         return;
       }
+      const {data:ownProfile}=await client.from("profiles").select("username").eq("id",currentUser.id).maybeSingle();
+      const ownProfileLink=$("clips-own-profile");
+      if(ownProfile?.username&&ownProfileLink)ownProfileLink.href=page("profile.html")+"?u="+encodeURIComponent(ownProfile.username);
       say("You're signed in. Enjoy the feed.");
       observer = new IntersectionObserver(entries => {
         entries.forEach(entry => {
