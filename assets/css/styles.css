@@ -20,3 +20,35 @@
 .account-field-hint{display:block;color:#8491a8;font-size:10px;font-weight:400;line-height:1.6;margin-top:5px}
 .account-customize-form .button{margin-top:7px;cursor:pointer}
 .account-customize-form .button:disabled{opacity:.6;cursor:wait}
+
+
+/* DARKLANDS 2.0 — shared spacing, forms and button sizing */
+:root{--line:rgba(184,199,224,.16);--panel:rgba(17,23,37,.92)}
+.button{min-height:42px;padding:0 17px;border-radius:11px;gap:10px;white-space:normal;line-height:1.25;max-width:100%}
+.button-small{min-height:36px;padding:0 13px;font-size:11px}
+button,a,input,textarea,select{-webkit-tap-highlight-color:transparent}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid rgba(177,193,255,.85);outline-offset:3px}
+.auth-card{border-color:rgba(180,195,224,.19);border-radius:19px;box-shadow:0 25px 80px rgba(0,0,0,.3),inset 0 1px rgba(255,255,255,.045)}
+.profile-card{width:100%;min-width:0;overflow:hidden}
+.profile-card .button{width:auto;max-width:100%;align-self:flex-start}
+.account-customize-form{width:100%;min-width:0;overflow:hidden;padding:clamp(14px,2.5vw,20px);border-radius:15px;border-color:rgba(173,190,231,.16);background:linear-gradient(145deg,rgba(21,29,45,.72),rgba(9,13,22,.75))}
+.account-customize-form .button{width:auto;max-width:100%;min-height:42px;align-self:flex-start}
+.account-customize-form input[type=file]{display:block;min-width:0;max-width:100%;font-size:11px;overflow:hidden}
+.account-media-preview{min-width:0;grid-template-columns:76px minmax(0,1fr);gap:13px}
+.account-media-preview>div{min-width:0}
+.account-banner-preview{min-width:0;overflow:hidden;border-radius:12px}
+.profile-form{min-width:0}
+.profile-form textarea{min-height:90px;border-radius:11px}
+.profile-form .button{min-height:40px}
+.profile-summary{border-radius:13px;border-color:rgba(173,190,231,.15);background:rgba(8,12,20,.5)}
+.profile-form-meta{flex-wrap:wrap}
+.form-message{overflow-wrap:anywhere}
+@media(max-width:520px){
+ .auth-card{padding:clamp(17px,5vw,24px)}
+ .profile-card .button,.account-customize-form .button,.profile-form .button{width:100%;align-self:stretch}
+ .account-customize-form{padding:14px}
+ .account-media-preview{grid-template-columns:62px minmax(0,1fr);gap:10px}
+ .account-media-preview>img{width:62px;height:62px}
+ .account-banner-preview{height:62px}
+ .profile-form-meta{flex-direction:column;gap:4px}
+}
