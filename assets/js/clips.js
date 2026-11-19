@@ -391,7 +391,7 @@
   async function runSearch(term) {
     const results=$("clips-search-results");
     if(!results)return;
-    const query=term.trim().replace(/[%_]/g,"").slice(0,60);
+    const query=term.trim().replace(/[^a-zA-Z0-9 _-]/g,"").replace(/\\s+/g," ").slice(0,60);
     results.hidden=false;results.replaceChildren();
     if(query.length<2){
       const hint=document.createElement("p");hint.className="discover-empty";hint.textContent="Type at least 2 characters to search.";results.append(hint);return;
