@@ -134,7 +134,7 @@
     });
   }
 
-  function createClipCard(clip, profile, url, likes, commentCount) {
+  function createClipCard(clip, profile, url, likes, commentCount, saveRows = [], repostRows = []) {
     const card = document.createElement("article");
     card.className = "clip-card";
     card.dataset.clipId = clip.id;
@@ -234,6 +234,39 @@
       like.disabled = false;
     });
 
+    const save = document.createElement("button");
+    save.type = "button";
+    save.className = "clip-action clip-save";
+    let saved = saveRows.some(row => row.user_id === currentUser.id);
+    const paintSave = () => { save.classList.toggle("liked", saved); save.innerHTML = '<span aria-hidden="true">' + (saved ? "▣" : "▢") + '</span><small>' + (saved ? "Saved" : "Save") + '</small>'; };
+    paintSave();
+    save.addEventListener("click", async event => {
+      event.stopPropagation(); if (save.disabled) return;
+      const previous = saved; saved = !saved; paintSave(); save.disabled = true;
+      const result = previous
+        ? await client.from("clip_saves").delete().eq("clip_id", clip.id).eq("user_id", currentUser.id)
+        : await client.from("clip_saves").insert({ clip_id: clip.id, user_id: currentUser.id });
+      if (result.error) { saved = previous; paintSave(); say("Couldn't update your saved clips. Please try again."); }
+      save.disabled = false;
+    });
+
+    const repost = document.createElement("button");
+    repost.type = "button";
+    repost.className = "clip-action clip-repost";
+    let reposted = repostRows.some(row => row.user_id === currentUser.id);
+    const paintRepost = () => { repost.classList.toggle("liked", reposted); repost.innerHTML = '<span aria-hidden="true">⟳</span><small>' + (repostRows.length + (reposted && !repostRows.some(row => row.user_id === currentUser.id) ? 1 : 0)) + ' · ' + (reposted ? "Reposted" : "Repost") + '</small>'; };
+    paintRepost();
+    repost.addEventListener("click", async event => {
+      event.stopPropagation(); if (repost.disabled) return;
+      const previous = reposted; reposted = !reposted; paintRepost(); repost.disabled = true;
+      const result = previous
+        ? await client.from("clip_reposts").delete().eq("clip_id", clip.id).eq("user_id", currentUser.id)
+        : await client.from("clip_reposts").insert({ clip_id: clip.id, user_id: currentUser.id });
+      if (result.error) { reposted = previous; paintRepost(); say("Couldn't update your repost. Please try again."); }
+      else { if (previous) repostRows = repostRows.filter(row => row.user_id !== currentUser.id); else repostRows = [...repostRows, { user_id: currentUser.id }]; paintRepost(); }
+      repost.disabled = false;
+    });
+
     const comment = document.createElement("button");
     comment.type = "button";
     comment.className = "clip-action";
@@ -269,52 +302,49 @@
     commentForm.append(commentInput, commentSubmit);
     commentsPanel.append(commentsHeader, commentsList, commentForm);
 
+    let replyTo = null;
     const loadComments = async () => {
       commentsList.replaceChildren();
-      const loading = document.createElement("p");
-      loading.className = "clip-comments-empty";
-      loading.textContent = "Loading comments…";
-      commentsList.append(loading);
-      const { data, error } = await client.from("clip_comments")
-        .select("id, user_id, body, created_at")
-        .eq("clip_id", clip.id)
-        .order("created_at", { ascending: true })
-        .limit(100);
+      const loading = document.createElement("p"); loading.className = "clip-comments-empty"; loading.textContent = "Loading comments…"; commentsList.append(loading);
+      const [{ data, error }, { data: heartRows, error: heartError }] = await Promise.all([
+        client.from("clip_comments").select("id, user_id, body, created_at, parent_comment_id").eq("clip_id", clip.id).order("created_at", { ascending: true }).limit(150),
+        client.from("clip_comment_likes").select("comment_id, user_id").limit(1000)
+      ]);
       commentsList.replaceChildren();
-      if (error) {
-        const failed = document.createElement("p");
-        failed.className = "clip-comments-empty";
-        failed.textContent = "Comments couldn't load. Please try again.";
-        commentsList.append(failed);
-        return;
+      if (error || heartError) { const failed=document.createElement("p");failed.className="clip-comments-empty";failed.textContent="Comments couldn't load. Please try again.";commentsList.append(failed);return; }
+      if (!data?.length) { const empty=document.createElement("p");empty.className="clip-comments-empty";empty.textContent="No comments yet. Start the conversation.";commentsList.append(empty); }
+      else {
+        const ids=[...new Set(data.map(item=>item.user_id))];
+        const {data:authors}=await client.from("profiles").select("id,username,display_name").in("id",ids);
+        const authorMap=new Map((authors||[]).map(author=>[author.id,author]));
+        const roots=data.filter(item=>!item.parent_comment_id);
+        const replies=new Map();
+        for(const item of data.filter(item=>item.parent_comment_id)){if(!replies.has(item.parent_comment_id))replies.set(item.parent_comment_id,[]);replies.get(item.parent_comment_id).push(item);}
+        const renderComment=(item,isReply=false)=>{
+          const row=document.createElement("article");row.className="clip-comment"+(isReply?" clip-comment-reply":"");
+          const authorProfile=authorMap.get(item.user_id);
+          const author=document.createElement("strong");author.textContent=authorProfile?.display_name||"Darklands member";
+          const handle=document.createElement("span");handle.className="clip-comment-handle";handle.textContent="@"+(authorProfile?.username||"member")+" · "+new Date(item.created_at).toLocaleString(undefined,{dateStyle:"medium",timeStyle:"short"});
+          const body=document.createElement("p");body.textContent=item.body;
+          const controls=document.createElement("div");controls.className="clip-comment-controls";
+          const hearts=heartRows.filter(row=>row.comment_id===item.id);let hearted=hearts.some(row=>row.user_id===currentUser.id);
+          const heart=document.createElement("button");heart.type="button";heart.className="clip-comment-control"+(hearted?" liked":"");heart.textContent=(hearted?"♥ ":"♡ ")+hearts.length;
+          heart.addEventListener("click",async()=>{
+            if(heart.disabled)return;const before=hearted;hearted=!hearted;heart.disabled=true;heart.classList.toggle("liked",hearted);heart.textContent=(hearted?"♥ ":"♡ ")+(hearts.length+(hearted?1:-1));
+            const result=before?await client.from("clip_comment_likes").delete().eq("comment_id",item.id).eq("user_id",currentUser.id):await client.from("clip_comment_likes").insert({comment_id:item.id,user_id:currentUser.id});
+            if(result.error){hearted=before;heart.classList.toggle("liked",hearted);heart.textContent=(hearted?"♥ ":"♡ ")+hearts.length;say("Couldn't update that comment heart.");}
+            heart.disabled=false;
+          });
+          controls.append(heart);
+          if(!isReply){const reply=document.createElement("button");reply.type="button";reply.className="clip-comment-control";reply.textContent="Reply";reply.addEventListener("click",()=>{replyTo=item.id;commentInput.placeholder="Replying to "+(authorProfile?.display_name||"comment")+"…";commentInput.focus();commentSubmit.textContent="Reply";});controls.append(reply);}
+          row.append(author,handle,body,controls);
+          if(!isReply){for(const child of replies.get(item.id)||[])row.append(renderComment(child,true));}
+          return row;
+        };
+        for(const item of roots)commentsList.append(renderComment(item));
+        for(const item of data.filter(item=>item.parent_comment_id&&!roots.some(root=>root.id===item.parent_comment_id)))commentsList.append(renderComment(item,true));
       }
-      if (!data?.length) {
-        const empty = document.createElement("p");
-        empty.className = "clip-comments-empty";
-        empty.textContent = "No comments yet. Start the conversation.";
-        commentsList.append(empty);
-      } else {
-        const ids = [...new Set(data.map(item => item.user_id))];
-        const { data: authors } = await client.from("profiles")
-          .select("id, username, display_name, avatar_url")
-          .in("id", ids);
-        const authorMap = new Map((authors || []).map(author => [author.id, author]));
-        for (const item of data) {
-          const row = document.createElement("article");
-          row.className = "clip-comment";
-          const author = document.createElement("strong");
-          const authorProfile = authorMap.get(item.user_id);
-          author.textContent = authorProfile?.display_name || "Darklands member";
-          const handle = document.createElement("span");
-          handle.className = "clip-comment-handle";
-          handle.textContent = "@" + (authorProfile?.username || "member") + " · " + new Date(item.created_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
-          const body = document.createElement("p");
-          body.textContent = item.body;
-          row.append(author, handle, body);
-          commentsList.append(row);
-        }
-      }
-      comment.querySelector("small").textContent = String(data?.length || 0);
+      comment.querySelector("small").textContent=String(data?.length||0);
     };
 
     comment.addEventListener("click", async event => {
@@ -331,12 +361,13 @@
       commentSubmit.disabled = true;
       commentSubmit.textContent = "Posting…";
       const { error } = await client.from("clip_comments").insert({
-        clip_id: clip.id, user_id: currentUser.id, body
+        clip_id: clip.id, user_id: currentUser.id, body, parent_comment_id: replyTo
       });
       if (error) {
         say("Couldn't post your comment. Please try again.");
       } else {
         commentInput.value = "";
+        replyTo = null; commentInput.placeholder = "Add a comment…"; commentSubmit.textContent = "Post";
         await loadComments();
       }
       commentSubmit.disabled = false;
@@ -361,7 +392,7 @@
         if (error.name !== "AbortError") say("Sharing isn't available in this browser.");
       }
     });
-    actions.append(like, comment, share);
+    actions.append(like, comment, save, repost, share);
 
     const hint = document.createElement("span");
     hint.className = "clip-play-hint";
@@ -479,21 +510,27 @@
       if (profileError) throw profileError;
       const profileMap = new Map((profiles || []).map(profile => [profile.id, profile]));
       const clipIds = clips.map(clip => clip.id);
-      const [{ data: likeRows, error: likesError }, { data: commentRows, error: commentsError }] = await Promise.all([
+      const [{ data: likeRows, error: likesError }, { data: commentRows, error: commentsError }, { data: saveRows, error: savesError }, { data: repostRows, error: repostsError }] = await Promise.all([
         client.from("clip_likes").select("clip_id, user_id").in("clip_id", clipIds),
-        client.from("clip_comments").select("id, clip_id").in("clip_id", clipIds)
+        client.from("clip_comments").select("id, clip_id").in("clip_id", clipIds),
+        client.from("clip_saves").select("clip_id, user_id").in("clip_id", clipIds),
+        client.from("clip_reposts").select("clip_id, user_id").in("clip_id", clipIds)
       ]);
       if (likesError) throw likesError;
       if (commentsError) throw commentsError;
+      if (savesError) throw savesError;
+      if (repostsError) throw repostsError;
       const likesByClip = new Map();
       const commentsByClip = new Map();
+      const savesByClip = new Map();
+      const repostsByClip = new Map();
       for (const row of likeRows || []) {
         if (!likesByClip.has(row.clip_id)) likesByClip.set(row.clip_id, []);
         likesByClip.get(row.clip_id).push(row);
       }
-      for (const row of commentRows || []) {
-        commentsByClip.set(row.clip_id, (commentsByClip.get(row.clip_id) || 0) + 1);
-      }
+      for (const row of commentRows || []) commentsByClip.set(row.clip_id, (commentsByClip.get(row.clip_id) || 0) + 1);
+      for (const row of saveRows || []) { if (!savesByClip.has(row.clip_id)) savesByClip.set(row.clip_id, []); savesByClip.get(row.clip_id).push(row); }
+      for (const row of repostRows || []) { if (!repostsByClip.has(row.clip_id)) repostsByClip.set(row.clip_id, []); repostsByClip.get(row.clip_id).push(row); }
       const prepared = await Promise.all(clips.map(async clip => {
         const { data: signed, error: signedError } = await client.storage.from("darklands-clips")
           .createSignedUrl(clip.storage_path, 3600);
@@ -501,7 +538,7 @@
       }));
       for (const item of prepared) {
         if (!item) continue;
-        const card = createClipCard(item.clip, item.profile, item.url, likesByClip.get(item.clip.id) || [], commentsByClip.get(item.clip.id) || 0);
+        const card = createClipCard(item.clip, item.profile, item.url, likesByClip.get(item.clip.id) || [], commentsByClip.get(item.clip.id) || 0, savesByClip.get(item.clip.id) || [], repostsByClip.get(item.clip.id) || []);
         feed.append(card);
         if (observer) observer.observe(card);
         if (window.location.hash === "#clip-" + item.clip.id) card.scrollIntoView();
