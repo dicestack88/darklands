@@ -374,6 +374,20 @@
       commentSubmit.textContent = "Post";
     });
 
+    const fullscreen = document.createElement("button");
+    fullscreen.type = "button";
+    fullscreen.className = "clip-action clip-fullscreen";
+    fullscreen.innerHTML = '<span aria-hidden="true">⛶</span><small>Fullscreen</small>';
+    fullscreen.setAttribute("aria-label", "View clip fullscreen");
+    fullscreen.addEventListener("click", async event => {
+      event.stopPropagation();
+      try {
+        if (document.fullscreenElement === card) await document.exitFullscreen();
+        else if (card.requestFullscreen) await card.requestFullscreen();
+        else say("Fullscreen isn't supported by this browser.");
+      } catch (_) { say("Fullscreen couldn't be opened. Try your browser's fullscreen shortcut."); }
+    });
+
     const share = document.createElement("button");
     share.type = "button";
     share.className = "clip-action";
@@ -392,7 +406,7 @@
         if (error.name !== "AbortError") say("Sharing isn't available in this browser.");
       }
     });
-    actions.append(like, comment, save, repost, share);
+    actions.append(like, comment, save, repost, share, fullscreen);
 
     const hint = document.createElement("span");
     hint.className = "clip-play-hint";
@@ -606,6 +620,33 @@
   feed.addEventListener("scroll", () => {
     if (feed.scrollTop + feed.clientHeight >= feed.scrollHeight - 500 && hasMore) loadFeed(false);
   }, { passive: true });
+
+  document.addEventListener("keydown", event => {
+    if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
+    const target = event.target;
+    if (target && (target.isContentEditable || /INPUT|TEXTAREA|SELECT/.test(target.tagName))) return;
+    const cards = [...feed.querySelectorAll(".clip-card")];
+    if (!cards.length) return;
+    const active = cards.find(card => {
+      const rect = card.getBoundingClientRect();
+      return rect.top < window.innerHeight * 0.65 && rect.bottom > window.innerHeight * 0.35;
+    }) || cards[0];
+    const video = active.querySelector("video");
+    if (event.key.toLowerCase() === "f") {
+      event.preventDefault();
+      if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+      else active.requestFullscreen?.().catch(() => say("Fullscreen isn't available here."));
+    } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
+      const index = cards.indexOf(active);
+      const next = cards[Math.max(0, Math.min(cards.length - 1, index + (event.key === "ArrowDown" ? 1 : -1)))];
+      next?.scrollIntoView({behavior:"smooth",block:"start"});
+    } else if (event.code === "Space" && video) {
+      event.preventDefault();
+      if (video.paused) video.play().catch(() => {});
+      else video.pause();
+    }
+  });
 
   if (captionInput) captionInput.addEventListener("input", () => {
     $("clip-caption-count").textContent = captionInput.value.length + " / 300";
