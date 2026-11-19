@@ -6,11 +6,12 @@
   const status=$("creator-status");
   const showError=message=>{status.textContent=message;};
   const initials=name=>(name||"D").trim().split(/\s+/).slice(0,2).map(x=>x[0]||"").join("").toUpperCase();
-  function makeVideo(clip,url){
+  function makeVideo(clip,url,options={}){
     const card=document.createElement("article");card.className="creator-video-card";
+    if(options.reposted){card.classList.add("is-repost");const tag=document.createElement("div");tag.className="creator-repost-tag";tag.textContent="⟳ REPOSTED";card.append(tag);}
     const video=document.createElement("video");video.src=url;video.controls=true;video.playsInline=true;video.preload="metadata";
     const caption=document.createElement("p");caption.textContent=clip.caption||"A moment from the community.";
-    const date=document.createElement("span");date.textContent=new Date(clip.created_at).toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"});
+    const date=document.createElement("span");date.textContent=(options.reposted?"Reposted · ":"")+new Date(options.repostedAt||clip.created_at).toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"});
     card.append(video,caption,date);return card;
   }
   async function start(){
@@ -62,16 +63,37 @@
         followButton.disabled=false;
       });
     }
-    const {data:clips,error:clipsError}=await client.from("clips").select("id,caption,storage_path,created_at").eq("user_id",profile.id).eq("status","approved").order("created_at",{ascending:false}).limit(60);
-    if(clipsError){showError("The creator loaded, but their clips couldn't be fetched.");return;}
-    const clipIds=(clips||[]).map(c=>c.id);
+    const [{data:clips,error:clipsError},{data:repostRows,error:repostError}]=await Promise.all([
+      client.from("clips").select("id,caption,storage_path,created_at").eq("user_id",profile.id).eq("status","approved").order("created_at",{ascending:false}).limit(60),
+      client.from("clip_reposts").select("clip_id,created_at").eq("user_id",profile.id).order("created_at",{ascending:false}).limit(60)
+    ]);
+    if(clipsError||repostError){showError("The creator loaded, but their posts and reposts couldn't be fetched.");return;}
+    const ownClips=clips||[];
+    const ownIds=new Set(ownClips.map(c=>c.id));
+    const repostIds=[...new Set((repostRows||[]).map(r=>r.clip_id).filter(id=>!ownIds.has(id)))];
+    let repostClips=[];
+    if(repostIds.length){
+      const {data,error:repostedClipsError}=await client.from("clips").select("id,caption,storage_path,created_at").in("id",repostIds).eq("status","approved");
+      if(repostedClipsError){showError("Your posts loaded, but reposts couldn't be fetched.");return;}
+      repostClips=repostedClips||[];
+    }
+    const repostById=new Map((repostRows||[]).map(row=>[row.clip_id,row]));
+    const clipIds=ownClips.map(c=>c.id);
     let likes=0;
     if(clipIds.length){const {count,error:likeError}=await client.from("clip_likes").select("clip_id",{count:"exact",head:true}).in("clip_id",clipIds);if(!likeError)likes=count||0;}
-    $("creator-clips-count").textContent=String(clips?.length||0);
+    $("creator-clips-count").textContent=String(ownClips.length);
     $("creator-likes-count").textContent=String(likes);
     const grid=$("creator-videos");grid.replaceChildren();
-    for(const clip of clips||[]){const {data:signed,error:signedError}=await client.storage.from("darklands-clips").createSignedUrl(clip.storage_path,3600);if(!signedError&&signed?.signedUrl)grid.append(makeVideo(clip,signed.signedUrl));}
-    if(!grid.children.length){const empty=document.createElement("p");empty.className="creator-empty";empty.textContent="No approved clips yet. Check back later.";grid.append(empty);}
+    const entries=[
+      ...ownClips.map(clip=>({clip,reposted:false})),
+      ...repostClips.map(clip=>({clip,reposted:true,repostedAt:repostById.get(clip.id)?.created_at}))
+    ].sort((a,b)=>new Date(b.repostedAt||b.clip.created_at)-new Date(a.repostedAt||a.clip.created_at));
+    for(const entry of entries){
+      const {clip}=entry;
+      const {data:signed,error:signedError}=await client.storage.from("darklands-clips").createSignedUrl(clip.storage_path,3600);
+      if(!signedError&&signed?.signedUrl)grid.append(makeVideo(clip,signed.signedUrl,entry));
+    }
+    if(!grid.children.length){const empty=document.createElement("p");empty.className="creator-empty";empty.textContent="No approved clips or reposts yet. Check back later.";grid.append(empty);}
     $("creator-profile").hidden=false;$("creator-videos-section").hidden=false;status.hidden=true;
     document.title=profile.display_name+" (@"+profile.username+") — Darklands";
   }
