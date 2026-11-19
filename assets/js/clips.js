@@ -178,8 +178,10 @@
       image.referrerPolicy = "no-referrer";
       avatar.append(image);
     } else avatar.textContent = initials(profile?.display_name);
-    const identity = document.createElement("div");
-    identity.className = "clip-identity";
+    const identity = document.createElement("a");
+    identity.className = "clip-identity clip-creator-link";
+    identity.href = profile?.username ? page("profile.html") + "?u=" + encodeURIComponent(profile.username) : "#";
+    identity.setAttribute("aria-label", "View creator profile");
     const display = document.createElement("strong");
     display.textContent = profile?.display_name || "Darklands member";
     const username = document.createElement("span");
