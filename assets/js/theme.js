@@ -13,8 +13,7 @@
 
   const mount = () => {
     if (document.getElementById("darklands-theme-toggle")) return;
-    const nav = document.querySelector(".header-nav, .creator-nav, .clips-header-nav, .moderation-nav, .notifications-nav, .site-header");
-    if (!nav) return;
+    const nav = document.querySelector(".header-nav, .creator-nav, .clips-header-nav, .moderation-nav, .notifications-nav, .site-header") || document.body;
     const button = document.createElement("button");
     button.type = "button";
     button.id = "darklands-theme-toggle";
@@ -31,6 +30,7 @@
       button.setAttribute("aria-pressed", String(saved === "light"));
       button.innerHTML = '<span class="theme-toggle-icon" aria-hidden="true">' + (saved === "dark" ? "☀" : "☾") + '</span><span class="theme-toggle-label">' + (saved === "dark" ? "Light mode" : "Dark mode") + '</span>';
     });
+    if (nav === document.body) button.classList.add("theme-toggle-floating");
     nav.appendChild(button);
   };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount, { once: true });
