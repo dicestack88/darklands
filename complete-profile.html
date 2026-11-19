@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#090b12">
+<title>Set up your profile — Darklands</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script defer src="assets/js/supabase-config.js"></script><script defer src="assets/js/google-auth.js"></script>
+</head><body class="auth-page"><div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+<header class="site-header"><a class="brand" href="./"><span class="brand-mark">D</span><span>DARKLANDS</span></a><button class="button button-small" id="profile-logout" type="button">Log out</button></header>
+<main class="auth-layout register-layout"><section class="auth-aside"><div class="eyebrow"><span class="status-dot"></span> ONE LAST STEP</div><h1>Make it<br><span>yours.</span></h1><p>Your Google account handles sign-in. Choose the identity people will know you by on Darklands.</p><div class="aside-decoration"><span>DL</span><i></i><i></i><i></i></div></section>
+<section class="auth-card"><div class="eyebrow">YOUR DARKLANDS IDENTITY</div><h2>Set up your profile</h2><p class="auth-subtitle" id="profile-setup-status">Checking your Google sign-in…</p>
+<form class="auth-form" id="profile-setup-form" hidden>
+<label for="username">Username</label><input id="username" name="username" type="text" placeholder="e.g. darkplayer_88" autocomplete="username" minlength="3" maxlength="20" pattern="[a-z0-9_]{3,20}" required>
+<small class="field-hint">3–20 characters. Lowercase letters, numbers and underscores only. This cannot be changed later.</small>
+<label for="display-name">Display name</label><input id="display-name" name="display_name" type="text" placeholder="How people will see you" maxlength="32" autocomplete="nickname" required>
+<small class="field-hint">1–32 characters. This cannot be changed later.</small>
+<button class="button button-full" type="submit">Create Darklands profile <span aria-hidden="true">→</span></button>
+</form>
+<p class="form-message" id="profile-setup-message" role="status" aria-live="polite"></p></section></main>
+<footer class="site-footer"><span>© 2026 DARKLANDS</span><span>A DICESTACK88 PROJECT</span></footer></body></html>
