@@ -75,3 +75,5 @@ html[data-theme="light"] .settings-heading h1 span{color:#087e78}
 @media(prefers-reduced-motion:no-preference){html[data-theme="light"] body{transition:background-color .22s,color .22s}}
 
 .theme-toggle-floating{position:fixed;z-index:99999;right:18px;top:18px;box-shadow:0 8px 25px rgba(0,0,0,.18)}
+
+.theme-toggle-floating{position:fixed;z-index:99999;right:18px;top:18px;box-shadow:0 8px 25px rgba(0,0,0,.18)}
