@@ -80,3 +80,6 @@
  .clips-submissions{margin:12px;padding:13px}
 }
 @media(max-width:390px){.clips-header-nav .text-link{font-size:9px;padding:6px}.clips-header-nav{gap:2px}.clips-feed{height:calc(100svh - 410px)}.clips-search-form button{padding:0 11px}}
+
+/* Clip saves, reposts and threaded comment interactions */
+.clip-comment-controls{display:flex;align-items:center;gap:12px;margin-top:5px}.clip-comment-control{border:0;background:transparent;color:#aeb9d0;padding:3px 0;font:600 9px var(--font);cursor:pointer}.clip-comment-control:hover,.clip-comment-control.liked{color:#ff8da9}.clip-comment-reply{margin:8px 0 0 13px;padding-left:11px;border-left:1px solid rgba(173,190,231,.2)}.clip-action.clip-save,.clip-action.clip-repost{font-size:8px}.clip-action.clip-save small,.clip-action.clip-repost small{font-size:7px}.clip-comment-control:disabled{opacity:.5;cursor:wait}
