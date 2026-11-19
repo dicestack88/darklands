@@ -84,27 +84,57 @@
     const status = document.getElementById("app-status");
     const content = document.getElementById("app-content");
     const setStatus = message => { if (status) status.textContent = message; };
-    if (!client) setStatus("Account services are not configured yet.");
-    else client.auth.getSession().then(async ({ data, error }) => {
-      const session = data && data.session;
-      if (error || !session || !isVerified(session.user)) {
-        await client.auth.signOut();
-        window.location.replace(sitePage("login.html"));
-        return;
-      }
-      const { data: profile, error: profileError } = await client.from("profiles").select("username, display_name, bio, avatar_url").eq("id", session.user.id).single();
-      if (profileError) { setStatus("Your account is signed in, but your profile could not be loaded. Please contact support."); return; }
-      document.getElementById("app-display-name").textContent = profile.display_name;
-      document.getElementById("app-username").textContent = "@" + profile.username;
-      if (content) content.hidden = false;
-      setStatus("Signed in and email verified.");
-    });
+
+    if (!client) {
+      setStatus("Account services are not configured yet.");
+    } else {
+      (async () => {
+        try {
+          // Validate the current user with Supabase Auth instead of trusting
+          // only a locally cached session.
+          const { data, error } = await client.auth.getUser();
+          const user = data && data.user;
+
+          if (error || !isVerified(user)) {
+            await client.auth.signOut();
+            window.location.replace(sitePage("login.html"));
+            return;
+          }
+
+          const { data: profile, error: profileError } = await client
+            .from("profiles")
+            .select("username, display_name, bio, avatar_url")
+            .eq("id", user.id)
+            .single();
+
+          if (profileError || !profile) {
+            setStatus("Your account is signed in, but your profile could not be loaded. Please try again later.");
+            return;
+          }
+
+          document.getElementById("app-display-name").textContent = profile.display_name;
+          document.getElementById("app-username").textContent = "@" + profile.username;
+          if (content) content.hidden = false;
+          setStatus("Signed in and email verified.");
+        } catch (error) {
+          setStatus("We couldn't verify your session. Please log in again.");
+          await client.auth.signOut();
+          window.location.replace(sitePage("login.html"));
+        }
+      })();
+    }
+
     const logout = document.getElementById("logout-button");
     if (logout && client) logout.addEventListener("click", async () => {
       logout.disabled = true;
-      const { error } = await client.auth.signOut();
-      if (error) { logout.disabled = false; setStatus("Could not sign out. Please try again."); }
-      else window.location.replace(sitePage("login.html"));
+      try {
+        const { error } = await client.auth.signOut();
+        if (error) throw error;
+        window.location.replace(sitePage("login.html"));
+      } catch (error) {
+        logout.disabled = false;
+        setStatus("Could not sign out. Please try again.");
+      }
     });
   }
 })();
