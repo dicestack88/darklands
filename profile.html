@@ -14,13 +14,27 @@
 <a class="creator-back" href="clips.html">← Back to the feed</a>
 <p id="creator-status" class="creator-status" role="status" aria-live="polite">Loading creator…</p>
 <section id="creator-profile" class="creator-profile" hidden>
-<div class="creator-cover"></div>
+<div class="creator-cover" id="creator-cover"></div>
 <div class="creator-main">
 <div id="creator-avatar" class="creator-avatar">D</div>
 <div class="creator-heading"><span class="clips-kicker">DARKLANDS CREATOR</span><h1 id="creator-name">Creator</h1><p id="creator-handle">@creator</p></div>
 <div class="creator-profile-actions"><div class="creator-stats"><div><strong id="creator-clips-count">0</strong><span>CLIPS</span></div><div><strong id="creator-likes-count">0</strong><span>LIKES</span></div></div><button id="creator-follow-button" class="creator-follow-button" type="button" hidden>Follow</button><span id="creator-own-label" class="creator-own-label" hidden>Your profile</span></div><div class="creator-social-stats"><div><strong id="creator-followers-count">0</strong><span>FOLLOWERS</span></div><div><strong id="creator-following-count">0</strong><span>FOLLOWING</span></div></div>
 <p id="creator-bio" class="creator-bio">No bio added yet.</p>
 </div>
+</section>
+<section id="creator-edit-panel" class="creator-edit-panel" hidden>
+<div class="creator-edit-heading"><div><span class="clips-kicker">MAKE IT YOURS</span><h2>Edit your profile</h2><p>Update your name, profile picture and banner.</p></div></div>
+<form id="creator-edit-form" class="creator-edit-form">
+<label for="creator-edit-name">Display name</label>
+<input id="creator-edit-name" name="display_name" type="text" minlength="1" maxlength="32" required autocomplete="nickname">
+<label for="creator-edit-avatar">Profile picture <span>JPG, PNG or WebP · Max 5 MB</span></label>
+<input id="creator-edit-avatar" name="avatar" type="file" accept="image/jpeg,image/png,image/webp">
+<label for="creator-edit-banner">Profile banner <span>JPG, PNG or WebP · Max 5 MB</span></label>
+<input id="creator-edit-banner" name="banner" type="file" accept="image/jpeg,image/png,image/webp">
+<p class="creator-edit-hint">Use images you have permission to share. Avoid personal or sensitive information.</p>
+<p id="creator-edit-message" class="form-message" role="status" aria-live="polite"></p>
+<button class="button" id="creator-edit-save" type="submit">Save profile changes ↗</button>
+</form>
 </section>
 <section id="creator-videos-section" class="creator-videos" hidden><div class="creator-videos-heading"><div><span class="clips-kicker">THEIR POSTS</span><h2>Videos</h2></div></div><div id="creator-videos" class="creator-video-grid"></div></section>
 </main>
