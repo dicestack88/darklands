@@ -33,7 +33,6 @@ begin
   if new.id is distinct from old.id
      or new.user_id is distinct from old.user_id
      or new.storage_path is distinct from old.storage_path
-     or new.status is distinct from old.status
      or new.created_at is distinct from old.created_at then
     raise exception 'Clip ownership, file path, status and creation time cannot be changed by a user.';
   end if;
