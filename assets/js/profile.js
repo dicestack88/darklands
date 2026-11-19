@@ -26,6 +26,37 @@
     $("creator-bio").textContent=profile.bio||"No bio added yet.";
     const avatar=$("creator-avatar");
     if(profile.avatar_url&&/^https?:\/\//i.test(profile.avatar_url)){const img=document.createElement("img");img.src=profile.avatar_url;img.alt="";avatar.replaceChildren(img);}else avatar.textContent=initials(profile.display_name);
+    const ownProfile=auth.user.id===profile.id;
+    const followButton=$("creator-follow-button");
+    $("creator-own-label").hidden=!ownProfile;
+    const [{count:followerCount,error:followerError},{count:followingCount,error:followingError}]=await Promise.all([
+      client.from("user_follows").select("follower_id",{count:"exact",head:true}).eq("following_id",profile.id),
+      client.from("user_follows").select("following_id",{count:"exact",head:true}).eq("follower_id",profile.id)
+    ]);
+    if(followerError||followingError){showError("We couldn't load this creator's follow stats.");return;}
+    $("creator-followers-count").textContent=Number(followerCount||0).toLocaleString();
+    $("creator-following-count").textContent=Number(followingCount||0).toLocaleString();
+    if(!ownProfile){
+      followButton.hidden=false;
+      const {data:existingFollow,error:followCheckError}=await client.from("user_follows").select("follower_id").eq("follower_id",auth.user.id).eq("following_id",profile.id).maybeSingle();
+      if(followCheckError){showError("We couldn't check your follow status.");return;}
+      let following=Boolean(existingFollow);
+      const paintFollow=()=>{followButton.textContent=following?"Following":"Follow";followButton.classList.toggle("is-following",following);followButton.setAttribute("aria-pressed",String(following));};
+      paintFollow();
+      followButton.addEventListener("click",async()=>{
+        if(followButton.disabled)return;
+        const previous=following;following=!previous;paintFollow();followButton.disabled=true;
+        const result=previous
+          ? await client.from("user_follows").delete().eq("follower_id",auth.user.id).eq("following_id",profile.id)
+          : await client.from("user_follows").insert({follower_id:auth.user.id,following_id:profile.id});
+        if(result.error){following=previous;paintFollow();showError("Your follow couldn't be updated. Please try again.");}
+        else {
+          const count=Number($("creator-followers-count").textContent.replace(/,/g,""));
+          $("creator-followers-count").textContent=Math.max(0,count+(following?1:-1)).toLocaleString();
+        }
+        followButton.disabled=false;
+      });
+    }
     const {data:clips,error:clipsError}=await client.from("clips").select("id,caption,storage_path,created_at").eq("user_id",profile.id).eq("status","approved").order("created_at",{ascending:false}).limit(60);
     if(clipsError){showError("The creator loaded, but their clips couldn't be fetched.");return;}
     const clipIds=(clips||[]).map(c=>c.id);
