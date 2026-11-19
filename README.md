@@ -4,25 +4,42 @@ The standalone social-platform project for the dicestack88 community.
 
 ## Development status
 
-This repository currently contains the first static interface prototype:
-- Community landing page
-- Login screen
-- Registration screen
-- Responsive dark visual system
+The project contains a static landing page and a Supabase-backed authentication foundation in progress:
+- Supabase Auth client integration for login
+- Registration form with username and display-name metadata
+- Email-confirmation redirect and verified-user checks
+- Protected account page that loads the signed-in user's profile
+- Registration intentionally disabled during development
 
-**Authentication is not connected.** Forms are demonstration-only and do not send or store submitted details. Do not enter real credentials.
+## Supabase setup (before testing)
 
-## Planned foundation
+1. In Supabase Project Settings → API, copy the publishable key (or legacy anon key).
+2. Open assets/js/supabase-config.js and replace the placeholder with that key.
+3. Never use a service_role key or secret key in browser code or commit one to GitHub.
+4. In Supabase Authentication → URL Configuration, set the Site URL to:
+   https://dicestack88.github.io/darklands/
+5. Add this exact Redirect URL to the allowed redirect URLs:
+   https://dicestack88.github.io/darklands/login.html?verified=1
+6. Keep Confirm email enabled.
+7. Keep REGISTRATION_ENABLED set to false until the account flow and policies have been reviewed and tested.
 
-1. Confirm an age-appropriate backend provider and hosting approach.
-2. Implement verified email registration and secure sessions.
-3. Add profiles and account settings.
-4. Build clips, comments, reactions and messaging.
+The Supabase URL and browser publishable/anon key are public client configuration. Database access must remain protected by Row Level Security. The service-role key must never be exposed to the browser.
+
+## Account identity rules
+
+The database migration enforces lowercase usernames (3–20 characters; letters, numbers and underscores), display names (1–32 characters), and immutable identity fields. Registration sends both values as Supabase Auth user metadata so the database trigger can create the matching profile.
+
+## Important testing notes
+
+- Do not use real personal passwords during initial development.
+- Registration remains closed by default.
+- The protected account page checks for a signed-in user with a confirmed email before showing profile content.
+- This is an authentication foundation, not a finished social platform. Clips, comments, friends and messaging are not implemented yet.
 
 ## Local preview
 
-Open `index.html` in a browser, or serve this folder with a local static HTTP server.
+Open index.html in a browser, or serve this folder with a local HTTP server. Supabase email redirects and GitHub Pages paths should be tested using the deployed site URL.
 
 ## Deployment
 
-The intended project URL is `https://dicestack88.github.io/darklands/`, once GitHub Pages is configured for this repository.
+https://dicestack88.github.io/darklands/
