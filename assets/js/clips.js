@@ -134,7 +134,7 @@
     });
   }
 
-  function createClipCard(clip, profile, url) {
+  function createClipCard(clip, profile, url, likes, commentCount) {
     const card = document.createElement("article");
     card.className = "clip-card";
     card.dataset.clipId = clip.id;
@@ -198,21 +198,155 @@
     actions.className = "clip-actions";
     const like = document.createElement("button");
     like.type = "button";
-    like.className = "clip-action is-coming";
-    like.disabled = true;
-    like.innerHTML = '<span aria-hidden="true">♡</span><small>Likes soon</small>';
-    like.setAttribute("aria-label", "Likes coming soon");
+    like.className = "clip-action clip-like";
+    let likeRows = likes || [];
+    let liked = likeRows.some(row => row.user_id === currentUser.id);
+    const paintLike = () => {
+      like.classList.toggle("liked", liked);
+      like.querySelector("span").textContent = liked ? "♥" : "♡";
+      like.querySelector("small").textContent = String(likeRows.length);
+      like.setAttribute("aria-label", (liked ? "Unlike" : "Like") + " clip, " + likeRows.length + " likes");
+    };
+    like.innerHTML = '<span aria-hidden="true">♡</span><small>0</small>';
+    paintLike();
+    like.addEventListener("click", async event => {
+      event.stopPropagation();
+      if (like.disabled) return;
+      const wasLiked = liked;
+      const previousRows = likeRows;
+      liked = !wasLiked;
+      likeRows = wasLiked
+        ? likeRows.filter(row => row.user_id !== currentUser.id)
+        : [...likeRows, { user_id: currentUser.id }];
+      paintLike();
+      like.disabled = true;
+      const result = wasLiked
+        ? await client.from("clip_likes").delete().eq("clip_id", clip.id).eq("user_id", currentUser.id)
+        : await client.from("clip_likes").insert({ clip_id: clip.id, user_id: currentUser.id });
+      if (result.error) {
+        liked = wasLiked;
+        likeRows = previousRows;
+        paintLike();
+        say("Couldn't update your like. Please try again.");
+      }
+      like.disabled = false;
+    });
+
     const comment = document.createElement("button");
     comment.type = "button";
-    comment.className = "clip-action is-coming";
-    comment.disabled = true;
-    comment.innerHTML = '<span aria-hidden="true">▢</span><small>Comments soon</small>';
-    comment.setAttribute("aria-label", "Comments coming soon");
+    comment.className = "clip-action";
+    comment.innerHTML = '<span aria-hidden="true">▢</span><small>' + (commentCount || 0) + '</small>';
+    comment.setAttribute("aria-label", "View comments");
+    const commentsPanel = document.createElement("section");
+    commentsPanel.className = "clip-comments-panel";
+    commentsPanel.hidden = true;
+    commentsPanel.setAttribute("aria-label", "Clip comments");
+    const commentsHeader = document.createElement("div");
+    commentsHeader.className = "clip-comments-header";
+    const commentsTitle = document.createElement("strong");
+    commentsTitle.textContent = "Comments";
+    const closeComments = document.createElement("button");
+    closeComments.type = "button";
+    closeComments.className = "clip-comments-close";
+    closeComments.textContent = "×";
+    closeComments.setAttribute("aria-label", "Close comments");
+    commentsHeader.append(commentsTitle, closeComments);
+    const commentsList = document.createElement("div");
+    commentsList.className = "clip-comments-list";
+    const commentForm = document.createElement("form");
+    commentForm.className = "clip-comment-form";
+    const commentInput = document.createElement("textarea");
+    commentInput.maxLength = 500;
+    commentInput.rows = 2;
+    commentInput.placeholder = "Add a comment…";
+    commentInput.required = true;
+    commentInput.setAttribute("aria-label", "Write a comment");
+    const commentSubmit = document.createElement("button");
+    commentSubmit.type = "submit";
+    commentSubmit.textContent = "Post";
+    commentForm.append(commentInput, commentSubmit);
+    commentsPanel.append(commentsHeader, commentsList, commentForm);
+
+    const loadComments = async () => {
+      commentsList.replaceChildren();
+      const loading = document.createElement("p");
+      loading.className = "clip-comments-empty";
+      loading.textContent = "Loading comments…";
+      commentsList.append(loading);
+      const { data, error } = await client.from("clip_comments")
+        .select("id, user_id, body, created_at")
+        .eq("clip_id", clip.id)
+        .order("created_at", { ascending: true })
+        .limit(100);
+      commentsList.replaceChildren();
+      if (error) {
+        const failed = document.createElement("p");
+        failed.className = "clip-comments-empty";
+        failed.textContent = "Comments couldn't load. Please try again.";
+        commentsList.append(failed);
+        return;
+      }
+      if (!data?.length) {
+        const empty = document.createElement("p");
+        empty.className = "clip-comments-empty";
+        empty.textContent = "No comments yet. Start the conversation.";
+        commentsList.append(empty);
+      } else {
+        const ids = [...new Set(data.map(item => item.user_id))];
+        const { data: authors } = await client.from("profiles")
+          .select("id, username, display_name, avatar_url")
+          .in("id", ids);
+        const authorMap = new Map((authors || []).map(author => [author.id, author]));
+        for (const item of data) {
+          const row = document.createElement("article");
+          row.className = "clip-comment";
+          const author = document.createElement("strong");
+          const authorProfile = authorMap.get(item.user_id);
+          author.textContent = authorProfile?.display_name || "Darklands member";
+          const handle = document.createElement("span");
+          handle.className = "clip-comment-handle";
+          handle.textContent = "@" + (authorProfile?.username || "member") + " · " + new Date(item.created_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+          const body = document.createElement("p");
+          body.textContent = item.body;
+          row.append(author, handle, body);
+          commentsList.append(row);
+        }
+      }
+      comment.querySelector("small").textContent = String(data?.length || 0);
+    };
+
+    comment.addEventListener("click", async event => {
+      event.stopPropagation();
+      const opening = commentsPanel.hidden;
+      commentsPanel.hidden = !opening;
+      if (opening) await loadComments();
+    });
+    closeComments.addEventListener("click", () => { commentsPanel.hidden = true; });
+    commentForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      const body = commentInput.value.trim();
+      if (!body || commentSubmit.disabled) return;
+      commentSubmit.disabled = true;
+      commentSubmit.textContent = "Posting…";
+      const { error } = await client.from("clip_comments").insert({
+        clip_id: clip.id, user_id: currentUser.id, body
+      });
+      if (error) {
+        say("Couldn't post your comment. Please try again.");
+      } else {
+        commentInput.value = "";
+        await loadComments();
+      }
+      commentSubmit.disabled = false;
+      commentSubmit.textContent = "Post";
+    });
+
     const share = document.createElement("button");
     share.type = "button";
     share.className = "clip-action";
     share.innerHTML = '<span aria-hidden="true">↗</span><small>Share</small>';
-    share.addEventListener("click", async () => {
+    share.addEventListener("click", async event => {
+      event.stopPropagation();
       const shareData = { title: "Darklands clip", text: caption.textContent, url: window.location.href.split("#")[0] + "#clip-" + clip.id };
       try {
         if (navigator.share) await navigator.share(shareData);
@@ -231,7 +365,7 @@
     hint.className = "clip-play-hint";
     hint.textContent = "Tap video to play";
     hint.hidden = true;
-    card.append(video, shade, sound, creator, caption, date, actions, hint);
+    card.append(video, shade, sound, creator, caption, date, actions, commentsPanel, hint);
     return card;
   }
 
@@ -270,6 +404,22 @@
         .in("id", userIds);
       if (profileError) throw profileError;
       const profileMap = new Map((profiles || []).map(profile => [profile.id, profile]));
+      const clipIds = clips.map(clip => clip.id);
+      const [{ data: likeRows, error: likesError }, { data: commentRows, error: commentsError }] = await Promise.all([
+        client.from("clip_likes").select("clip_id, user_id").in("clip_id", clipIds),
+        client.from("clip_comments").select("id, clip_id").in("clip_id", clipIds)
+      ]);
+      if (likesError) throw likesError;
+      if (commentsError) throw commentsError;
+      const likesByClip = new Map();
+      const commentsByClip = new Map();
+      for (const row of likeRows || []) {
+        if (!likesByClip.has(row.clip_id)) likesByClip.set(row.clip_id, []);
+        likesByClip.get(row.clip_id).push(row);
+      }
+      for (const row of commentRows || []) {
+        commentsByClip.set(row.clip_id, (commentsByClip.get(row.clip_id) || 0) + 1);
+      }
       const prepared = await Promise.all(clips.map(async clip => {
         const { data: signed, error: signedError } = await client.storage.from("darklands-clips")
           .createSignedUrl(clip.storage_path, 3600);
@@ -277,7 +427,7 @@
       }));
       for (const item of prepared) {
         if (!item) continue;
-        const card = createClipCard(item.clip, item.profile, item.url);
+        const card = createClipCard(item.clip, item.profile, item.url, likesByClip.get(item.clip.id) || [], commentsByClip.get(item.clip.id) || 0);
         feed.append(card);
         if (observer) observer.observe(card);
         if (window.location.hash === "#clip-" + item.clip.id) card.scrollIntoView();
