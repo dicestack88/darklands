@@ -377,7 +377,7 @@
     card.className="discover-creator-card";
     card.href=page("profile.html")+"?u="+encodeURIComponent(profile.username);
     const avatar=document.createElement("span");avatar.className="discover-avatar";
-    if(profile.avatar_url&&/^https?:\\/\\//i.test(profile.avatar_url)){
+    if(profile.avatar_url&&/^https?:\/\//i.test(profile.avatar_url)){
       const image=document.createElement("img");image.src=profile.avatar_url;image.alt="";image.loading="lazy";avatar.append(image);
     }else avatar.textContent=initials(profile.display_name);
     const info=document.createElement("span");info.className="discover-creator-info";
@@ -391,7 +391,7 @@
   async function runSearch(term) {
     const results=$("clips-search-results");
     if(!results)return;
-    const query=term.trim().replace(/[^a-zA-Z0-9 _-]/g,"").replace(/\\s+/g," ").slice(0,60);
+    const query=term.trim().replace(/[^a-zA-Z0-9 _-]/g,"").replace(/\s+/g," ").slice(0,60);
     results.hidden=false;results.replaceChildren();
     if(query.length<2){
       const hint=document.createElement("p");hint.className="discover-empty";hint.textContent="Type at least 2 characters to search.";results.append(hint);return;
