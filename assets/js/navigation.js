@@ -2,6 +2,13 @@
   "use strict";
 
   const config = window.DARKLANDS_CONFIG;
+  if (!document.querySelector('script[data-dicestack-glass-mode]')) {
+    const glassModeScript = document.createElement("script");
+    glassModeScript.src = "https://dicestack88.github.io/glass-mode.js";
+    glassModeScript.dataset.dicestackGlassMode = "true";
+    document.head.append(glassModeScript);
+  }
+
   for (const href of ["assets/css/navigation.css", "assets/css/ecosystem-glass.css"]) {
     if (!document.querySelector(`link[href="${href}"]`)) {
       const link = document.createElement("link");
