@@ -512,6 +512,7 @@
     reportClip.className = "clip-action";
     reportClip.innerHTML = '<span aria-hidden="true">⚑</span><small>Report</small>';
     reportClip.setAttribute("aria-label", "Report this clip");
+    reportClip.hidden = clip.user_id === currentUser.id;
     reportClip.addEventListener("click", async event => {
       event.stopPropagation();
       const reason = window.prompt("Report reason: spam, harassment, inappropriate, privacy, or other", "other");
