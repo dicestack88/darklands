@@ -84,3 +84,18 @@ html[data-glass-mode="liquid"] :where(.feature-card,.feature-large,.auth-card,.s
   html[data-glass-mode="frosted"] .site-header,html[data-glass-mode="frosted"] .dimension-unified-nav,
   .dicestack-glass-picker>summary,.dicestack-glass-panel{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
 }
+
+
+/* Keep the navigation visibly glassy in both shared appearance modes. */
+.site-header:has(.dimension-unified-nav),
+.dimension-unified-nav {
+  background: linear-gradient(115deg,rgba(25,34,55,.64),rgba(10,15,28,.48)) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(1.18) !important;
+  backdrop-filter: blur(14px) saturate(1.18) !important;
+}
+html[data-glass-mode="liquid"] .site-header:has(.dimension-unified-nav),
+html[data-glass-mode="liquid"] .dimension-unified-nav {
+  background: linear-gradient(115deg,rgba(25,34,55,.52),rgba(10,15,28,.36)) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(1.8) !important;
+  backdrop-filter: blur(28px) saturate(1.8) !important;
+}
