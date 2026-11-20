@@ -51,7 +51,8 @@
     ["Notifications", "notifications.html", ["notifications.html"]],
     ["Home", "index.html", ["index.html", ""]],
     ["Settings", "settings.html", ["settings.html"]],
-    ["Analytics", "analytics.html", ["analytics.html"]]
+    ["Analytics", "analytics.html", ["analytics.html"]],
+    ["My moderation", "my-moderation.html", ["my-moderation.html"]]
   ];
 
   const currentFile = location.pathname.split("/").filter(Boolean).pop() || "index.html";
@@ -70,6 +71,7 @@
   }
 
   const notificationLink = linkElements.find(link => link.textContent === "Notifications");
+  const myModerationLink = linkElements.find(link => link.textContent === "My moderation");
   if (notificationCount) {
     notificationCount.hidden = notificationCount.hidden;
     notificationLink.append(notificationCount);
@@ -145,6 +147,7 @@
         const signedIn = Boolean(data?.user);
         guestLogin.hidden = signedIn;
         guestRegister.hidden = signedIn || liveConfig?.REGISTRATION_ENABLED !== true;
+        if (myModerationLink) myModerationLink.hidden = !signedIn;
         logoutButton.hidden = !signedIn;
         if (!signedIn) return;
         const { data: isModerator, error } = await client.rpc("is_darklands_moderator");
