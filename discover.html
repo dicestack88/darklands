@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090b12">
+  <meta name="description" content="Discover creators and approved clips across Dicestack Dimension.">
+  <title>Discover — Dicestack Dimension</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <link rel="stylesheet" href="assets/css/clips.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="assets/js/supabase-config.js"></script>
+  <script defer src="assets/js/discover.js"></script>
+  <script defer src="assets/js/notification-badge.js"></script>
+  <script defer src="assets/js/theme.js"></script>
+</head>
+<body class="auth-page discover-page">
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <header class="site-header"><a class="brand" href="./"><span class="brand-mark">D</span><span>DICESTACK DIMENSION</span></a></header>
+  <main class="discover-shell">
+    <div class="discover-page-heading">
+      <span class="clips-kicker">EXPLORE THE DIMENSION</span>
+      <h1>Discover<span>.</span></h1>
+      <p>Find creators and explore approved moments from across the community.</p>
+    </div>
+    <section class="clips-discover discover-search-panel" aria-label="Search Dicestack Dimension">
+      <div class="clips-discover-copy"><span class="clips-kicker">FIND YOUR PEOPLE</span><h2>What are you looking for?</h2><p>Search by creator name, username or clip caption.</p></div>
+      <form id="discover-search-form" class="clips-search-form" role="search">
+        <span class="clips-search-icon" aria-hidden="true">⌕</span>
+        <input id="discover-search-input" type="search" maxlength="60" placeholder="Search creators or clips…" autocomplete="off" aria-label="Search creators or clips">
+        <button type="submit">Search</button>
+      </form>
+      <div id="discover-search-results" class="clips-search-results" hidden aria-live="polite"></div>
+    </section>
+    <section class="discover-intro" aria-label="Discover tips">
+      <div><span class="clips-kicker">A NEW WAY TO EXPLORE</span><h2>Meet the community.</h2><p>Search for creators, find new videos, then open a creator profile to follow their activity.</p></div>
+      <a class="button" href="clips.html">Watch Clips <span aria-hidden="true">↗</span></a>
+    </section>
+    <p id="discover-status" class="clips-status" role="status" aria-live="polite">Checking your sign-in…</p>
+  </main>
+  <footer class="site-footer"><span>© 2026 DICESTACK DIMENSION</span><span>A DICESTACK88 PROJECT</span></footer>
+  <script src="assets/js/navigation.js"></script>
+</body>
+</html>
