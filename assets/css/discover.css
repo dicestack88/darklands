@@ -11,3 +11,10 @@
 .discover-intro .button{flex:0 0 auto}
 .discover-page .clips-status{margin-top:20px}
 @media(max-width:620px){.discover-shell{width:calc(100% - 28px);padding-top:34px}.discover-intro{align-items:flex-start;flex-direction:column}.discover-intro .button{width:100%}}
+
+/* Live search recommendations dropdown */
+.discover-search-panel{position:relative;z-index:5}
+.discover-search-panel .clips-search-results{position:absolute;z-index:30;top:calc(100% - 12px);left:clamp(20px,3vw,32px);right:clamp(20px,3vw,32px);max-height:min(68vh,560px);overflow:auto;margin:0;padding:18px;border:1px solid rgba(173,190,231,.22);border-radius:15px;background:rgba(10,15,27,.98);box-shadow:0 22px 65px rgba(0,0,0,.48);backdrop-filter:blur(22px)}
+.discover-search-panel .clips-search-results::-webkit-scrollbar{width:8px}
+.discover-search-panel .clips-search-results::-webkit-scrollbar-thumb{border-radius:8px;background:rgba(166,184,255,.25)}
+@media(max-width:620px){.discover-search-panel .clips-search-results{left:12px;right:12px;padding:13px;max-height:65vh}}
