@@ -34,6 +34,8 @@
     }
     const ownProfile=auth.user.id===profile.id;
     const followButton=$("creator-follow-button");
+    const messageButton=$("creator-message-button");
+    if(!ownProfile){messageButton.hidden=false;messageButton.addEventListener("click",async()=>{const body=window.prompt("Write your first message (max 1000 characters):");if(body===null)return;messageButton.disabled=true;const result=await client.rpc("dimension_send_message_request",{p_recipient:profile.id,p_body:body});messageButton.disabled=false;if(result.error){showError(result.error.message||"Could not send the message.");return;}window.location.href=new URL("messages.html?c="+encodeURIComponent(result.data),config.SITE_URL).toString();});}
     $("creator-own-label").hidden=!ownProfile;
     const [{count:followerCount,error:followerError},{count:followingCount,error:followingError}]=await Promise.all([
       client.from("user_follows").select("follower_id",{count:"exact",head:true}).eq("following_id",profile.id),
