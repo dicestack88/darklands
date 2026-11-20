@@ -106,6 +106,13 @@ create policy "Moderators can review content reports"
   on public.dimension_content_reports for select to authenticated
   using ((select public.is_darklands_moderator()));
 
+grant update (review_status,moderator_note) on public.dimension_content_reports to authenticated;
+drop policy if exists "Moderators can update content report reviews" on public.dimension_content_reports;
+create policy "Moderators can update content report reviews"
+  on public.dimension_content_reports for update to authenticated
+  using ((select public.is_darklands_moderator()))
+  with check ((select public.is_darklands_moderator()));
+
 alter table public.message_reports
   add column if not exists review_status text not null default 'open',
   add column if not exists moderator_note text not null default '',
