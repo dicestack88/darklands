@@ -2,10 +2,14 @@
   "use strict";
 
   const config = window.DARKLANDS_CONFIG;
-  const css = document.createElement("link");
-  css.rel = "stylesheet";
-  css.href = "assets/css/navigation.css";
-  document.head.append(css);
+  for (const href of ["assets/css/navigation.css", "assets/css/ecosystem-glass.css"]) {
+    if (!document.querySelector(`link[href="${href}"]`)) {
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = href;
+      document.head.append(link);
+    }
+  }
 
   const header = document.querySelector(".site-header") || (() => {
     const element = document.createElement("header");
@@ -29,7 +33,6 @@
 
   const oldLogout = header.querySelector('button[id*="logout"]');
   const logoutButton = oldLogout || document.createElement("button");
-  const themeToggle = document.getElementById("darklands-theme-toggle");
   const notificationCount = header.querySelector(".notification-nav-count");
 
   nav.replaceChildren();
@@ -121,7 +124,6 @@
   logoutButton.classList.add("dimension-logout");
   logoutButton.textContent = "Log out";
   nav.append(logoutButton);
-  if (themeToggle) nav.append(themeToggle);
 
   header.replaceChildren(nav);
 
