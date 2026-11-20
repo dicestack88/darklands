@@ -10,14 +10,14 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/styles.css">
-  <script src="assets/js/app.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script><script src="assets/js/supabase-config.js" defer></script><script src="assets/js/app.js" defer></script><script src="assets/js/message-settings.js" defer></script>
 <script defer src="assets/js/theme.js"></script>
 </head>
 <body class="settings-page">
   <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
   <header class="site-header">
     <a class="brand" href="./" aria-label="Dicestack Dimension home"><span class="brand-mark">D</span><span>DICESTACK DIMENSION</span></a>
-    <nav class="header-nav" aria-label="Main navigation"><a href="./">Home</a><a class="nav-login" href="login.html">Log in</a><a class="button button-small" href="register.html">Create account <span aria-hidden="true">↗</span></a></nav>
+    <nav class="header-nav" aria-label="Main navigation"><a href="messages.html">Messages</a><a href="clips.html">Clips</a><a href="./">Home</a><a class="nav-login" href="login.html">Log in</a><a class="button button-small" href="register.html">Create account <span aria-hidden="true">↗</span></a></nav>
   </header>
   <main class="settings-shell">
     <a class="back-link settings-back" href="./">← Back to Dicestack Dimension</a>
@@ -53,8 +53,7 @@
         <section class="settings-panel" id="privacy">
           <div class="settings-panel-heading"><div><div class="eyebrow">03 / CONTROL</div><h2>Privacy</h2><p>Decide what information is visible to other members.</p></div></div>
           <div class="preference-row"><div><strong>Profile visibility</strong><span>Choose who can view your profile.</span></div><select aria-label="Profile visibility" disabled><option>Public (planned)</option></select></div>
-          <div class="preference-row"><div><strong>Direct messages</strong><span>Control who can send you a message.</span></div><select aria-label="Direct message permissions" disabled><option>Friends only (planned)</option></select></div>
-          <p class="settings-footnote">Privacy controls will become configurable when profiles and messaging are connected.</p>
+          <div class="preference-row message-privacy-row"><div><strong>Who can message me?</strong><span>Choose who can start a conversation with you.</span></div><select id="message-privacy-setting" aria-label="Who can message me"><option value="requests">Everyone — message requests</option><option value="mutuals">Mutual followers only</option><option value="following">People I follow — requests</option></select></div><p id="message-privacy-description" class="settings-footnote">New conversations from eligible members will follow this rule. Existing accepted chats stay available unless you block someone.</p><div class="settings-actions"><p id="message-privacy-status" class="form-message" role="status" aria-live="polite"></p><button id="save-message-privacy" class="button" type="button">Save messaging privacy</button></div>
         </section>
         <section class="settings-panel" id="preferences">
           <div class="settings-panel-heading"><div><div class="eyebrow">04 / EXPERIENCE</div><h2>Preferences</h2><p>Make Dicestack Dimension feel the way you want it to.</p></div></div>
