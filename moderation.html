@@ -47,6 +47,14 @@
     <div id="moderation-access-label" class="moderation-access" hidden>RESTRICTED MODERATOR ACCESS</div>
     <div id="moderation-content" hidden>
       <section class="moderation-section">
+        <div class="moderation-section-heading"><div><span class="moderation-kicker">DIRECT ACTIONS</span><h2>Find a member</h2><p class="moderation-role-description">Search by username or display name to warn, timeout, suspend or lift a restriction.</p></div></div>
+        <form id="moderation-member-search" class="moderation-role-search">
+          <input id="moderation-member-query" type="search" maxlength="60" minlength="2" placeholder="Search members…" aria-label="Search members by username or display name" required>
+          <button class="moderation-refresh" type="submit">Find member</button>
+        </form>
+        <div id="moderation-member-results" class="moderation-member-results"><p class="moderation-empty">Search for a member to see available moderation actions.</p></div>
+      </section>
+      <section class="moderation-section">
         <div class="moderation-section-heading">
           <div><span class="moderation-kicker">UPLOAD QUEUE</span><h2>Pending clips</h2></div>
           <button class="moderation-refresh" id="moderation-refresh" type="button">Refresh ↻</button>
