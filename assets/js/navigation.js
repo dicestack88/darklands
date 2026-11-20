@@ -35,6 +35,18 @@
   nav.replaceChildren();
   nav.append(brand);
 
+  const ecosystem = document.createElement("details");
+  ecosystem.className = "dimension-ecosystem-switcher";
+  ecosystem.innerHTML = `
+    <summary aria-label="Open Dicestack apps"><span class="ecosystem-switcher-mark">✦</span><span>Dicestack apps</span><span class="ecosystem-switcher-chevron" aria-hidden="true">⌄</span></summary>
+    <div class="ecosystem-switcher-panel">
+      <span class="ecosystem-switcher-label">THE DICESTACK ECOSYSTEM</span>
+      <a href="https://dicestack88.github.io/"><span>⌂</span><span><strong>Dicestack hub</strong><small>Main website & projects</small></span><b>↗</b></a>
+      <a href="https://dicestack88.github.io/launcher.html"><span>⌘</span><span><strong>Launcher</strong><small>Eaglercraft clients & games</small></span><b>↗</b></a>
+      <a href="https://www.youtube.com/@dicestack88"><span>▶</span><span><strong>YouTube</strong><small>Videos & creator updates</small></span><b>↗</b></a>
+    </div>`;
+  nav.append(ecosystem);
+
   const menu = document.createElement("button");
   menu.type = "button";
   menu.className = "dimension-sidebar-toggle";
@@ -131,6 +143,9 @@
     menu.setAttribute("aria-label", open ? "Close navigation menu" : "Open navigation menu");
   });
   backdrop.addEventListener("click", closeMenu);
+  ecosystem.addEventListener("click", event => {
+    if (event.target.closest("a")) ecosystem.open = false;
+  });
   document.addEventListener("keydown", event => {
     if (event.key === "Escape") closeMenu();
   });
