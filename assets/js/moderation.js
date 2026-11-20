@@ -12,13 +12,38 @@
   };
   const memberRoot=$("my-moderation-content"),accessLabel=$("moderation-access-label"),memberNav=$("member-moderation-nav"),moderatorNav=$("moderation-section-nav"),moderatorSidebarGroup=$("moderator-sidebar-group"),roleNavLink=$("role-nav-link");
   let signedInUser=null,isModerator=false;
-  const roleSection=$("moderation-role-section"),roleSearch=$("moderation-role-search"),
+  const roleSection=$("role-management-section"),roleSearch=$("moderation-role-search"),
     roleQuery=$("moderation-role-query"),roleResults=$("moderation-role-results");
   const memberSearch=$("moderation-member-search"),memberQuery=$("moderation-member-query"),memberResults=$("moderation-member-results");
   const verified=user=>Boolean(user&&(user.email_confirmed_at||user.confirmed_at));
   const page=name=>new URL(name,config.SITE_URL).toString();
   const say=message=>{status.textContent=message;};
   const date=value=>new Date(value).toLocaleString(undefined,{dateStyle:"medium",timeStyle:"short"});
+  function selectModerationSection(id){
+    const target=$(id);
+    if(!target)return;
+    document.querySelectorAll(".moderation-main .moderation-section").forEach(section=>{
+      section.hidden=section!==target;
+    });
+    document.querySelectorAll(".moderation-sidebar .moderation-section-nav a").forEach(link=>{
+      const active=link.getAttribute("href")==="#"+id;
+      link.classList.toggle("active",active);
+      if(active)link.setAttribute("aria-current","page");
+      else link.removeAttribute("aria-current");
+    });
+  }
+  function bindModerationNavigation(nav){
+    nav?.addEventListener("click",event=>{
+      const link=event.target.closest("a[href^='#']");
+      if(!link)return;
+      const id=link.getAttribute("href").slice(1);
+      if(!$(id))return;
+      event.preventDefault();
+      selectModerationSection(id);
+    });
+  }
+  bindModerationNavigation(memberNav);
+  bindModerationNavigation(moderatorNav);
   const empty=(root,message)=>{const p=document.createElement("p");p.className="moderation-empty";p.textContent=message;root.replaceChildren(p);};
   const node=(tag,cls,text)=>{const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el;};
   function button(label,kind,handler){
@@ -296,8 +321,10 @@
         if(moderatorNav)moderatorNav.hidden=false;
         if(moderatorSidebarGroup)moderatorSidebarGroup.hidden=false;
         if(isOwner===true&&roleSection){roleSection.hidden=false;if(roleNavLink)roleNavLink.hidden=false;await loadRoleMembers("");}
+        selectModerationSection("member-search-section");
         await Promise.all([loadQueue(),loadAppeals(),loadHistory()]);
       }else{
+        selectModerationSection("member-status-section");
         say("Your account moderation information is up to date.");
       }
     }catch(e){say(e.message||"We couldn't verify moderator access.");}
