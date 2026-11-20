@@ -17,3 +17,6 @@ html[data-theme="light"] .dimension-sidebar-toggle{background:#fff;border-color:
 html[data-theme="light"].dimension-nav-open .dimension-unified-nav{background:#fffefa;border-color:#dce4dd}
 html[data-theme="light"].dimension-nav-open .dimension-unified-nav a{color:#34434c;background:#f1f5f1}
 html[data-theme="light"].dimension-nav-open .dimension-unified-nav a[aria-current="page"]{background:#e2f3ed;color:#087e78}
+
+/* Respect auth-state visibility even inside the slide-out navigation. */
+.dimension-unified-nav [hidden]{display:none!important}
