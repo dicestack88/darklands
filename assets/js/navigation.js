@@ -72,6 +72,7 @@
 
   const notificationLink = linkElements.find(link => link.textContent === "Notifications");
   const myModerationLink = linkElements.find(link => link.textContent === "My moderation");
+  if (myModerationLink) myModerationLink.hidden = true;
   if (notificationCount) {
     notificationCount.hidden = notificationCount.hidden;
     notificationLink.append(notificationCount);
