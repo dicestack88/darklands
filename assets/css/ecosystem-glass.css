@@ -1,0 +1,36 @@
+/* Dicestack Dimension — shared dark frosted-glass material.
+   Loaded by the global navigation script, so it reaches every Dimension page. */
+:root{color-scheme:dark!important}
+html,body{color-scheme:dark!important}
+.site-header,.site-header:has(.dimension-unified-nav),.dimension-unified-nav,.header-nav,.creator-nav,.clips-header-nav,.moderation-header-nav,.moderation-nav,.notifications-nav,.messages-top-nav{
+  background:linear-gradient(115deg,rgba(25,34,55,.70),rgba(10,15,28,.58))!important;
+  border-color:rgba(210,225,255,.18)!important;
+  backdrop-filter:blur(28px) saturate(175%)!important;
+  -webkit-backdrop-filter:blur(28px) saturate(175%)!important;
+  box-shadow:0 12px 38px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.12)!important;
+}
+:where(.feature-card,.feature-large,.auth-card,.settings-panel,.home-welcome,.join-strip,.profile-summary,.profile-preview,.account-customize-form,.home-shortcut,.clip-card,.creator-card,.message-card,.notification-card,.report-card,.moderation-card,.analytics-card,.settings-nav,.sidebar,.dimension-ecosystem-switcher .ecosystem-switcher-panel,[class$="-panel"],[class$="-card"],[class*=" modal"],[class*=" dialog"]){
+  background:linear-gradient(145deg,rgba(255,255,255,.095),rgba(255,255,255,.025) 62%),rgba(15,21,35,.62)!important;
+  border:1px solid rgba(210,225,255,.16)!important;
+  box-shadow:0 16px 42px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.12)!important;
+  backdrop-filter:blur(24px) saturate(165%)!important;
+  -webkit-backdrop-filter:blur(24px) saturate(165%)!important;
+}
+.dimension-unified-nav .dimension-nav-link,.dimension-unified-nav .dimension-sidebar-toggle,.dimension-unified-nav .dimension-auth-link,.dimension-unified-nav .dimension-ecosystem-switcher>summary,
+button,.button,[role="button"]{
+  border-color:rgba(210,225,255,.19)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.13),0 8px 24px rgba(0,0,0,.16);
+  backdrop-filter:blur(16px) saturate(150%);
+  -webkit-backdrop-filter:blur(16px) saturate(150%);
+}
+input,textarea,select{
+  color-scheme:dark!important;
+  background:rgba(255,255,255,.055)!important;
+  border-color:rgba(210,225,255,.19)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07)!important;
+  backdrop-filter:blur(14px) saturate(145%);
+  -webkit-backdrop-filter:blur(14px) saturate(145%);
+}
+.dimension-ecosystem-switcher[open] .ecosystem-switcher-panel{background:rgba(12,18,31,.88)!important;border:1px solid rgba(210,225,255,.2)!important;backdrop-filter:blur(30px) saturate(170%)!important;-webkit-backdrop-filter:blur(30px) saturate(170%)!important}
+:where(.feature-card,.feature-large,.auth-card,.settings-panel,.home-welcome,.join-strip,.profile-summary,.profile-preview,.home-shortcut,[class$="-panel"],[class$="-card"]){overflow:hidden}
+@media(prefers-reduced-transparency:reduce){:where(.site-header,.dimension-unified-nav,.feature-card,.feature-large,.auth-card,.settings-panel,.home-welcome,.join-strip,.profile-summary,.profile-preview,.account-customize-form,.home-shortcut,[class$="-panel"],[class$="-card"]){backdrop-filter:none!important;-webkit-backdrop-filter:none!important}}
