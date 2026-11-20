@@ -1,0 +1,111 @@
+/* Dicestack Dimension — restrained teal / blue / violet accent language. */
+:root {
+  --dimension-accent-a: #65e6d2;
+  --dimension-accent-b: #79a9ff;
+  --dimension-accent-c: #a58bff;
+  --dimension-accent-glow: rgba(101,230,210,.22);
+  --dimension-accent-gradient: linear-gradient(110deg,var(--dimension-accent-a),var(--dimension-accent-b) 52%,var(--dimension-accent-c));
+}
+
+/* Hover and keyboard feedback stays clipped to each component's own shape. */
+:where(.feature-card,.feature-large,.auth-card,.settings-panel,.home-welcome,.join-strip,.profile-summary,.profile-preview,.home-shortcut,.clip-card,.creator-card,.message-card,.notification-card,.report-card,.moderation-card,.analytics-card,.settings-nav,.sidebar,[class$="-panel"],[class$="-card"]) {
+  position:relative;
+  isolation:isolate;
+}
+:where(.feature-card,.feature-large,.auth-card,.settings-panel,.home-welcome,.join-strip,.profile-summary,.profile-preview,.home-shortcut,.clip-card,.creator-card,.message-card,.notification-card,.report-card,.moderation-card,.analytics-card,.settings-nav,.sidebar,[class$="-panel"],[class$="-card"])::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:0;
+  border-radius:inherit;
+  pointer-events:none;
+  opacity:0;
+  background:radial-gradient(ellipse at 12% 0%,rgba(101,230,210,.15),transparent 48%),radial-gradient(ellipse at 100% 100%,rgba(165,139,255,.13),transparent 52%);
+  transition:opacity .24s ease;
+}
+:where(.feature-card,.feature-large,.auth-card,.settings-panel,.home-welcome,.join-strip,.profile-summary,.profile-preview,.home-shortcut,.clip-card,.creator-card,.message-card,.notification-card,.report-card,.moderation-card,.analytics-card,.settings-nav,.sidebar,[class$="-panel"],[class$="-card"]):hover::after {
+  opacity:1;
+}
+:where(.feature-card,.feature-large,.auth-card,.settings-panel,.home-welcome,.join-strip,.profile-summary,.profile-preview,.home-shortcut,.clip-card,.creator-card,.message-card,.notification-card,.report-card,.moderation-card,.analytics-card,.settings-nav,.sidebar,[class$="-panel"],[class$="-card"]) > * {
+  position:relative;
+}
+:where(button,.button,[role="button"],input,select,textarea,.dimension-nav-link,.dimension-ecosystem-switcher>summary):focus-visible {
+  outline:2px solid rgba(101,230,210,.82);
+  outline-offset:3px;
+  box-shadow:0 0 0 4px rgba(101,230,210,.11),0 0 22px rgba(121,169,255,.15);
+}
+:where(button,.button,[role="button"],.dimension-nav-link,.dimension-ecosystem-switcher>summary) {
+  transition:color .18s ease,border-color .18s ease,box-shadow .22s ease,background-color .18s ease,transform .18s ease;
+}
+:where(button,.button,[role="button"],.dimension-nav-link,.dimension-ecosystem-switcher>summary):hover {
+  border-color:rgba(101,230,210,.42);
+  box-shadow:0 0 0 1px rgba(101,230,210,.08),0 0 20px rgba(101,230,210,.13),0 0 30px rgba(165,139,255,.08);
+}
+.dimension-unified-nav .dimension-nav-link[aria-current="page"] {
+  text-shadow:0 0 16px rgba(101,230,210,.3);
+}
+.dimension-unified-nav .dimension-logout:hover {
+  box-shadow:0 0 24px rgba(101,230,210,.28),0 0 34px rgba(165,139,255,.2);
+}
+
+/* Lightweight page loader and same-site transition curtain. */
+.dimension-page-loader {
+  position:fixed;
+  inset:0;
+  z-index:2147483000;
+  display:grid;
+  place-items:center;
+  padding:24px;
+  background:radial-gradient(ellipse at 18% 8%,rgba(20,145,143,.22),transparent 42%),radial-gradient(ellipse at 90% 92%,rgba(119,82,177,.2),transparent 44%),rgba(7,10,20,.97);
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transition:opacity .22s ease,visibility .22s ease;
+}
+html.dimension-loading .dimension-page-loader {
+  opacity:1;
+  visibility:visible;
+  pointer-events:auto;
+}
+.dimension-loader-content {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:17px;
+  color:#eaf0ff;
+  font:600 11px/1.2 "DM Sans",system-ui,sans-serif;
+  letter-spacing:.2em;
+}
+.dimension-loader-mark {
+  position:relative;
+  width:54px;
+  height:54px;
+  display:grid;
+  place-items:center;
+  border:1px solid rgba(161,191,255,.28);
+  border-radius:17px;
+  background:linear-gradient(145deg,rgba(101,230,210,.18),rgba(121,169,255,.13),rgba(165,139,255,.18));
+  box-shadow:0 0 34px rgba(101,230,210,.16),inset 0 1px 0 rgba(255,255,255,.16);
+  font:700 29px/1 "Space Grotesk",system-ui,sans-serif;
+  letter-spacing:0;
+}
+.dimension-loader-mark::after {
+  content:"";
+  position:absolute;
+  inset:-5px;
+  border:2px solid transparent;
+  border-top-color:var(--dimension-accent-a);
+  border-right-color:var(--dimension-accent-c);
+  border-radius:21px;
+  animation:dimension-loader-spin .9s linear infinite;
+}
+.dimension-loader-caption {
+  color:#aab8d4;
+  font-size:9px;
+  letter-spacing:.28em;
+}
+@keyframes dimension-loader-spin { to { transform:rotate(360deg); } }
+@media(prefers-reduced-motion:reduce) {
+  :where(button,.button,[role="button"],input,select,textarea,.dimension-nav-link,.dimension-ecosystem-switcher>summary),
+  .dimension-page-loader,.dimension-page-loader * { transition:none!important;animation:none!important; }
+}

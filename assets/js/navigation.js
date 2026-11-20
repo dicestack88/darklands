@@ -9,13 +9,20 @@
     document.head.append(glassModeScript);
   }
 
-  for (const href of ["assets/css/navigation.css", "assets/css/ecosystem-glass.css"]) {
+  for (const href of ["assets/css/navigation.css", "assets/css/ecosystem-glass.css", "assets/css/dimension-effects.css"]) {
     if (!document.querySelector(`link[href="${href}"]`)) {
       const link = document.createElement("link");
       link.rel = "stylesheet";
       link.href = href;
       document.head.append(link);
     }
+  }
+
+  if (!document.querySelector('script[data-dimension-page-effects]')) {
+    const effectsScript = document.createElement("script");
+    effectsScript.src = "assets/js/dimension-effects.js";
+    effectsScript.dataset.dimensionPageEffects = "true";
+    document.body.append(effectsScript);
   }
 
   const header = document.querySelector(".site-header") || (() => {
