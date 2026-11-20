@@ -49,7 +49,6 @@
     ["Messages", "messages.html", ["messages.html"]],
     ["My profile", "profile.html", ["profile.html"]],
     ["Notifications", "notifications.html", ["notifications.html"]],
-    ["My account", "app.html", ["app.html"]],
     ["Home", "index.html", ["index.html", ""]],
     ["Settings", "settings.html", ["settings.html"]]
   ];
