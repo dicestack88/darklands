@@ -110,14 +110,11 @@
       roots.messageReports.replaceChildren();
       if(!messageReports.data?.length)empty(roots.messageReports,"No open message reports.");
       else{
-        const ids=[...new Set(messageReports.data.map(r=>r.conversation_id))];
-        const {data:conversations,error}=await db.from("conversations").select("id,user_one,user_two").in("id",ids);
+        const {data:targets,error}=await db.rpc("dimension_moderation_message_report_targets");
         if(error)throw error;
-        const map=new Map((conversations||[]).map(c=>[c.id,c]));
+        const targetMap=new Map((targets||[]).map(item=>[item.report_id,item.target_user_id]));
         for(const report of messageReports.data){
-          const convo=map.get(report.conversation_id);
-          const target=convo?(convo.user_one===report.reporter_id?convo.user_two:convo.user_one):null;
-          roots.messageReports.append(renderReportCard({report,targetUserId:target,targetLabel:"Message report",table:"message_reports",contextType:"message_report"}));
+          roots.messageReports.append(renderReportCard({report,targetUserId:targetMap.get(report.id),targetLabel:"Message report",table:"message_reports",contextType:"message_report"}));
         }
       }
       roots.contentReports.replaceChildren();
