@@ -122,20 +122,29 @@
     if (event.key === "Escape") closeMenu();
   });
 
-  if (config?.SUPABASE_URL && config?.SUPABASE_ANON_KEY && window.supabase?.createClient) {
-    const client = window.supabase.createClient(config.SUPABASE_URL, config.SUPABASE_ANON_KEY, {
-      auth: { persistSession: true, autoRefreshToken: true }
-    });
-    client.auth.getUser().then(async ({ data }) => {
-      const signedIn = Boolean(data?.user);
-      guestLogin.hidden = signedIn;
-      guestRegister.hidden = signedIn;
-      if (oldLogout) oldLogout.hidden = !signedIn;
-      if (!signedIn) return;
-      const { data: isModerator, error } = await client.rpc("is_darklands_moderator");
-      if (!error && isModerator === true) moderatorLink.hidden = false;
-    }).catch(() => {});
-  } else if (oldLogout) {
-    oldLogout.hidden = true;
+  const syncAuthNavigation = () => {
+    const liveConfig = window.DARKLANDS_CONFIG || config;
+    if (liveConfig?.SUPABASE_URL && liveConfig?.SUPABASE_ANON_KEY && window.supabase?.createClient) {
+      const client = window.supabase.createClient(liveConfig.SUPABASE_URL, liveConfig.SUPABASE_ANON_KEY, {
+        auth: { persistSession: true, autoRefreshToken: true }
+      });
+      client.auth.getUser().then(async ({ data }) => {
+        const signedIn = Boolean(data?.user);
+        guestLogin.hidden = signedIn;
+        guestRegister.hidden = signedIn;
+        if (oldLogout) oldLogout.hidden = !signedIn;
+        if (!signedIn) return;
+        const { data: isModerator, error } = await client.rpc("is_darklands_moderator");
+        if (!error && isModerator === true) moderatorLink.hidden = false;
+      }).catch(() => {});
+    } else if (oldLogout) {
+      oldLogout.hidden = true;
+    }
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", syncAuthNavigation, { once: true });
+  } else {
+    syncAuthNavigation();
   }
 })();
