@@ -44,7 +44,8 @@
   nav.append(menu);
 
   const links = [
-    ["Discover", "clips.html", ["clips.html"]],
+    ["Discover", "discover.html", ["discover.html"]],
+    ["Clips", "clips.html", ["clips.html"]],
     ["Messages", "messages.html", ["messages.html"]],
     ["My profile", "profile.html", ["profile.html"]],
     ["Notifications", "notifications.html", ["notifications.html"]],
