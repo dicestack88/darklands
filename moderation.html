@@ -27,10 +27,24 @@
   <main class="moderation-shell">
     <div class="eyebrow"><span class="status-dot"></span> DICESTACK DIMENSION / TRUST & SAFETY</div>
     <div class="moderation-heading">
-      <div><h1>Moderation<span>.</span></h1><p>Review submissions and community reports.</p></div>
-      <span class="moderation-access">RESTRICTED ACCESS</span>
+      <div><h1>Moderation<span>.</span></h1><p>Your account status, moderation history and community safety tools.</p></div>
     </div>
     <p id="moderation-status" class="moderation-status" role="status" aria-live="polite">Checking your moderator access…</p>
+    <section id="my-moderation-content" hidden>
+      <section class="moderation-section">
+        <div class="moderation-section-heading"><div><span class="moderation-kicker">ACCOUNT STATUS</span><h2>Active restrictions</h2></div></div>
+        <div id="my-restrictions" class="moderation-reports"></div>
+      </section>
+      <section class="moderation-section">
+        <div class="moderation-section-heading"><div><span class="moderation-kicker">YOUR RECORD</span><h2>Moderation history</h2></div></div>
+        <div id="my-actions" class="moderation-reports"></div>
+      </section>
+      <section class="moderation-section">
+        <div class="moderation-section-heading"><div><span class="moderation-kicker">RIGHT TO APPEAL</span><h2>Your appeals</h2></div></div>
+        <div id="my-appeals" class="moderation-reports"></div>
+      </section>
+    </section>
+    <div id="moderation-access-label" class="moderation-access" hidden>RESTRICTED MODERATOR ACCESS</div>
     <div id="moderation-content" hidden>
       <section class="moderation-section">
         <div class="moderation-section-heading">
