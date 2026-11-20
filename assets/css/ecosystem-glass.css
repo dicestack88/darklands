@@ -38,14 +38,12 @@ input,textarea,select{
 
 /* Shared manual appearance modes — Frosted is the default. */
 html[data-glass-mode="frosted"] .site-header,
-html[data-glass-mode="frosted"] .dimension-unified-nav,
 html[data-glass-mode="frosted"] :where(.feature-card,.feature-large,.auth-card,.settings-panel,.home-welcome,.join-strip,.profile-summary,.profile-preview,.account-customize-form,.home-shortcut,.clip-card,.creator-card,.message-card,.notification-card,.report-card,.moderation-card,.analytics-card,.settings-nav,.sidebar,[class$="-panel"],[class$="-card"]) {
   -webkit-backdrop-filter:blur(9px) saturate(1.12)!important;
   backdrop-filter:blur(9px) saturate(1.12)!important;
   box-shadow:0 9px 26px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.075)!important;
 }
 html[data-glass-mode="liquid"] .site-header,
-html[data-glass-mode="liquid"] .dimension-unified-nav,
 html[data-glass-mode="liquid"] :where(.feature-card,.feature-large,.auth-card,.settings-panel,.home-welcome,.join-strip,.profile-summary,.profile-preview,.account-customize-form,.home-shortcut,.clip-card,.creator-card,.message-card,.notification-card,.report-card,.moderation-card,.analytics-card,.settings-nav,.sidebar,[class$="-panel"],[class$="-card"]) {
   -webkit-backdrop-filter:blur(25px) saturate(1.8)!important;
   backdrop-filter:blur(25px) saturate(1.8)!important;
@@ -87,14 +85,12 @@ html[data-glass-mode="liquid"] :where(.feature-card,.feature-large,.auth-card,.s
 
 
 /* Keep the navigation visibly glassy in both shared appearance modes. */
-.site-header:has(.dimension-unified-nav),
-.dimension-unified-nav {
+.site-header:has(.dimension-unified-nav) {
   background: linear-gradient(115deg,rgba(25,34,55,.64),rgba(10,15,28,.48)) !important;
   -webkit-backdrop-filter: blur(14px) saturate(1.18) !important;
   backdrop-filter: blur(14px) saturate(1.18) !important;
 }
-html[data-glass-mode="liquid"] .site-header:has(.dimension-unified-nav),
-html[data-glass-mode="liquid"] .dimension-unified-nav {
+html[data-glass-mode="liquid"] .site-header:has(.dimension-unified-nav) {
   background: linear-gradient(115deg,rgba(25,34,55,.52),rgba(10,15,28,.36)) !important;
   -webkit-backdrop-filter: blur(28px) saturate(1.8) !important;
   backdrop-filter: blur(28px) saturate(1.8) !important;
@@ -106,6 +102,19 @@ html[data-glass-mode="liquid"] .dimension-unified-nav {
   overflow: visible;
 }
 .dimension-unified-nav {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* One shared navbar surface: the header owns the glass material.
+   The nav is only a layout container; never paint a second glass panel on it. */
+.site-header > .dimension-unified-nav,
+.site-header > nav.dimension-unified-nav,
+html[data-glass-mode="frosted"] .site-header > .dimension-unified-nav,
+html[data-glass-mode="liquid"] .site-header > .dimension-unified-nav {
   background: transparent !important;
   border: 0 !important;
   box-shadow: none !important;
