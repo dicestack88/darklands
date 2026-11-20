@@ -7,6 +7,10 @@
   const content = document.getElementById("moderation-content");
   const clipsRoot = document.getElementById("moderation-clips");
   const reportsRoot = document.getElementById("moderation-reports");
+  const roleSection = document.getElementById("moderation-role-section");
+  const roleSearch = document.getElementById("moderation-role-search");
+  const roleQuery = document.getElementById("moderation-role-query");
+  const roleResults = document.getElementById("moderation-role-results");
   const refreshButton = document.getElementById("moderation-refresh");
   const logoutButton = document.getElementById("moderation-logout");
   const verified = user => Boolean(user && (user.email_confirmed_at || user.confirmed_at));
@@ -194,6 +198,54 @@
     }
   }
 
+  async function loadRoleMembers(query="") {
+    if(!roleResults)return;
+    roleResults.setAttribute("aria-busy","true");
+    const {data,error}=await client.rpc("dimension_search_role_members",{p_query:query});
+    roleResults.removeAttribute("aria-busy");
+    if(error)throw error;
+    roleResults.replaceChildren();
+    if(!data?.length){empty(roleResults,"No matching members found.");return;}
+    for(const member of data){
+      const row=document.createElement("article");
+      row.className="moderation-role-row";
+      const identity=document.createElement("div");
+      identity.className="moderation-role-identity";
+      const name=document.createElement("strong");
+      name.textContent=member.display_name||member.username;
+      const handle=document.createElement("span");
+      handle.textContent="@"+member.username;
+      identity.append(name,handle);
+      const controls=document.createElement("div");
+      controls.className="moderation-role-controls";
+      const select=document.createElement("select");
+      select.className="moderation-role-select";
+      select.setAttribute("aria-label","Role for @"+member.username);
+      for(const [value,label] of [["member","Member"],["supporter","Supporter"],["moderator","Moderator"]]){
+        const option=document.createElement("option");option.value=value;option.textContent=label;select.append(option);
+      }
+      const isOwner=member.role==="owner";
+      if(isOwner){
+        select.replaceChildren();
+        const option=document.createElement("option");option.value="owner";option.textContent="Owner";select.append(option);
+        select.disabled=true;
+      }else select.value=member.role||"member";
+      const save=document.createElement("button");
+      save.type="button";save.className="moderation-action approve";save.textContent=isOwner?"Protected":"Save role";
+      save.disabled=isOwner;
+      save.addEventListener("click",async()=>{
+        save.disabled=true;save.textContent="Saving…";
+        const {error:saveError}=await client.rpc("dimension_set_member_role",{p_user_id:member.user_id,p_role:select.value});
+        if(saveError){say(saveError.message||"The member role could not be updated.");save.disabled=false;save.textContent="Save role";return;}
+        say("Updated @"+member.username+"'s role.");
+        await loadRoleMembers(roleQuery.value.trim());
+      });
+      controls.append(select,save);
+      row.append(identity,controls);
+      roleResults.append(row);
+    }
+  }
+
   async function start() {
     if (!client) { say("Account services aren't configured. Please try again later."); return; }
     try {
@@ -204,19 +256,31 @@
         window.location.replace(page("login.html"));
         return;
       }
-      const { data: isModerator, error: accessError } = await client.rpc("is_darklands_moderator");
-      if (accessError) throw accessError;
-      if (isModerator !== true) {
-        say("Access denied. This account is not on the Darklands moderator list.");
+      const [{data:isModerator,error:accessError},{data:isOwner,error:ownerError}]=await Promise.all([
+        client.rpc("is_darklands_moderator"),
+        client.rpc("dimension_is_owner")
+      ]);
+      if(accessError)throw accessError;
+      if(ownerError)throw ownerError;
+      if(isModerator!==true){
+        say("Access denied. This account does not have moderation access.");
         return;
       }
-      content.hidden = false;
+      content.hidden=false;
+      if(isOwner===true&&roleSection){
+        roleSection.hidden=false;
+        await loadRoleMembers("");
+      }
       await loadQueue();
     } catch (error) {
       say(error.message || "We couldn't verify moderator access. Please try again later.");
     }
   }
 
+  if(roleSearch)roleSearch.addEventListener("submit",event=>{
+    event.preventDefault();
+    loadRoleMembers(roleQuery.value.trim()).catch(error=>say(error.message||"Member search failed."));
+  });
   if (refreshButton) refreshButton.addEventListener("click", () => loadQueue().catch(error => say(error.message || "Refresh failed.")));
   if (logoutButton && client) logoutButton.addEventListener("click", async () => {
     logoutButton.disabled = true;

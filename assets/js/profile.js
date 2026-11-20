@@ -19,9 +19,26 @@
     const {data:auth,error:authError}=await client.auth.getUser();
     if(authError||!auth?.user){window.location.replace(new URL("login.html",config.SITE_URL).toString());return;}
     const username=new URLSearchParams(location.search).get("u");
-    if(!username||!/^[a-z0-9_]{3,20}$/.test(username)){showError("That creator profile couldn't be found.");return;}
-    const {data:profile,error}=await client.from("profiles").select("id,username,display_name,bio,avatar_url,banner_url,created_at").eq("username",username).maybeSingle();
-    if(error||!profile){showError("This creator profile doesn't exist or is unavailable.");return;}
+    let profileQuery=client.from("profiles").select("id,username,display_name,bio,avatar_url,banner_url,created_at");
+    if(username){
+      if(!/^[a-z0-9_]{3,20}$/.test(username)){showError("That creator profile couldn't be found.");return;}
+      profileQuery=profileQuery.eq("username",username);
+    }else{
+      profileQuery=profileQuery.eq("id",auth.user.id);
+    }
+    const {data:profile,error}=await profileQuery.maybeSingle();
+    if(error||!profile){showError(username?"This creator profile doesn't exist or is unavailable.":"Your creator profile hasn't been set up yet.");return;}
+    const {data:roleRow,error:roleError}=await client.from("dimension_member_roles").select("role").eq("user_id",profile.id).maybeSingle();
+    if(roleError){showError("The creator loaded, but their profile badge couldn't be fetched.");return;}
+    const role=roleRow?.role||"member";
+    const badgeLabels={owner:"OWNER",moderator:"MODERATOR",supporter:"SUPPORTER",member:"MEMBER"};
+    const badgeRoot=$("creator-role-badges");
+    if(badgeRoot){
+      const badge=document.createElement("span");
+      badge.className="dimension-role-badge role-"+role;
+      badge.textContent=badgeLabels[role]||"MEMBER";
+      badgeRoot.replaceChildren(badge);
+    }
     $("creator-name").textContent=profile.display_name;
     $("creator-handle").textContent="@"+profile.username;
     $("creator-bio").textContent=profile.bio||"No bio added yet.";
@@ -97,7 +114,7 @@
     }
     if(!grid.children.length){const empty=document.createElement("p");empty.className="creator-empty";empty.textContent="No approved clips or reposts yet. Check back later.";grid.append(empty);}
     $("creator-profile").hidden=false;$("creator-videos-section").hidden=false;status.hidden=true;
-    document.title=profile.display_name+" (@"+profile.username+") — Darklands";
+    document.title=profile.display_name+" (@"+profile.username+") — Dicestack Dimension";
   }
   start().catch(()=>showError("Something went wrong while loading this creator."));
 })();
