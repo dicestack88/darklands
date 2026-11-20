@@ -62,7 +62,7 @@
     const {data,error}=await db.auth.getUser();user=data?.user;if(error||!user){window.location.replace(page("login.html"));return;}
     const {data:profileData,error:profileError}=await db.from("profiles").select("id,username,display_name,avatar_url,message_privacy,presence_status,last_seen_at").eq("id",user.id).single();
     if(profileError||!profileData){say("Finish setting up your profile before messaging.");return;}myProfile=profileData;el.presence.value=myProfile.presence_status||"online";el.presenceDot.dataset.status=el.presence.value;
-    await updatePresence(el.presence.value);await loadConversations();await loadBlocked();say("Your messages are private to the people in each conversation.");
+    await updatePresence(el.presence.value);await loadConversations();await loadBlocked();say("Your messages are private to the people in each conversation.");const requestedConversation=new URLSearchParams(location.search).get("c");if(requestedConversation&&conversations.some(c=>c.id===requestedConversation))await openConversation(requestedConversation);
     heartbeat=setInterval(()=>{if(document.visibilityState==="visible")db.rpc("dimension_touch_presence",{});},30000);
     resetIdle();
     db.channel("dimension-inbox-"+user.id).on("postgres_changes",{event:"*",schema:"public",table:"conversations"},async()=>{await loadConversations();if(current){const updated=conversations.find(c=>c.id===current.id);if(updated){current=updated;await openConversation(current.id);}else{current=null;el.active.hidden=true;el.empty.hidden=false;}}}).subscribe();
