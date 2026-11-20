@@ -30,9 +30,21 @@
       <div><h1>Moderation<span>.</span></h1><p>Your account status, moderation history and community safety tools.</p></div>
     </div>
     <p id="moderation-status" class="moderation-status" role="status" aria-live="polite">Checking your account…</p>
-    <div class="moderation-layout"><aside class="moderation-sidebar" aria-label="Moderation navigation"><div class="moderation-sidebar-group"><span class="moderation-sidebar-label">YOUR ACCOUNT</span><nav id="member-moderation-nav" class="moderation-section-nav" aria-label="Your moderation sections" hidden>
+    <div class="moderation-layout">
+      <aside class="moderation-sidebar" aria-label="Moderation navigation">
+        <div class="moderation-sidebar-group"><span class="moderation-sidebar-label">YOUR ACCOUNT</span>
+    <nav id="member-moderation-nav" class="moderation-section-nav" aria-label="Your moderation sections" hidden>
       <a href="#member-status-section">Restrictions</a><a href="#member-history-section">Your history</a><a href="#member-appeals-section">Your appeals</a>
-    </nav></div><div id="moderator-sidebar-group" class="moderation-sidebar-group" hidden><span class="moderation-sidebar-label">MODERATION TOOLS</span><nav id="moderation-section-nav" class="moderation-section-nav" aria-label="Moderator tools" hidden>
+    </nav>
+        </div>
+        <div id="moderator-sidebar-group" class="moderation-sidebar-group" hidden><span class="moderation-sidebar-label">MODERATION TOOLS</span>
+    <nav id="moderation-section-nav" class="moderation-section-nav" aria-label="Moderator tools" hidden>
+      <a href="#member-search-section">Member actions</a><a href="#clip-queue-section">Clip queue</a><a href="#clip-reports-section">Clip reports</a><a href="#message-reports-section">Message reports</a><a href="#content-reports-section">Account & comments</a><a href="#appeals-section">Appeals</a><a href="#history-section">History</a><a href="#role-management-section" id="role-nav-link" hidden>Roles</a>
+    </nav>
+        </div>
+      </aside>
+      <div class="moderation-main">
+    <section id="my-moderation-content" hidden>
       <section id="member-status-section" class="moderation-section">
         <div class="moderation-section-heading"><div><span class="moderation-kicker">ACCOUNT STATUS</span><h2>Active restrictions</h2></div></div>
         <div id="my-restrictions" class="moderation-reports"></div>
@@ -47,9 +59,6 @@
       </section>
     </section>
     <div id="moderation-access-label" class="moderation-access" hidden>RESTRICTED MODERATOR ACCESS</div>
-    <nav id="moderation-section-nav" class="moderation-section-nav" aria-label="Moderator tools" hidden>
-      <a href="#member-search-section">Member actions</a><a href="#clip-queue-section">Clip queue</a><a href="#clip-reports-section">Clip reports</a><a href="#message-reports-section">Message reports</a><a href="#content-reports-section">Account & comments</a><a href="#appeals-section">Appeals</a><a href="#history-section">History</a><a href="#role-management-section" id="role-nav-link" hidden>Roles</a>
-    </nav></div><div class="moderation-main">
     <div id="moderation-content" hidden>
       <section id="member-search-section" class="moderation-section">
         <div class="moderation-section-heading"><div><span class="moderation-kicker">DIRECT ACTIONS</span><h2>Find a member</h2><p class="moderation-role-description">Search by username or display name to warn, timeout, suspend or lift a restriction.</p></div></div>
@@ -98,7 +107,9 @@
         </form>
         <div id="moderation-role-results" class="moderation-role-results"><p class="moderation-empty">Loading members…</p></div>
       </section>
-    </div></div>
+    </div>
+      </div>
+    </div>
   </main>
   <footer class="site-footer"><span>© 2026 DICESTACK DIMENSION</span><span>MODERATOR AREA</span></footer>
 <script src="assets/js/navigation.js"></script>
