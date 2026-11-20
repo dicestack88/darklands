@@ -11,7 +11,7 @@
   const page=name=>new URL(name,config.SITE_URL).toString();
   const initials=name=>(name||"D").trim().split(/\s+/).slice(0,2).map(part=>part[0]||"").join("").toUpperCase();
 
-  function creatorCard(profile){
+  let searchTimer=null;\n  let searchSequence=0;\n\n  function creatorCard(profile){
     const card=document.createElement("a");card.className="discover-creator-card";
     card.href=page("profile.html")+"?u="+encodeURIComponent(profile.username);
     const avatar=document.createElement("span");avatar.className="discover-avatar";
@@ -38,7 +38,7 @@
         client.from("profiles").select("id,username,display_name,avatar_url").ilike("username",pattern).limit(12),
         client.from("clips").select("id,user_id,caption,storage_path,created_at").eq("status","approved").ilike("caption",pattern).order("created_at",{ascending:false}).limit(12)
       ]);
-      if(byName.error)throw byName.error;if(byHandle.error)throw byHandle.error;if(clipResult.error)throw clipResult.error;
+      if(requestId!==searchSequence)return;\n      if(byName.error)throw byName.error;if(byHandle.error)throw byHandle.error;if(clipResult.error)throw clipResult.error;
       const creatorMap=new Map();
       for(const profile of [...(byName.data||[]),...(byHandle.data||[])])creatorMap.set(profile.id,profile);
       const creatorSection=document.createElement("section");creatorSection.className="discover-result-section";
@@ -54,7 +54,7 @@
       if(clips.length){
         const ids=[...new Set(clips.map(clip=>clip.user_id))];
         const {data:profiles,error:profilesError}=await client.from("profiles").select("id,username,display_name,avatar_url").in("id",ids);
-        if(profilesError)throw profilesError;
+        if(profilesError)throw profilesError;\n        if(requestId!==searchSequence)return;
         const map=new Map((profiles||[]).map(profile=>[profile.id,profile]));
         for(const clip of clips){
           const {data:signed,error:signedError}=await client.storage.from("darklands-clips").createSignedUrl(clip.storage_path,3600);
