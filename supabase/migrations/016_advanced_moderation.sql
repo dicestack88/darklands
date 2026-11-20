@@ -314,7 +314,7 @@ begin
   select * into v_appeal from public.dimension_moderation_appeals where id=p_appeal_id for update;
   if not found or v_appeal.status<>'open' then raise exception 'Open appeal not found.' using errcode='P0002'; end if;
   select * into v_action from public.dimension_moderation_actions where id=v_appeal.action_id;
-  if v_action.action_type in ('timeout','suspension') and coalesce((select role from public.dimension_member_roles where user_id=v_appeal.user_id),'member') in ('owner','moderator')
+  if coalesce((select role from public.dimension_member_roles where user_id=v_appeal.user_id),'member') in ('owner','moderator')
      and not (select public.dimension_is_owner()) then
     raise exception 'Owner access is required to review this appeal.' using errcode='42501';
   end if;
