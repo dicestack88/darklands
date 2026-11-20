@@ -267,6 +267,7 @@ grant execute on function public.dimension_touch_presence(text) to authenticated
 
 
 -- Keep inbox ordering current and create private in-app message notifications.
+alter table public.notifications add column if not exists conversation_id uuid references public.conversations(id) on delete set null;
 alter table public.notifications drop constraint if exists notifications_type_check;
 alter table public.notifications
   add constraint notifications_type_check
@@ -294,8 +295,8 @@ begin
   from public.conversations c where c.id=new.conversation_id;
 
   if v_recipient is not null and v_recipient <> new.sender_id then
-    insert into public.notifications(recipient_id,actor_id,type)
-    values(v_recipient,new.sender_id,v_type);
+    insert into public.notifications(recipient_id,actor_id,type,conversation_id)
+    values(v_recipient,new.sender_id,v_type,new.conversation_id);
   end if;
   return new;
 end;
