@@ -10,7 +10,7 @@
     messageReports:$("moderation-message-reports"),contentReports:$("moderation-content-reports"),
     appeals:$("moderation-appeals"),history:$("moderation-history")
   };
-  const memberRoot=$("my-moderation-content"),accessLabel=$("moderation-access-label");
+  const memberRoot=$("my-moderation-content"),accessLabel=$("moderation-access-label"),memberNav=$("member-moderation-nav"),moderatorNav=$("moderation-section-nav"),roleNavLink=$("role-nav-link");
   let signedInUser=null,isModerator=false;
   const roleSection=$("moderation-role-section"),roleSearch=$("moderation-role-search"),
     roleQuery=$("moderation-role-query"),roleResults=$("moderation-role-results");
@@ -285,6 +285,7 @@
       if(error||!verified(user)){await db.auth.signOut();location.replace(page("login.html"));return;}
       signedInUser=user;
       memberRoot.hidden=false;
+      if(memberNav)memberNav.hidden=false;
       await loadMemberView(user);
       const [{data:modResult,error:modError},{data:isOwner,error:ownerError}]=await Promise.all([db.rpc("is_darklands_moderator"),db.rpc("dimension_is_owner")]);
       if(modError)throw modError;if(ownerError)throw ownerError;
@@ -292,7 +293,8 @@
       if(isModerator){
         contentRoot.hidden=false;
         accessLabel.hidden=false;
-        if(isOwner===true&&roleSection){roleSection.hidden=false;await loadRoleMembers("");}
+        if(moderatorNav)moderatorNav.hidden=false;
+        if(isOwner===true&&roleSection){roleSection.hidden=false;if(roleNavLink)roleNavLink.hidden=false;await loadRoleMembers("");}
         await Promise.all([loadQueue(),loadAppeals(),loadHistory()]);
       }else{
         say("Your account moderation information is up to date.");
