@@ -4,7 +4,7 @@
 create table if not exists public.dimension_moderation_actions (
   id uuid primary key default gen_random_uuid(),
   target_user_id uuid not null references auth.users(id) on delete cascade,
-  moderator_id uuid not null references auth.users(id) on delete restrict,
+  moderator_id uuid references auth.users(id) on delete set null,
   action_type text not null check (action_type in ('warning','timeout','suspension','restriction_lifted','appeal_decision','clip_report_reviewed','message_report_reviewed','content_report_reviewed')),
   reason text not null default '',
   moderator_note text not null default '',
@@ -145,10 +145,10 @@ declare
   v_details text := left(trim(coalesce(p_details,'')),500);
 begin
   if v_user is null then raise exception 'Sign-in required.' using errcode='42501'; end if;
-  if p_target_type not in ('comment','account') or p_target_id is null then
+  if not coalesce(p_target_type in ('comment','account'),false) or p_target_id is null then
     raise exception 'Choose a valid report target.' using errcode='22023';
   end if;
-  if p_reason not in ('spam','harassment','inappropriate','privacy','impersonation','other') then
+  if not coalesce(p_reason in ('spam','harassment','inappropriate','privacy','impersonation','other'),false) then
     raise exception 'Choose a valid report reason.' using errcode='22023';
   end if;
   if p_target_type='account' then
@@ -426,7 +426,7 @@ begin
   elsif tg_table_name='messages' then v_user:=new.sender_id;
   else return new;
   end if;
-  if v_user is null or (select public.is_darklands_moderator()) and v_user=(select auth.uid()) then return new; end if;
+  if v_user is null then return new; end if;
   select restriction_type,reason,expires_at into v_kind,v_reason,v_expires
   from public.dimension_account_restrictions
   where user_id=v_user and active=true and (expires_at is null or expires_at>now())
