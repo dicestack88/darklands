@@ -233,6 +233,9 @@ set search_path = ''
 as $$
 begin
   delete from public.user_blocks where blocker_id=auth.uid() and blocked_id=p_member;
+  -- Removing a block also clears the blocked thread so a fresh request can be made.
+  delete from public.conversations
+  where status='blocked' and user_one=least(auth.uid(),p_member) and user_two=greatest(auth.uid(),p_member);
 end;
 $$;
 
