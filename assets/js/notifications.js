@@ -7,7 +7,7 @@
   const page=name=>new URL(name,config.SITE_URL).toString();
   const copy={
     clip_like:"liked your clip",comment:"commented on your clip",comment_reply:"replied to your comment",
-    comment_like:"hearted your comment",clip_repost:"reposted your clip",follow:"started following you"
+    comment_like:"hearted your comment",clip_repost:"reposted your clip",follow:"started following you",message:"sent you a message",message_request:"sent you a message request"
   };
   let user=null;
   function message(text){status.textContent=text;}
@@ -26,7 +26,7 @@
     for(const row of rows){
       const actor=byId.get(row.actor_id),item=document.createElement("a");
       item.className="notification-item"+(row.read_at?"":" is-unread");
-      item.href=row.clip_id?page("clips.html")+"#clip-"+row.clip_id:(actor?.username?page("profile.html")+"?u="+encodeURIComponent(actor.username):page("clips.html"));
+      item.href=(row.type==="message"||row.type==="message_request")?page("messages.html"):(row.clip_id?page("clips.html")+"#clip-"+row.clip_id:(actor?.username?page("profile.html")+"?u="+encodeURIComponent(actor.username):page("clips.html")));
       const avatar=document.createElement("span");avatar.className="notification-avatar";
       if(actor?.avatar_url&&/^https?:\/\//i.test(actor.avatar_url)){const img=document.createElement("img");img.src=actor.avatar_url;img.alt="";avatar.append(img);}
       else avatar.textContent=(actor?.display_name||"D").trim().split(/\s+/).slice(0,2).map(x=>x[0]||"").join("").toUpperCase();
