@@ -1,4 +1,4 @@
-# Darklands
+# Dicestack Dimension
 
 The standalone social-platform project for the dicestack88 community.
 
@@ -17,9 +17,9 @@ The project contains a static landing page and a Supabase-backed authentication 
 2. Open assets/js/supabase-config.js and replace the placeholder with that key.
 3. Never use a service_role key or secret key in browser code or commit one to GitHub.
 4. In Supabase Authentication → URL Configuration, set the Site URL to:
-   https://dicestack88.github.io/darklands/
+   https://dicestack88.github.io/dimension/
 5. Add this exact Redirect URL to the allowed redirect URLs:
-   https://dicestack88.github.io/darklands/login.html?verified=1
+   https://dicestack88.github.io/dimension/login.html?verified=1
 6. Keep Confirm email enabled.
 7. Keep REGISTRATION_ENABLED set to false until the account flow and policies have been reviewed and tested.
 
@@ -42,4 +42,4 @@ Open index.html in a browser, or serve this folder with a local HTTP server. Sup
 
 ## Deployment
 
-https://dicestack88.github.io/darklands/
+https://dicestack88.github.io/dimension/
