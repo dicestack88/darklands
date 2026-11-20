@@ -484,3 +484,23 @@ end;
 $$;
 revoke all on function public.dimension_moderation_message_report_targets() from public,anon;
 grant execute on function public.dimension_moderation_message_report_targets() to authenticated;
+
+
+create or replace function public.dimension_set_content_report_review_metadata()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+  if new.review_status is distinct from old.review_status then
+    if new.review_status='open' then new.reviewed_by:=null;new.reviewed_at:=null;
+    else new.reviewed_by:=(select auth.uid());new.reviewed_at:=now();end if;
+  else new.reviewed_by:=old.reviewed_by;new.reviewed_at:=old.reviewed_at;
+  end if;
+  return new;
+end;
+$$;
+revoke all on function public.dimension_set_content_report_review_metadata() from public,anon,authenticated;
+drop trigger if exists dimension_content_report_review_metadata on public.dimension_content_reports;
+create trigger dimension_content_report_review_metadata before update on public.dimension_content_reports
+for each row execute function public.dimension_set_content_report_review_metadata();
