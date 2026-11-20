@@ -460,3 +460,27 @@ for each row execute function public.dimension_enforce_active_restriction();
 -- Indexes keep moderator queues responsive as reports accumulate.
 create index if not exists clip_reports_review_queue_idx on public.clip_reports(review_status,created_at);
 create index if not exists message_reports_review_queue_idx on public.message_reports(review_status,created_at);
+
+
+-- Resolve the other participant in a message report without granting moderators
+-- direct access to private conversation rows.
+create or replace function public.dimension_moderation_message_report_targets()
+returns table(report_id uuid,target_user_id uuid)
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+begin
+  if (select auth.uid()) is null or not (select public.is_darklands_moderator()) then
+    raise exception 'Moderator access required.' using errcode='42501';
+  end if;
+  return query
+    select mr.id,
+      case when c.user_one=mr.reporter_id then c.user_two else c.user_one end
+    from public.message_reports mr
+    join public.conversations c on c.id=mr.conversation_id;
+end;
+$$;
+revoke all on function public.dimension_moderation_message_report_targets() from public,anon;
+grant execute on function public.dimension_moderation_message_report_targets() to authenticated;
