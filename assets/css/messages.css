@@ -115,3 +115,21 @@
   line-height: 1;
   text-align: center;
 }
+
+/* Voice calling controls stay inside the active messaging conversation. */
+.voice-call-button{width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(103,232,249,.28);border-radius:10px;background:rgba(103,232,249,.09);color:var(--msg-cyan);font-size:16px;cursor:pointer}
+.voice-call-button:hover{background:rgba(103,232,249,.16)}
+.voice-call-status{min-height:0;margin:0;padding:0 20px;color:var(--muted);font-size:9px}
+.voice-call-dialog,.incoming-call-dialog{width:min(390px,calc(100% - 28px));text-align:center}
+.voice-call-dialog h2,.incoming-call-dialog h2{margin:10px 0 7px}
+.voice-call-dialog p,.incoming-call-dialog p{margin:0 0 18px}
+.voice-call-symbol{width:64px;height:64px;display:grid;place-items:center;margin:4px auto 15px;border-radius:22px;background:linear-gradient(145deg,rgba(103,232,249,.18),rgba(167,139,250,.18));border:1px solid rgba(103,232,249,.28);font-size:27px}
+.voice-call-controls{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.voice-call-controls button{min-height:39px;padding:0 15px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.05);color:var(--text);font:600 11px var(--font);cursor:pointer}
+.voice-call-controls .end-voice-call,.voice-call-controls .decline-voice-call{border-color:transparent;background:#b93855;color:white}
+.voice-call-controls .accept-voice-call{border-color:transparent;background:#16875e;color:white}
+.voice-call-dialog::backdrop,.incoming-call-dialog::backdrop{background:rgba(2,5,12,.78);backdrop-filter:blur(8px)}
+.voice-call-dialog[open],.incoming-call-dialog[open]{animation:voice-call-enter .18s ease-out}
+@keyframes voice-call-enter{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+#voice-remote-audio{display:none}
+.messages-page [hidden]{display:none!important}
