@@ -10,7 +10,7 @@
     messageReports:$("moderation-message-reports"),contentReports:$("moderation-content-reports"),
     appeals:$("moderation-appeals"),history:$("moderation-history")
   };
-  const memberRoot=$("my-moderation-content"),accessLabel=$("moderation-access-label"),memberNav=$("member-moderation-nav"),moderatorNav=$("moderation-section-nav"),roleNavLink=$("role-nav-link");
+  const memberRoot=$("my-moderation-content"),accessLabel=$("moderation-access-label"),memberNav=$("member-moderation-nav"),moderatorNav=$("moderation-section-nav"),moderatorSidebarGroup=$("moderator-sidebar-group"),roleNavLink=$("role-nav-link");
   let signedInUser=null,isModerator=false;
   const roleSection=$("moderation-role-section"),roleSearch=$("moderation-role-search"),
     roleQuery=$("moderation-role-query"),roleResults=$("moderation-role-results");
@@ -294,6 +294,7 @@
         contentRoot.hidden=false;
         accessLabel.hidden=false;
         if(moderatorNav)moderatorNav.hidden=false;
+        if(moderatorSidebarGroup)moderatorSidebarGroup.hidden=false;
         if(isOwner===true&&roleSection){roleSection.hidden=false;if(roleNavLink)roleNavLink.hidden=false;await loadRoleMembers("");}
         await Promise.all([loadQueue(),loadAppeals(),loadHistory()]);
       }else{
