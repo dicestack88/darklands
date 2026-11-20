@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#090b12">
+<title>Creator Analytics — Dicestack Dimension</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css"><link rel="stylesheet" href="assets/css/analytics.css">
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script defer src="assets/js/supabase-config.js"></script><script defer src="assets/js/analytics.js"></script><script defer src="assets/js/theme.js"></script>
+</head>
+<body class="analytics-page">
+<header class="site-header"><a class="brand" href="index.html"><span class="brand-mark">D</span><span>DICESTACK DIMENSION</span></a></header>
+<main class="analytics-shell">
+  <div class="analytics-heading"><div><span class="analytics-kicker">CREATOR STUDIO</span><h1>Analytics<span>.</span></h1><p>Understand how your clips are performing.</p></div><label class="analytics-range">Date range<select id="analytics-range"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option><option value="365">Last 12 months</option><option value="0">All time</option></select></label></div>
+  <p id="analytics-status" class="analytics-status" role="status" aria-live="polite">Checking your account…</p>
+  <section id="owner-analytics-tools" class="analytics-owner-tools" hidden><label for="analytics-creator-search">Owner view · Creator account</label><form id="analytics-creator-form"><input id="analytics-creator-search" type="search" maxlength="60" placeholder="Search username or display name"><button type="submit">Find creator</button></form><select id="analytics-creator-select" aria-label="Choose creator" hidden></select></section>
+  <section id="analytics-dashboard" hidden>
+    <div class="analytics-stat-grid">
+      <article class="analytics-stat"><span>VIDEO VIEWS</span><strong id="stat-views">0</strong><small>Recorded plays</small></article>
+      <article class="analytics-stat"><span>LIKES</span><strong id="stat-likes">0</strong><small>On your clips</small></article>
+      <article class="analytics-stat"><span>COMMENTS</span><strong id="stat-comments">0</strong><small>Community conversations</small></article>
+      <article class="analytics-stat"><span>REPOSTS</span><strong id="stat-reposts">0</strong><small>Clip shares</small></article>
+      <article class="analytics-stat"><span>SAVES</span><strong id="stat-saves">0</strong><small>Added to collections</small></article>
+      <article class="analytics-stat"><span>APPROVED CLIPS</span><strong id="stat-clips">0</strong><small>Published videos</small></article>
+    </div>
+    <section class="analytics-panel"><div class="analytics-panel-heading"><div><span class="analytics-kicker">REACH</span><h2>Views over time</h2></div><span class="analytics-period">Daily views · last 30 days</span></div><div id="analytics-chart" class="analytics-chart" aria-label="Daily video views chart"></div></section>
+    <section class="analytics-panel"><div class="analytics-panel-heading"><div><span class="analytics-kicker">CONTENT</span><h2>Clip performance</h2></div></div><div class="analytics-table-wrap"><table class="analytics-table"><thead><tr><th>Clip</th><th>Views</th><th>Likes</th><th>Comments</th><th>Reposts</th><th>Saves</th></tr></thead><tbody id="analytics-clips"></tbody></table></div></section>
+  </section>
+</main>
+<footer class="site-footer"><span>© 2026 DICESTACK DIMENSION</span><span>CREATOR STUDIO</span></footer><script src="assets/js/navigation.js"></script>
+</body></html>
