@@ -61,10 +61,11 @@
     }
   };
   const handleSignal=async row=>{
-    if(!call||row.call_id!==call.id||row.recipient_id!==user.id||signalBusy)return;
+    if(!call||row.call_id!==call.id||row.recipient_id!==user.id)return;
     try{
       if(row.signal_type==="offer"){
         pendingOffer=row.payload;
+        window.dispatchEvent(new CustomEvent("dimension:voice-offer",{detail:{callId:call.id}}));
         if(pc?.remoteDescription)return;
       }else if(row.signal_type==="answer"){
         if(!pc||pc.remoteDescription)return;
@@ -140,6 +141,7 @@
       resetCall(error.name==="NotAllowedError"?"Microphone permission was denied.":"Couldn't access your microphone or start the call.");
     }
   };
+  const waitForOffer=()=>new Promise((resolve,reject)=>{if(pendingOffer){resolve(pendingOffer);return;}const onOffer=e=>{if(e.detail?.callId!==call?.id)return;cleanup();resolve(pendingOffer);};const timer=setTimeout(()=>{cleanup();reject(new Error("The caller offer has not arrived yet."));},8000);const cleanup=()=>{clearTimeout(timer);window.removeEventListener("dimension:voice-offer",onOffer);};window.addEventListener("dimension:voice-offer",onOffer);});
   const acceptCall=async()=>{
     if(!call||call.callee_id!==user.id||signalBusy)return;
     signalBusy=true;ui.accept.disabled=true;
