@@ -16,7 +16,9 @@
   const uploadButton = $("clip-upload-button");
   const list = $("clips-list");
   const loadMoreButton = $("clips-load-more");
-  const MAX_BYTES = 50 * 1024 * 1024;
+  const MAX_BYTES = 15 * 1024 * 1024;
+  const MAX_DURATION_SECONDS = 45;
+  const ACCOUNT_QUOTA_BYTES = 100 * 1024 * 1024;
   const ALLOWED_TYPES = ["video/mp4", "video/webm", "video/quicktime"];
   const PAGE_SIZE = 10;
   let currentUser = null;
@@ -35,6 +37,47 @@
   const page = name => new URL(name, config.SITE_URL).toString();
   const formatDate = value => new Date(value).toLocaleDateString(undefined, { month: "short", day: "numeric" });
   const initials = name => (name || "D").trim().split(/\s+/).slice(0, 2).map(part => part[0] || "").join("").toUpperCase();
+  const formatMB = bytes => (bytes / (1024 * 1024)).toFixed(1).replace(/\.0$/, "");
+  async function getStorageUsage() {
+    const { data, error } = await client.storage.from("darklands-clips").list(currentUser.id, { limit: 1000 });
+    if (error) throw error;
+    return (data || []).reduce((total, file) => total + Number(file.metadata?.size || file.metadata?.contentLength || 0), 0);
+  }
+  async function refreshStorageUsage() {
+    const display = $("clips-storage-usage");
+    if (!display) return 0;
+    try {
+      const used = await getStorageUsage();
+      display.textContent = `Account storage: ${formatMB(used)} MB / 100 MB · ${formatMB(Math.max(0, ACCOUNT_QUOTA_BYTES - used))} MB remaining`;
+      return used;
+    } catch (error) {
+      display.textContent = "Account storage usage is temporarily unavailable.";
+      throw error;
+    }
+  }
+  function readVideoDuration(file) {
+    return new Promise((resolve, reject) => {
+      const video = document.createElement("video");
+      const objectUrl = URL.createObjectURL(file);
+      const cleanup = () => {
+        video.removeAttribute("src");
+        video.load();
+        URL.revokeObjectURL(objectUrl);
+      };
+      video.preload = "metadata";
+      video.onloadedmetadata = () => {
+        const duration = video.duration;
+        cleanup();
+        if (!Number.isFinite(duration) || duration <= 0) reject(new Error("We couldn't read this video's duration. Please try exporting it again."));
+        else resolve(duration);
+      };
+      video.onerror = () => {
+        cleanup();
+        reject(new Error("We couldn't read this video. Please try a different MP4, WebM or MOV file."));
+      };
+      video.src = objectUrl;
+    });
+  }
 
   function showPanel(name) {
     const isUpload = name === "upload";
@@ -71,6 +114,33 @@
     caption.className = "clip-submission-caption";
     caption.textContent = clip.caption || "No caption";
     details.append(top, caption);
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "clip-delete-button";
+    remove.textContent = "Delete clip";
+    remove.addEventListener("click", async () => {
+      if (remove.disabled || !window.confirm("Delete this clip permanently?")) return;
+      remove.disabled = true;
+      remove.textContent = "Deleting…";
+      const { error: storageError } = await client.storage.from("darklands-clips").remove([clip.storage_path]);
+      if (storageError) {
+        remove.disabled = false;
+        remove.textContent = "Delete clip";
+        feedback("We couldn't delete this video file. Please try again.", true);
+        return;
+      }
+      const { error: rowError } = await client.from("clips").delete().eq("id", clip.id).eq("user_id", currentUser.id);
+      if (rowError) {
+        feedback("The video file was removed, but its clip record couldn't be deleted. Please contact a moderator.", true);
+        await loadClips();
+        await refreshStorageUsage().catch(() => {});
+        return;
+      }
+      feedback("Clip deleted. Your account storage has been freed.");
+      await loadClips();
+      await refreshStorageUsage().catch(() => {});
+    });
+    details.append(remove);
     article.append(media, details);
     return article;
   }
@@ -604,6 +674,7 @@
       }, { root: feed, threshold: [0, 0.25, 0.65, 1] });
       await loadFeed(true);
       await loadClips();
+      await refreshStorageUsage().catch(() => {});
     } catch (error) {
       say("We couldn't verify your session. Please log in again.");
       await client.auth.signOut();
@@ -661,8 +732,19 @@
     const caption = captionInput.value.trim();
     if (!file) return feedback("Choose a video file first.", true);
     if (!ALLOWED_TYPES.includes(file.type)) return feedback("Please choose an MP4, WebM or MOV video.", true);
-    if (file.size > MAX_BYTES) return feedback("That video is larger than the 50 MB limit.", true);
+    if (file.size > MAX_BYTES) return feedback("That video is larger than the 15 MB limit.", true);
     if (caption.length > 300) return feedback("Your caption must be 300 characters or fewer.", true);
+    try {
+      const duration = await readVideoDuration(file);
+      if (duration > MAX_DURATION_SECONDS) return feedback("Clips must be 45 seconds or shorter.", true);
+      const used = await getStorageUsage();
+      if (used + file.size > ACCOUNT_QUOTA_BYTES) {
+        await refreshStorageUsage().catch(() => {});
+        return feedback("You've reached your 100 MB account upload limit. Delete one of your clips to free up space.", true);
+      }
+    } catch (validationError) {
+      return feedback(validationError.message || "We couldn't validate this video.", true);
+    }
     uploadButton.disabled = true;
     uploadButton.textContent = "Uploading…";
     fileInput.disabled = true;
@@ -683,6 +765,7 @@
       $("clip-caption-count").textContent = "0 / 300";
       feedback("Upload complete. Your clip is now pending review.");
       await loadClips();
+      await refreshStorageUsage().catch(() => {});
       showPanel("submissions");
     } catch (error) {
       if (uploaded) await client.storage.from("darklands-clips").remove([storagePath]);
