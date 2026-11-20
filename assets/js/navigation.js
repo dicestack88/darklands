@@ -1,61 +1,160 @@
 (() => {
   "use strict";
+
   const config = window.DARKLANDS_CONFIG;
-  const navCss = document.createElement("link");navCss.rel="stylesheet";navCss.href="assets/css/navigation.css";document.head.append(navCss);
-  const links = [
-    ["Home","index.html"],["Clips","clips.html"],["Messages","messages.html"],
-    ["Notifications","notifications.html"],["My account","app.html"],["Settings","settings.html"]
-  ];
-  const nav = document.querySelector(".header-nav,.creator-nav,.clips-header-nav,.messages-top-nav,.moderation-header-nav,.moderation-nav,.notifications-nav,.site-header nav") || (() => {
-    const n=document.createElement("nav");n.className="dimension-global-nav";document.body.prepend(n);return n;
+  const css = document.createElement("link");
+  css.rel = "stylesheet";
+  css.href = "assets/css/navigation.css";
+  document.head.append(css);
+
+  const header = document.querySelector(".site-header") || (() => {
+    const element = document.createElement("header");
+    element.className = "site-header";
+    document.body.prepend(element);
+    return element;
   })();
-  nav.classList.add("dimension-unified-nav");
-  const existing = new Set([...nav.querySelectorAll("a")].map(a=>new URL(a.href,location.href).pathname));
-  links.forEach(([label,href])=>{
-    const url=new URL(href,location.href);
-    if(existing.has(url.pathname))return;
-    const a=document.createElement("a");a.className="text-link dimension-nav-link";a.href=url.href;a.textContent=label;nav.append(a);
-  });
-  const moderatorLink=document.createElement("a");
-  moderatorLink.className="text-link dimension-moderation-link";
-  moderatorLink.href=new URL("moderation.html",location.href).href;
-  moderatorLink.textContent="Moderation";
-  moderatorLink.hidden=true;
+
+  const nav = header.querySelector("nav") || document.createElement("nav");
+  nav.className = "dimension-unified-nav";
+  nav.setAttribute("aria-label", "Main navigation");
+
+  const brand = header.querySelector(".brand") || (() => {
+    const element = document.createElement("a");
+    element.className = "brand";
+    element.href = "index.html";
+    element.setAttribute("aria-label", "Dicestack Dimension home");
+    element.innerHTML = '<span class="brand-mark">D</span><span>DICESTACK DIMENSION</span>';
+    return element;
+  })();
+
+  const oldLogout = header.querySelector('button[id*="logout"]');
+  const logoutButton = oldLogout || document.createElement("button");
+  const notificationCount = header.querySelector(".notification-nav-count");
+
+  nav.replaceChildren();
+  nav.append(brand);
+
+  const menu = document.createElement("button");
+  menu.type = "button";
+  menu.className = "dimension-sidebar-toggle";
+  menu.setAttribute("aria-label", "Open navigation menu");
+  menu.setAttribute("aria-expanded", "false");
+  menu.innerHTML = '<span aria-hidden="true">☰</span><span>Menu</span>';
+  nav.append(menu);
+
+  const links = [
+    ["Discover", "clips.html", ["clips.html"]],
+    ["Messages", "messages.html", ["messages.html"]],
+    ["My profile", "profile.html", ["profile.html"]],
+    ["Notifications", "notifications.html", ["notifications.html"]],
+    ["My account", "app.html", ["app.html"]],
+    ["Home", "index.html", ["index.html", ""]],
+    ["Settings", "settings.html", ["settings.html"]]
+  ];
+
+  const currentFile = location.pathname.split("/").filter(Boolean).pop() || "index.html";
+  const linkElements = [];
+
+  for (const [label, href, matches] of links) {
+    const anchor = document.createElement("a");
+    anchor.className = "dimension-nav-link";
+    anchor.href = href;
+    anchor.textContent = label;
+    if (matches.includes(currentFile) || (currentFile === "index.html" && matches.includes(""))) {
+      anchor.setAttribute("aria-current", "page");
+    }
+    nav.append(anchor);
+    linkElements.push(anchor);
+  }
+
+  const notificationLink = linkElements.find(link => link.textContent === "Notifications");
+  if (notificationCount) {
+    notificationCount.hidden = notificationCount.hidden;
+    notificationLink.append(notificationCount);
+  }
+
+  const moderatorLink = document.createElement("a");
+  moderatorLink.className = "dimension-nav-link dimension-moderation-link";
+  moderatorLink.href = "moderation.html";
+  moderatorLink.textContent = "Moderation";
+  moderatorLink.hidden = true;
+  if (currentFile === "moderation.html") moderatorLink.setAttribute("aria-current", "page");
   nav.append(moderatorLink);
-  const logout=nav.querySelector('button[id$="logout"],button[id*="logout"]');
-  if(logout)nav.append(logout);
 
-  const toggle=document.createElement("button");
-  toggle.type="button";toggle.className="dimension-sidebar-toggle";
-  toggle.setAttribute("aria-label","Open navigation sidebar");toggle.setAttribute("aria-expanded","false");
-  toggle.innerHTML='<span aria-hidden="true">☰</span><span>Menu</span>';
-  nav.prepend(toggle);
-  const backdrop=document.createElement("button");
-  backdrop.type="button";backdrop.className="dimension-nav-backdrop";
-  backdrop.setAttribute("aria-label","Close navigation sidebar");
-  const close=()=>{document.documentElement.classList.remove("dimension-nav-open");toggle.setAttribute("aria-expanded","false");toggle.setAttribute("aria-label","Open navigation sidebar");};
-  toggle.addEventListener("click",()=>{
-    const open=document.documentElement.classList.toggle("dimension-nav-open");
-    toggle.setAttribute("aria-expanded",String(open));
-    toggle.setAttribute("aria-label",open?"Close navigation sidebar":"Open navigation sidebar");
-  });
-  backdrop.addEventListener("click",close);
+  const guestLogin = document.createElement("a");
+  guestLogin.className = "dimension-auth-link nav-login";
+  guestLogin.href = "login.html";
+  guestLogin.textContent = "Log in";
+  nav.append(guestLogin);
+
+  const guestRegister = document.createElement("a");
+  guestRegister.className = "dimension-auth-link dimension-register-link nav-register";
+  guestRegister.href = "register.html";
+  guestRegister.textContent = "Create account";
+  nav.append(guestRegister);
+
+  if (!oldLogout) {
+    logoutButton.type = "button";
+    logoutButton.id = "dimension-logout";
+    logoutButton.addEventListener("click", async () => {
+      const liveConfig = window.DARKLANDS_CONFIG;
+      if (!liveConfig?.SUPABASE_URL || !liveConfig?.SUPABASE_ANON_KEY || !window.supabase?.createClient) return;
+      const client = window.supabase.createClient(liveConfig.SUPABASE_URL, liveConfig.SUPABASE_ANON_KEY);
+      const { error } = await client.auth.signOut();
+      if (!error) location.href = "login.html";
+    });
+  }
+  logoutButton.classList.add("dimension-logout");
+  logoutButton.textContent = "Log out";
+  nav.append(logoutButton);
+
+  header.replaceChildren(nav);
+
+  const backdrop = document.createElement("button");
+  backdrop.type = "button";
+  backdrop.className = "dimension-nav-backdrop";
+  backdrop.setAttribute("aria-label", "Close navigation menu");
   document.body.append(backdrop);
-  document.addEventListener("keydown",e=>{if(e.key==="Escape")close();});
 
-  const current=new URL(location.href).pathname;
-  nav.querySelectorAll("a").forEach(a=>{if(new URL(a.href).pathname===current)a.setAttribute("aria-current","page");});
+  const closeMenu = () => {
+    document.documentElement.classList.remove("dimension-nav-open");
+    menu.setAttribute("aria-expanded", "false");
+    menu.setAttribute("aria-label", "Open navigation menu");
+  };
 
-  if(config?.SUPABASE_URL&&config?.SUPABASE_ANON_KEY&&window.supabase?.createClient){
-    const client=window.supabase.createClient(config.SUPABASE_URL,config.SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true}});
-    client.auth.getUser().then(async({data})=>{
-      const signedIn=Boolean(data?.user);
-      nav.querySelectorAll(".nav-login,.nav-register").forEach(link=>{
-        link.hidden=signedIn;
+  menu.addEventListener("click", () => {
+    const open = document.documentElement.classList.toggle("dimension-nav-open");
+    menu.setAttribute("aria-expanded", String(open));
+    menu.setAttribute("aria-label", open ? "Close navigation menu" : "Open navigation menu");
+  });
+  backdrop.addEventListener("click", closeMenu);
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape") closeMenu();
+  });
+
+  const syncAuthNavigation = () => {
+    const liveConfig = window.DARKLANDS_CONFIG || config;
+    if (liveConfig?.SUPABASE_URL && liveConfig?.SUPABASE_ANON_KEY && window.supabase?.createClient) {
+      const client = window.supabase.createClient(liveConfig.SUPABASE_URL, liveConfig.SUPABASE_ANON_KEY, {
+        auth: { persistSession: true, autoRefreshToken: true }
       });
-      if(!signedIn)return;
-      const {data:isModerator,error}=await client.rpc("is_darklands_moderator");
-      if(!error&&isModerator===true)moderatorLink.hidden=false;
-    }).catch(()=>{});
+      client.auth.getUser().then(async ({ data }) => {
+        const signedIn = Boolean(data?.user);
+        guestLogin.hidden = signedIn;
+        guestRegister.hidden = signedIn;
+        logoutButton.hidden = !signedIn;
+        if (!signedIn) return;
+        const { data: isModerator, error } = await client.rpc("is_darklands_moderator");
+        if (!error && isModerator === true) moderatorLink.hidden = false;
+      }).catch(() => {});
+    } else {
+      logoutButton.hidden = true;
+    }
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", syncAuthNavigation, { once: true });
+  } else {
+    syncAuthNavigation();
   }
 })();
