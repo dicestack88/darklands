@@ -94,3 +94,11 @@
 /* Mobile inbox navigation: opening a chat hides the sidebar, with a clear way back. */
 .back-to-inbox{display:none}
 @media(max-width:620px){.back-to-inbox{display:inline-flex;align-items:center;justify-content:center}}
+
+/* Keep profile photos fully contained in their avatar frames. */
+.conversation-avatar,.chat-avatar,.member-avatar{position:relative;flex-shrink:0;overflow:hidden;isolation:isolate}
+.conversation-avatar img,.chat-avatar img,.member-avatar img{display:block;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:cover;object-position:center;border-radius:inherit}
+.chat-avatar{flex:0 0 40px;min-width:40px;min-height:40px}
+/* A wider, compact emoji grid keeps the complete picker visible at once. */
+.emoji-picker{width:280px;max-width:calc(100vw - 48px);grid-template-columns:repeat(8,minmax(0,1fr));gap:3px;padding:8px}
+.emoji-picker button{width:100%;height:30px;min-width:0;display:grid;place-items:center;padding:0;font-size:18px;line-height:1}
