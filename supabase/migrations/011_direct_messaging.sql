@@ -8,7 +8,7 @@ alter table public.profiles
     check (presence_status in ('online','idle','dnd','offline')),
   add column if not exists last_seen_at timestamptz not null default now();
 
-grant update (message_privacy, presence_status, last_seen_at)
+grant update (message_privacy, presence_status)
   on public.profiles to authenticated;
 
 create table if not exists public.user_blocks (
@@ -347,6 +347,7 @@ as $$
 declare
   v_recent integer;
 begin
+  perform pg_advisory_xact_lock(hashtextextended(new.sender_id::text, 1));
   select count(*) into v_recent
   from public.messages
   where sender_id=new.sender_id
