@@ -264,3 +264,51 @@ grant execute on function public.dimension_decline_message_request(uuid) to auth
 grant execute on function public.dimension_block_member(uuid) to authenticated;
 grant execute on function public.dimension_unblock_member(uuid) to authenticated;
 grant execute on function public.dimension_touch_presence(text) to authenticated;
+
+
+-- Keep inbox ordering current and create private in-app message notifications.
+alter table public.notifications drop constraint if exists notifications_type_check;
+alter table public.notifications
+  add constraint notifications_type_check
+  check (type in ('clip_like','comment','comment_reply','comment_like','clip_repost','follow','message','message_request'));
+
+create or replace function public.dimension_after_message_insert()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_recipient uuid;
+  v_type text;
+begin
+  update public.conversations
+  set last_message_at=new.created_at,updated_at=now()
+  where id=new.conversation_id
+  returning case when user_one=new.sender_id then user_two else user_one end
+  into v_recipient;
+
+  select case when c.status='pending' and c.requested_by=new.sender_id
+    then 'message_request' else 'message' end
+  into v_type
+  from public.conversations c where c.id=new.conversation_id;
+
+  if v_recipient is not null and v_recipient <> new.sender_id then
+    insert into public.notifications(recipient_id,actor_id,type)
+    values(v_recipient,new.sender_id,v_type);
+  end if;
+  return new;
+end;
+$$;
+
+revoke all on function public.dimension_after_message_insert() from public,anon,authenticated;
+drop trigger if exists dimension_message_inserted on public.messages;
+create trigger dimension_message_inserted
+  after insert on public.messages
+  for each row execute function public.dimension_after_message_insert();
+
+-- Moderators can review reports without exposing reports to other members.
+drop policy if exists "Moderators can view message reports" on public.message_reports;
+create policy "Moderators can view message reports"
+  on public.message_reports for select to authenticated
+  using ((select public.is_darklands_moderator()));
