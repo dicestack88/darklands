@@ -20,7 +20,7 @@
   <header class="site-header">
     <a class="brand" href="./" aria-label="Dicestack Dimension home"><span class="brand-mark">D</span><span>DICESTACK DIMENSION</span></a>
   </header>
-  <main class="settings-shell">
+  <main class="settings-shell" id="protected-settings">
     <div class="settings-heading">
       <div><div class="eyebrow">YOUR ACCOUNT</div><h1>Settings<span>.</span></h1><p>Manage your account details and messaging preferences.</p></div>
       <div class="settings-avatar" aria-hidden="true">D</div>
@@ -35,11 +35,33 @@
         <div><span class="settings-info-label">Display name</span><strong id="settings-display-name">Loading…</strong></div>
       </div>
       <p id="settings-account-status" class="settings-footnote" role="status" aria-live="polite">Checking your account…</p>
-      <a class="button settings-account-link" href="app.html">Manage my profile <span aria-hidden="true">↗</span></a>
+    </section>
+
+    <section class="settings-panel settings-profile-panel" aria-labelledby="profile-heading">
+      <div class="settings-panel-heading"><div><div class="eyebrow">02 / PROFILE</div><h2 id="profile-heading">Your profile</h2><p>Update how other people see you across Dicestack Dimension.</p></div></div>
+      <div class="settings-profile-preview">
+        <img id="account-avatar-preview" alt="Your profile picture" hidden>
+        <div class="settings-profile-preview-copy"><strong id="settings-profile-name">Loading profile…</strong><span id="settings-profile-username"></span><div id="account-banner-preview" class="account-banner-preview">Your banner preview</div></div>
+      </div>
+      <form id="account-customize-form" class="profile-form account-customize-form">
+        <div class="settings-field"><label for="account-display-name">Display name</label><input id="account-display-name" name="display_name" type="text" minlength="1" maxlength="32" required></div>
+        <div class="settings-field"><label for="account-avatar-file">Profile picture <span class="account-field-hint">JPG, PNG or WebP · Max 5 MB</span></label><input id="account-avatar-file" type="file" accept="image/jpeg,image/png,image/webp"></div>
+        <div class="settings-field"><label for="account-banner-file">Profile banner <span class="account-field-hint">JPG, PNG or WebP · Max 5 MB</span></label><input id="account-banner-file" type="file" accept="image/jpeg,image/png,image/webp"></div>
+        <p class="account-field-hint">Only upload images you have permission to share. Avoid personal or sensitive information.</p>
+        <p id="account-customize-message" class="form-message" role="status" aria-live="polite"></p>
+        <button class="button" type="submit">Save profile appearance <span aria-hidden="true">↗</span></button>
+      </form>
+      <div class="profile-summary"><span class="profile-summary-label">ABOUT YOU</span><p id="profile-bio-preview">No bio added yet.</p></div>
+      <form id="profile-form" class="profile-form">
+        <div class="settings-field"><label for="profile-bio">Bio</label><textarea id="profile-bio" name="bio" maxlength="160" rows="3" placeholder="A little about yourself…"></textarea></div>
+        <div class="profile-form-meta"><span>Maximum 160 characters. Avoid sharing private information.</span><span id="bio-count">0 / 160</span></div>
+        <p id="profile-message" class="form-message" role="status" aria-live="polite"></p>
+        <button class="button" type="submit">Save bio <span aria-hidden="true">↗</span></button>
+      </form>
     </section>
 
     <section class="settings-panel" id="privacy" aria-labelledby="privacy-heading">
-      <div class="settings-panel-heading"><div><div class="eyebrow">02 / PRIVACY</div><h2 id="privacy-heading">Messaging privacy</h2><p>Choose who can start a conversation with you.</p></div></div>
+      <div class="settings-panel-heading"><div><div class="eyebrow">03 / PRIVACY</div><h2 id="privacy-heading">Messaging privacy</h2><p>Choose who can start a conversation with you.</p></div></div>
       <div class="preference-row message-privacy-row">
         <div><strong>Who can message me?</strong><span>New conversations follow this rule. Existing accepted chats remain available unless you block someone.</span></div>
         <select id="message-privacy-setting" aria-label="Who can message me" disabled>
@@ -55,12 +77,12 @@
     </section>
 
     <section class="settings-panel" id="appearance" aria-labelledby="appearance-heading">
-      <div class="settings-panel-heading"><div><div class="eyebrow">03 / EXPERIENCE</div><h2 id="appearance-heading">Appearance</h2><p>Change the look of Dicestack Dimension.</p></div></div>
+      <div class="settings-panel-heading"><div><div class="eyebrow">04 / EXPERIENCE</div><h2 id="appearance-heading">Appearance</h2><p>Change the look of Dicestack Dimension.</p></div></div>
       <div class="preference-row"><div><strong>Colour theme</strong><span>Your choice is saved in this browser and applies across the site.</span></div><span class="settings-theme-hint">Use the Light mode / Dark mode control in the navigation bar.</span></div>
     </section>
 
     <section class="settings-panel" aria-labelledby="security-heading">
-      <div class="settings-panel-heading"><div><div class="eyebrow">04 / SECURITY</div><h2 id="security-heading">Sign-in security</h2><p>How your account is authenticated.</p></div></div>
+      <div class="settings-panel-heading"><div><div class="eyebrow">05 / SECURITY</div><h2 id="security-heading">Sign-in security</h2><p>How your account is authenticated.</p></div></div>
       <div class="security-row"><div class="security-symbol">G</div><div class="security-copy"><strong>Google sign-in</strong><span>Dicestack Dimension uses your Google account to sign you in. Passwords and Google account verification are managed by Google.</span></div><span class="settings-status">CONNECTED</span></div>
       <p class="settings-footnote">There is no separate Dicestack Dimension email-verification step. Two-factor authentication and password changes are managed through your Google account settings.</p>
     </section>
