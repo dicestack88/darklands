@@ -29,6 +29,7 @@
 
   const oldLogout = header.querySelector('button[id*="logout"]');
   const logoutButton = oldLogout || document.createElement("button");
+  const themeToggle = document.getElementById("darklands-theme-toggle");
   const notificationCount = header.querySelector(".notification-nav-count");
 
   nav.replaceChildren();
@@ -107,6 +108,7 @@
   logoutButton.classList.add("dimension-logout");
   logoutButton.textContent = "Log out";
   nav.append(logoutButton);
+  if (themeToggle) nav.append(themeToggle);
 
   header.replaceChildren(nav);
 
@@ -141,7 +143,7 @@
       client.auth.getUser().then(async ({ data }) => {
         const signedIn = Boolean(data?.user);
         guestLogin.hidden = signedIn;
-        guestRegister.hidden = signedIn;
+        guestRegister.hidden = signedIn || liveConfig?.REGISTRATION_ENABLED !== true;
         logoutButton.hidden = !signedIn;
         if (!signedIn) return;
         const { data: isModerator, error } = await client.rpc("is_darklands_moderator");
