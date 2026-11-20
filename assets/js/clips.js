@@ -217,6 +217,14 @@
     video.loop = true;
     video.preload = "metadata";
     video.setAttribute("aria-label", "Community clip. Tap to pause or play.");
+    let viewRecorded = false;
+    video.addEventListener("play", () => {
+      if (viewRecorded) return;
+      viewRecorded = true;
+      client.rpc("dimension_record_clip_view", { p_clip_id: clip.id }).then(({ error }) => {
+        if (error) console.warn("Clip view could not be recorded.");
+      }).catch(() => {});
+    });
     video.addEventListener("click", () => {
       if (video.paused) video.play().catch(() => {});
       else video.pause();
