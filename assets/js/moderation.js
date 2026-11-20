@@ -8,7 +8,7 @@
   const roots={
     clips:$("moderation-clips"),clipReports:$("moderation-reports"),
     messageReports:$("moderation-message-reports"),contentReports:$("moderation-content-reports"),
-    appeals:$("moderation-appeals"),history:$("moderation-history")
+    appeals:$("moderation-appeals"),history:$("moderation-history"),featureRequests:$("moderation-feature-requests")
   };
   const memberRoot=$("my-moderation-content"),accessLabel=$("moderation-access-label"),memberNav=$("member-moderation-nav"),moderatorNav=$("moderation-section-nav"),moderatorSidebarGroup=$("moderator-sidebar-group"),roleNavLink=$("role-nav-link");
   let signedInUser=null,isModerator=false;
@@ -311,6 +311,42 @@
       card.append(body);appealRoot.append(card);
     }
   }
+  async function loadFeatureRequests(){
+    const root=roots.featureRequests;
+    if(!root)return;
+    const {data,error}=await db.from("dimension_feature_requests")
+      .select("id,user_id,category,title,description,status,moderator_note,created_at")
+      .order("created_at",{ascending:false}).limit(100);
+    if(error)throw error;
+    root.replaceChildren();
+    if(!data?.length){empty(root,"No feature suggestions have been submitted yet.");return;}
+    for(const item of data){
+      const card=node("article","moderation-report"),body=node("div","moderation-report-body");
+      body.append(
+        node("div","moderation-meta",item.category.replaceAll("_"," ").toUpperCase()+" · "+date(item.created_at)),
+        node("h3","moderation-report-title",item.title),
+        node("p","moderation-report-details",item.description),
+        node("p","moderation-id","Submitted by · "+item.user_id)
+      );
+      const controls=node("div","moderation-actions"),status=node("select","moderation-note");
+      status.setAttribute("aria-label","Feedback status");
+      for(const [value,label] of [["new","New"],["reviewing","Reviewing"],["planned","Planned"],["completed","Completed"],["declined","Declined"]]){
+        const option=node("option","",label);option.value=value;status.append(option);
+      }
+      status.value=item.status;
+      const note=node("input","moderation-note");note.maxLength=500;note.placeholder="Optional moderator note";note.value=item.moderator_note||"";
+      controls.append(status,note,button("Save status","approve",async()=>{
+        const {error}=await db.rpc("dimension_review_feature_request",{
+          p_request_id:item.id,p_status:status.value,p_moderator_note:note.value.trim()
+        });
+        if(error)throw error;
+        say("Feature feedback updated.");
+        await loadFeatureRequests();
+      }));
+      body.append(controls);card.append(body);root.append(card);
+    }
+  }
+
   async function start(){
     if(!db){say("Account services aren't configured. Please try again later.");return;}
     try{
@@ -330,7 +366,7 @@
         if(moderatorSidebarGroup)moderatorSidebarGroup.hidden=false;
         if(isOwner===true&&roleSection){roleSection.hidden=false;if(roleNavLink)roleNavLink.hidden=false;await loadRoleMembers("");}
         selectModerationSection("member-search-section");
-        await Promise.all([loadQueue(),loadAppeals(),loadHistory()]);
+        await Promise.all([loadQueue(),loadAppeals(),loadHistory(),loadFeatureRequests()]);
       }else{
         selectModerationSection("member-status-section");
         say("Your account moderation information is up to date.");
@@ -339,7 +375,7 @@
   }
   if(memberSearch)memberSearch.addEventListener("submit",e=>{e.preventDefault();loadMemberSearch(memberQuery.value).catch(err=>say(err.message));});
   if(roleSearch)roleSearch.addEventListener("submit",e=>{e.preventDefault();loadRoleMembers(roleQuery.value.trim()).catch(err=>say(err.message));});
-  $("moderation-refresh")?.addEventListener("click",()=>Promise.all([loadMemberView(signedInUser),...(isModerator?[loadQueue(),loadAppeals(),loadHistory()]:[])]).catch(e=>say(e.message||"Refresh failed.")));
+  $("moderation-refresh")?.addEventListener("click",()=>Promise.all([loadMemberView(signedInUser),...(isModerator?[loadQueue(),loadAppeals(),loadHistory(),loadFeatureRequests()]:[])]).catch(e=>say(e.message||"Refresh failed.")));
   $("moderation-logout")?.addEventListener("click",async()=>{const {error}=await db.auth.signOut();if(error){say("Could not sign out.");return;}location.replace(page("login.html"));});
   start();
 })();

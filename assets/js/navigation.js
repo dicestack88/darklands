@@ -9,7 +9,7 @@
     document.head.append(glassModeScript);
   }
 
-  for (const href of ["assets/css/navigation.css", "assets/css/ecosystem-glass.css", "assets/css/dimension-effects.css"]) {
+  for (const href of ["assets/css/navigation.css", "assets/css/ecosystem-glass.css", "assets/css/dimension-effects.css", "assets/css/feature-feedback.css"]) {
     if (!document.querySelector(`link[href="${href}"]`)) {
       const link = document.createElement("link");
       link.rel = "stylesheet";
@@ -140,6 +140,91 @@
   nav.append(logoutButton);
 
   header.replaceChildren(nav);
+
+
+  // Persistent but unobtrusive beta notice and feature-feedback entry point.
+  if (!document.querySelector(".dimension-beta-dock")) {
+    const dock = document.createElement("div");
+    dock.className = "dimension-beta-dock";
+    dock.innerHTML = '<span class="dimension-beta-label">Currently in beta</span><button class="dimension-feedback-trigger" type="button">✦ Suggest a feature</button>';
+    document.body.append(dock);
+
+    const modal = document.createElement("div");
+    modal.className = "dimension-feedback-backdrop";
+    modal.innerHTML = `
+      <section class="dimension-feedback-dialog" role="dialog" aria-modal="true" aria-labelledby="dimension-feedback-title">
+        <button class="dimension-feedback-close" type="button" aria-label="Close feedback form">×</button>
+        <span class="dimension-feedback-kicker">HELP SHAPE DIMENSION</span>
+        <h2 id="dimension-feedback-title">What should we build next?</h2>
+        <p>Dimension is currently in beta testing. Share feature ideas, improvements or bugs. Your feedback helps guide what we work on next.</p>
+        <form class="dimension-feedback-form">
+          <label>Feedback type
+            <select name="category" required>
+              <option value="feature">New feature idea</option>
+              <option value="improvement">Improvement</option>
+              <option value="bug">Bug report</option>
+              <option value="other">Something else</option>
+            </select>
+          </label>
+          <label>Short title
+            <input name="title" maxlength="100" minlength="4" placeholder="e.g. Custom profile themes" required>
+          </label>
+          <label>Tell us more
+            <textarea name="description" minlength="10" maxlength="1500" placeholder="Describe what you'd like to see and how it could work…" required></textarea>
+          </label>
+          <button class="dimension-feedback-submit" type="submit">Send feedback</button>
+          <p class="dimension-feedback-status" role="status" aria-live="polite"></p>
+        </form>
+      </section>`;
+    document.body.append(modal);
+    const trigger = dock.querySelector("button");
+    const close = () => { modal.classList.remove("is-open"); trigger.focus(); };
+    trigger.addEventListener("click", () => {
+      modal.classList.add("is-open");
+      modal.querySelector("input[name=title]").focus();
+    });
+    modal.querySelector(".dimension-feedback-close").addEventListener("click", close);
+    modal.addEventListener("click", event => { if (event.target === modal) close(); });
+    document.addEventListener("keydown", event => { if (event.key === "Escape" && modal.classList.contains("is-open")) close(); });
+    modal.querySelector("form").addEventListener("submit", async event => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const submit = form.querySelector("button[type=submit]");
+      const status = form.querySelector(".dimension-feedback-status");
+      const config = window.DARKLANDS_CONFIG;
+      if (!config?.SUPABASE_URL || !config?.SUPABASE_ANON_KEY || !window.supabase?.createClient) {
+        status.textContent = "Feedback services are temporarily unavailable. Please try again later.";
+        return;
+      }
+      submit.disabled = true;
+      submit.textContent = "Sending…";
+      status.textContent = "";
+      try {
+        const client = window.supabase.createClient(config.SUPABASE_URL, config.SUPABASE_ANON_KEY);
+        const { data: authData, error: authError } = await client.auth.getUser();
+        if (authError || !authData?.user) {
+          status.textContent = "Please log in and verify your email before sending feedback.";
+          submit.disabled = false;
+          submit.textContent = "Send feedback";
+          return;
+        }
+        const values = new FormData(form);
+        const { error } = await client.rpc("dimension_submit_feature_request", {
+          p_category: values.get("category"),
+          p_title: String(values.get("title") || "").trim(),
+          p_description: String(values.get("description") || "").trim()
+        });
+        if (error) throw error;
+        form.reset();
+        status.textContent = "Thanks! Your feedback has been sent to the Dimension team.";
+      } catch (error) {
+        status.textContent = error?.message || "We couldn't send that just now. Please try again.";
+      } finally {
+        submit.disabled = false;
+        submit.textContent = "Send feedback";
+      }
+    });
+  }
 
   const backdrop = document.createElement("button");
   backdrop.type = "button";

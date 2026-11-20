@@ -1,0 +1,50 @@
+/* Beta notice and feature feedback — fixed, compact and out of the way. */
+.dimension-beta-dock {
+  position:fixed;left:18px;bottom:max(16px,env(safe-area-inset-bottom));z-index:900;
+  display:flex;align-items:center;gap:8px;pointer-events:none;
+}
+.dimension-beta-label,.dimension-feedback-trigger {
+  pointer-events:auto;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-height:36px;padding:0 13px;border:1px solid rgba(151,178,224,.2);
+  border-radius:999px;background:rgba(10,16,30,.82);color:#dce7ff;
+  -webkit-backdrop-filter:blur(16px) saturate(1.2);backdrop-filter:blur(16px) saturate(1.2);
+  box-shadow:0 8px 28px rgba(0,0,0,.2);font:600 10px/1 "DM Sans",system-ui,sans-serif;
+  letter-spacing:.07em;
+}
+.dimension-beta-label {color:#8de7dc;text-transform:uppercase;font-size:9px;letter-spacing:.12em}
+.dimension-beta-label::before {content:"";width:6px;height:6px;border-radius:50%;background:#65e6d2;box-shadow:0 0 12px #65e6d2}
+.dimension-feedback-trigger {cursor:pointer;letter-spacing:0;transition:transform .18s,border-color .18s,box-shadow .18s}
+.dimension-feedback-trigger:hover {transform:translateY(-2px);border-color:rgba(101,230,210,.55);box-shadow:0 0 22px rgba(101,230,210,.13),0 8px 28px rgba(0,0,0,.2)}
+.dimension-feedback-trigger:focus-visible,.dimension-feedback-close:focus-visible {outline:2px solid #65e6d2;outline-offset:3px}
+.dimension-feedback-backdrop {
+  position:fixed;inset:0;z-index:100000;display:none;align-items:center;justify-content:center;
+  padding:20px;background:rgba(3,7,16,.7);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)
+}
+.dimension-feedback-backdrop.is-open {display:flex}
+.dimension-feedback-dialog {
+  width:min(520px,100%);max-height:min(720px,90dvh);overflow:auto;position:relative;
+  padding:26px;border:1px solid rgba(154,185,235,.24);border-radius:22px;
+  background:linear-gradient(145deg,rgba(23,34,57,.98),rgba(10,15,29,.98));
+  box-shadow:0 28px 90px rgba(0,0,0,.5),inset 0 1px rgba(255,255,255,.08);color:#edf2ff
+}
+.dimension-feedback-dialog h2 {margin:7px 0 8px;font:700 25px/1.15 "Space Grotesk",sans-serif}
+.dimension-feedback-dialog p {color:#aebbd4;font-size:13px;line-height:1.6}
+.dimension-feedback-kicker {color:#75e4d6;font-size:9px;font-weight:800;letter-spacing:.18em}
+.dimension-feedback-close {position:absolute;right:17px;top:15px;width:34px;height:34px;border:1px solid rgba(160,180,220,.2);border-radius:50%;background:rgba(255,255,255,.05);color:#dce7ff;cursor:pointer;font-size:18px}
+.dimension-feedback-form {display:grid;gap:13px;margin-top:18px}
+.dimension-feedback-form label {display:grid;gap:7px;color:#dce7ff;font-size:11px;font-weight:700}
+.dimension-feedback-form input,.dimension-feedback-form select,.dimension-feedback-form textarea {
+  width:100%;box-sizing:border-box;border:1px solid rgba(154,180,225,.22);border-radius:11px;
+  padding:12px 13px;background:rgba(4,9,20,.56);color:#edf2ff;font:500 13px "DM Sans",sans-serif
+}
+.dimension-feedback-form textarea {min-height:118px;resize:vertical}
+.dimension-feedback-form input:focus,.dimension-feedback-form select:focus,.dimension-feedback-form textarea:focus {outline:2px solid rgba(101,230,210,.55);outline-offset:1px}
+.dimension-feedback-submit {min-height:42px;border:0;border-radius:999px;background:linear-gradient(105deg,#65e6d2,#79a9ff 58%,#a58bff);color:#11172d;font:800 12px "DM Sans",sans-serif;cursor:pointer}
+.dimension-feedback-submit:disabled {opacity:.6;cursor:wait}
+.dimension-feedback-status {min-height:18px;margin:0;color:#8de7dc!important;font-size:11px!important}
+@media(max-width:600px) {
+  .dimension-beta-dock {left:10px;bottom:max(10px,env(safe-area-inset-bottom));gap:6px}
+  .dimension-beta-label,.dimension-feedback-trigger {min-height:33px;padding:0 10px;font-size:9px}
+  .dimension-feedback-dialog {padding:22px 18px;border-radius:18px}
+}
+@media(prefers-reduced-motion:reduce) {.dimension-feedback-trigger{transition:none}}
