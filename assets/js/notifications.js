@@ -7,14 +7,14 @@
   const page=name=>new URL(name,config.SITE_URL).toString();
   const copy={
     clip_like:"liked your clip",comment:"commented on your clip",comment_reply:"replied to your comment",
-    comment_like:"hearted your comment",clip_repost:"reposted your clip",follow:"started following you"
+    comment_like:"hearted your comment",clip_repost:"reposted your clip",follow:"started following you",message:"sent you a message",message_request:"sent you a message request"
   };
   let user=null;
   function message(text){status.textContent=text;}
   function empty(text){list.replaceChildren();const p=document.createElement("p");p.className="notifications-empty";p.textContent=text;list.append(p);}
   async function load(){
     message("Loading your notifications…");
-    const {data,error}=await client.from("notifications").select("id,actor_id,type,clip_id,comment_id,created_at,read_at").order("created_at",{ascending:false}).limit(80);
+    const {data,error}=await client.from("notifications").select("id,actor_id,type,clip_id,comment_id,conversation_id,created_at,read_at").order("created_at",{ascending:false}).limit(80);
     if(error){empty("Notifications couldn't load. Refresh and try again.");message("Your notification centre isn't available right now.");return;}
     const rows=data||[];
     if(!rows.length){empty("You're all caught up. New likes, comments and follows will show up here.");message("No new activity yet.");readAll.disabled=true;return;}
@@ -26,12 +26,12 @@
     for(const row of rows){
       const actor=byId.get(row.actor_id),item=document.createElement("a");
       item.className="notification-item"+(row.read_at?"":" is-unread");
-      item.href=row.clip_id?page("clips.html")+"#clip-"+row.clip_id:(actor?.username?page("profile.html")+"?u="+encodeURIComponent(actor.username):page("clips.html"));
+      item.href=(row.type==="message"||row.type==="message_request")?page("messages.html")+(row.conversation_id?"?c="+encodeURIComponent(row.conversation_id):""):(row.clip_id?page("clips.html")+"#clip-"+row.clip_id:(actor?.username?page("profile.html")+"?u="+encodeURIComponent(actor.username):page("clips.html")));
       const avatar=document.createElement("span");avatar.className="notification-avatar";
       if(actor?.avatar_url&&/^https?:\/\//i.test(actor.avatar_url)){const img=document.createElement("img");img.src=actor.avatar_url;img.alt="";avatar.append(img);}
       else avatar.textContent=(actor?.display_name||"D").trim().split(/\s+/).slice(0,2).map(x=>x[0]||"").join("").toUpperCase();
       const body=document.createElement("span");body.className="notification-copy";
-      const line=document.createElement("span"),name=document.createElement("strong");name.textContent=actor?.display_name||"A Darklands member";
+      const line=document.createElement("span"),name=document.createElement("strong");name.textContent=actor?.display_name||"A Dimension member";
       line.append(name,document.createTextNode(" "+(copy[row.type]||"interacted with you")));
       const time=document.createElement("small");time.textContent=new Date(row.created_at).toLocaleString(undefined,{dateStyle:"medium",timeStyle:"short"});
       body.append(line,time);
