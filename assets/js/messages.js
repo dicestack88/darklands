@@ -14,12 +14,21 @@
   const profile=id=>profiles.get(id);
   const fmtTime=d=>new Date(d).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"});
   async function refreshProfiles(ids){const missing=[...new Set(ids)].filter(id=>!profiles.has(id));if(!missing.length)return;const {data,error}=await db.from("profiles").select("id,username,display_name,avatar_url,presence_status,last_seen_at,message_privacy").in("id",missing);if(error)throw error;(data||[]).forEach(p=>profiles.set(p.id,p));}
+  let conversationLoadToken=0;
   async function loadConversations(){
+    const token=++conversationLoadToken;
     const {data,error}=await db.from("conversations").select("id,user_one,user_two,requested_by,status,last_message_at,updated_at").order("last_message_at",{ascending:false}).limit(100);
     if(error)throw error;
-    conversations=data||[];
+    if(token!==conversationLoadToken)return;
+    // Defensive UI deduplication: one inbox row per other account.
+    const byMember=new Map();
+    for(const c of data||[]){
+      const id=otherId(c),existing=byMember.get(id);
+      if(!existing||c.id===current?.id||new Date(c.last_message_at)>new Date(existing.last_message_at))byMember.set(id,c);
+    }
+    conversations=[...byMember.values()];
     await refreshProfiles(conversations.map(otherId));
-    await renderList();
+    if(token===conversationLoadToken)await renderList();
   }
   function visibleConversations(){const q=el.search.value.trim().toLowerCase();return conversations.filter(c=>folder==="requests"?c.status==="pending"&&c.requested_by!==user.id:(c.status==="accepted"||(c.status==="pending"&&c.requested_by===user.id))).filter(c=>{const p=profile(otherId(c));return !q||(p?.username||"").toLowerCase().includes(q)||(p?.display_name||"").toLowerCase().includes(q);});}
   let listRenderToken=0;
@@ -58,13 +67,21 @@
     }
     if(token===listRenderToken)el.list.replaceChildren(fragment);
   }
+  let messageLoadToken=0;
   async function loadMessages(){
-    el.stream.replaceChildren();const {data,error}=await db.from("messages").select("id,sender_id,body,created_at,read_at").eq("conversation_id",current.id).order("created_at",{ascending:true}).limit(200);
-    if(error){const p=document.createElement("p");p.className="message-empty";p.textContent="Messages could not be loaded.";el.stream.append(p);return;}
-    if(!data?.length){const p=document.createElement("p");p.className="message-empty";p.textContent="Say hello to start your conversation.";el.stream.append(p);}
-    (data||[]).forEach(m=>{const b=document.createElement("article");b.className="message-bubble"+(m.sender_id===user.id?" mine":"");const body=document.createElement("p");body.textContent=m.body;const time=document.createElement("time");time.textContent=fmtTime(m.created_at)+(m.sender_id===user.id&&m.read_at?" · Read":"");b.append(body,time);el.stream.append(b);});
+    if(!current)return;
+    const conversationId=current.id;
+    const token=++messageLoadToken;
+    const {data,error}=await db.from("messages").select("id,sender_id,body,created_at,read_at").eq("conversation_id",conversationId).order("created_at",{ascending:true}).limit(200);
+    if(token!==messageLoadToken||current?.id!==conversationId)return;
+    if(error){const p=document.createElement("p");p.className="message-empty";p.textContent="Messages could not be loaded.";el.stream.replaceChildren(p);return;}
+    const fragment=document.createDocumentFragment();
+    if(!data?.length){const p=document.createElement("p");p.className="message-empty";p.textContent="Say hello to start your conversation.";fragment.append(p);}
+    (data||[]).forEach(m=>{const b=document.createElement("article");b.className="message-bubble"+(m.sender_id===user.id?" mine":"");const body=document.createElement("p");body.textContent=m.body;const time=document.createElement("time");time.textContent=fmtTime(m.created_at)+(m.sender_id===user.id&&m.read_at?" · Read":"");b.append(body,time);fragment.append(b);});
+    el.stream.replaceChildren(fragment);
     el.stream.scrollTop=el.stream.scrollHeight;
-    const unread=(data||[]).filter(m=>m.sender_id!==user.id&&!m.read_at).map(m=>m.id);if(unread.length)await db.from("messages").update({read_at:new Date().toISOString()}).in("id",unread);
+    const unread=(data||[]).filter(m=>m.sender_id!==user.id&&!m.read_at).map(m=>m.id);
+    if(unread.length)await db.from("messages").update({read_at:new Date().toISOString()}).in("id",unread);
   }
   async function openConversation(id){
     current=conversations.find(c=>c.id===id);if(!current)return;
@@ -92,6 +109,7 @@
     resetIdle();
     db.channel("dimension-inbox-"+user.id).on("postgres_changes",{event:"*",schema:"public",table:"conversations"},async()=>{await loadConversations();if(current){const updated=conversations.find(c=>c.id===current.id);if(updated){current=updated;const incoming=current.status==="pending"&&current.requested_by!==user.id;el.requestBanner.hidden=!incoming;el.composer.hidden=current.status!=="accepted";if(current.status==="pending"&&current.requested_by===user.id){el.requestBanner.hidden=false;el.requestBanner.querySelector("strong").textContent="Request sent";el.requestBanner.querySelector("p").textContent="You can chat once this member accepts your request.";el.requestBanner.querySelector(".request-actions").hidden=true;}else{el.requestBanner.querySelector(".request-actions").hidden=false;}}else{current=null;el.active.hidden=true;el.empty.hidden=false;el.workspace.classList.remove("chat-open");}}}).subscribe();
   }
+  $("back-to-inbox")?.addEventListener("click",()=>{current=null;messageLoadToken++;el.active.hidden=true;el.empty.hidden=false;el.workspace.classList.remove("chat-open");});
   el.tabs.forEach(t=>t.addEventListener("click",()=>switchFolder(t.dataset.folder)));
   el.search.addEventListener("input",renderList);
   $("new-message").addEventListener("click",()=>$("new-message-dialog").showModal());

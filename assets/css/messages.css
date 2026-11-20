@@ -90,3 +90,7 @@
 
 /* Keep hidden UI hidden even when component styles define flex or grid display. */
 .messages-page [hidden]{display:none!important}
+
+/* Mobile inbox navigation: opening a chat hides the sidebar, with a clear way back. */
+.back-to-inbox{display:none}
+@media(max-width:620px){.back-to-inbox{display:inline-flex;align-items:center;justify-content:center}}
