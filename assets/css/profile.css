@@ -84,3 +84,11 @@
 }
 .creator-follow-button{background:linear-gradient(110deg,#65e6d2,#a392ff);color:#10142a}
 .creator-stats strong,.creator-social-stats strong{color:#fff}
+
+/* Verified Dimension account-role badges */
+.dimension-role-badges{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.dimension-role-badge{display:inline-flex;align-items:center;gap:5px;width:max-content;padding:5px 9px;border:1px solid rgba(173,190,231,.22);border-radius:999px;background:rgba(173,190,231,.09);color:#c8d4f5;font:700 8px/1 var(--font);letter-spacing:.12em}
+.dimension-role-badge.role-owner{border-color:rgba(255,197,94,.42);background:rgba(255,183,76,.13);color:#ffd68a}
+.dimension-role-badge.role-moderator{border-color:rgba(103,190,255,.4);background:rgba(66,164,255,.13);color:#91d4ff}
+.dimension-role-badge.role-supporter{border-color:rgba(213,132,255,.4);background:rgba(190,94,255,.13);color:#e1aaff}
+.dimension-role-badge.role-member{border-color:rgba(105,230,190,.3);background:rgba(75,210,165,.09);color:#9ce9ce}
