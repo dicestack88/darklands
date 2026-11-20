@@ -13,7 +13,7 @@
 
   client.auth.getSession().then(({ data, error }) => {
     if (error) {
-      console.warn("Darklands session check failed:", error.message);
+      console.warn("Dicestack Dimension session check failed:", error.message);
       return;
     }
 
@@ -21,6 +21,6 @@
       window.location.replace(new URL("clips.html", config.SITE_URL).toString());
     }
   }).catch(error => {
-    console.warn("Darklands session check failed:", error);
+    console.warn("Dicestack Dimension session check failed:", error);
   });
 })();

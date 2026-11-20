@@ -62,7 +62,7 @@
         return;
       }
 
-      message(status, "Choose your permanent Darklands username and display name.");
+      message(status, "Choose your permanent Dicestack Dimension username and display name.");
       form.hidden = false;
     } catch (error) {
       message(status, "We couldn't check your profile. Please try again.", true);
@@ -98,12 +98,12 @@
         }
         throw error;
       }
-      message(feedback, "Profile created! Opening Darklands…");
+      message(feedback, "Profile created! Opening Dicestack Dimension…");
       window.location.replace(page("app.html"));
     } catch (error) {
       message(feedback, error.message || "We couldn't create your profile. Please try again.", true);
       submit.disabled = false;
-      submit.textContent = "Create Darklands profile →";
+      submit.textContent = "Create Dicestack Dimension profile →";
     }
   });
 
