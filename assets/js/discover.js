@@ -77,8 +77,18 @@
     }
   }
 
-  form.addEventListener("submit",event=>{event.preventDefault();search(input.value);});
-  input.addEventListener("keydown",event=>{if(event.key==="Escape"){input.value="";results.hidden=true;}});
+  form.addEventListener("submit",event=>{event.preventDefault();if(searchTimer)clearTimeout(searchTimer);search(input.value);});
+  input.addEventListener("input",()=>{
+    if(searchTimer)clearTimeout(searchTimer);
+    const term=input.value.trim();
+    if(term.length<2){searchSequence++;results.hidden=true;results.replaceChildren();return;}
+    results.hidden=false;
+    const hint=document.createElement("p");hint.className="discover-empty";hint.textContent="Finding creators and clips…";results.replaceChildren(hint);
+    searchTimer=setTimeout(()=>search(term),260);
+  });
+  input.addEventListener("keydown",event=>{
+    if(event.key==="Escape"){if(searchTimer)clearTimeout(searchTimer);searchSequence++;input.value="";results.hidden=true;results.replaceChildren();}
+  });
   (async()=>{
     if(!client){status.textContent="Account services are unavailable. Please try again later.";return;}
     const {data,error}=await client.auth.getUser();
