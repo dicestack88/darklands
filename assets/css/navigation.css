@@ -290,3 +290,55 @@ html[data-theme="light"] .ecosystem-switcher-panel>a:hover{background:#eaf0fb}
     display: flex;
   }
 }
+
+
+/* Give the Dimension header more vertical breathing room. */
+.site-header:has(.dimension-unified-nav) {
+  box-sizing: border-box;
+  height: 88px;
+  min-height: 88px;
+  padding-block: 10px;
+}
+.dimension-unified-nav {
+  min-height: 64px;
+  align-items: center;
+  gap: clamp(7px, .8vw, 13px);
+}
+.dimension-unified-nav .brand,
+.dimension-ecosystem-switcher>summary,
+.dimension-unified-nav .dimension-nav-link,
+.dimension-unified-nav .dimension-logout {
+  align-self: center;
+}
+.dimension-unified-nav .dimension-nav-link {
+  min-height: 42px;
+  padding-inline: 11px;
+  border: 0 !important;
+  border-radius: 11px;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: 0;
+}
+.dimension-unified-nav .dimension-nav-link:hover {
+  background: rgba(255,255,255,.065) !important;
+}
+.dimension-unified-nav .dimension-nav-link[aria-current="page"] {
+  background: rgba(101,230,240,.11) !important;
+}
+@media (max-width: 900px) {
+  .site-header:has(.dimension-unified-nav) {
+    height: auto;
+    min-height: 82px;
+    padding-block: 14px;
+  }
+  .dimension-unified-nav {
+    min-height: 54px;
+    row-gap: 12px;
+  }
+}
+@media (max-width: 620px) {
+  .site-header:has(.dimension-unified-nav) {
+    min-height: 76px;
+    padding-block: 12px;
+  }
+}
