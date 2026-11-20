@@ -52,7 +52,21 @@
     const ownProfile=auth.user.id===profile.id;
     const followButton=$("creator-follow-button");
     const messageButton=$("creator-message-button");
-    if(!ownProfile){messageButton.hidden=false;messageButton.addEventListener("click",async()=>{const body=window.prompt("Write your first message (max 1000 characters):");if(body===null)return;messageButton.disabled=true;const result=await client.rpc("dimension_send_message_request",{p_recipient:profile.id,p_body:body});messageButton.disabled=false;if(result.error){showError(result.error.message||"Could not send the message.");return;}window.location.href=new URL("messages.html?c="+encodeURIComponent(result.data),config.SITE_URL).toString();});}
+    const reportButton=$("creator-report-button");
+    if(!ownProfile){
+      reportButton.hidden=false;
+      reportButton.addEventListener("click",async()=>{
+        const reason=window.prompt("Report reason: spam, harassment, inappropriate, privacy, impersonation, or other","other");
+        if(reason===null)return;
+        const normalized=reason.trim().toLowerCase().replace(/\s+/g,"_");
+        if(!["spam","harassment","inappropriate","privacy","impersonation","other"].includes(normalized)){showError("Please enter one of the listed report reasons.");return;}
+        const details=window.prompt("Optional details (max 500 characters):","")||"";
+        reportButton.disabled=true;
+        const {error}=await client.rpc("dimension_submit_content_report",{p_target_type:"account",p_target_id:profile.id,p_reason:normalized,p_details:details.slice(0,500)});
+        reportButton.disabled=false;
+        showError(error?(error.message||"Couldn't submit this report."):"Account report submitted. Thanks for helping keep Dimension safe.");
+      });
+      messageButton.hidden=false;messageButton.addEventListener("click",async()=>{const body=window.prompt("Write your first message (max 1000 characters):");if(body===null)return;messageButton.disabled=true;const result=await client.rpc("dimension_send_message_request",{p_recipient:profile.id,p_body:body});messageButton.disabled=false;if(result.error){showError(result.error.message||"Could not send the message.");return;}window.location.href=new URL("messages.html?c="+encodeURIComponent(result.data),config.SITE_URL).toString();});}
     $("creator-own-label").hidden=!ownProfile;
     const [{count:followerCount,error:followerError},{count:followingCount,error:followingError}]=await Promise.all([
       client.from("user_follows").select("follower_id",{count:"exact",head:true}).eq("following_id",profile.id),
