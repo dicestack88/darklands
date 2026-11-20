@@ -32,7 +32,7 @@
           await client.auth.signOut();
           throw new Error("Please verify your email address before logging in. Check your inbox for the confirmation link.");
         }
-        window.location.assign(sitePage("app.html"));
+        window.location.assign(sitePage("settings.html"));
       } catch (error) {
         showMessage(loginForm, error.message || "Unable to log in. Please try again.", true);
         setBusy(loginForm, false);
@@ -64,7 +64,7 @@
         try {
           const { data, error } = await client.auth.signUp({ email, password, options: { emailRedirectTo: sitePage("login.html?verified=1"), data: { username, display_name: displayName } } });
           if (error) throw error;
-          if (data.session && isVerified(data.user)) { window.location.assign(sitePage("app.html")); return; }
+          if (data.session && isVerified(data.user)) { window.location.assign(sitePage("settings.html")); return; }
           registerForm.reset();
           showMessage(registerForm, "Account request received. Check your email for a verification link. You won't be able to log in until you verify it.");
         } catch (error) {
