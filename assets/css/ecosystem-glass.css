@@ -255,3 +255,68 @@ html[data-glass-mode="liquid"] .site-header:has(.dimension-unified-nav)::before 
     background: rgba(12,19,29,.96) !important;
   }
 }
+
+/* === Refined form fields ===
+   Consistent, rounded controls that stay inside their parent cards and panels. */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]):not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="reset"]),
+textarea,
+select {
+  display:block;
+  box-sizing:border-box;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  min-height:44px;
+  padding:11px 14px;
+  border:1px solid rgba(170,190,225,.24)!important;
+  border-radius:13px!important;
+  background:linear-gradient(145deg,rgba(255,255,255,.065),rgba(255,255,255,.025)),rgba(7,13,26,.78)!important;
+  color:#edf3ff!important;
+  font:500 13px/1.45 "DM Sans",system-ui,sans-serif;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.075),0 3px 12px rgba(0,0,0,.08)!important;
+  outline:none;
+  transition:border-color .18s ease,background .18s ease,box-shadow .18s ease;
+}
+textarea {
+  min-height:116px;
+  padding:13px 14px;
+  resize:vertical;
+}
+select {
+  padding-right:36px;
+  cursor:pointer;
+}
+input::placeholder,
+textarea::placeholder {
+  color:rgba(174,190,218,.58)!important;
+  opacity:1;
+}
+input:hover,
+textarea:hover,
+select:hover {
+  border-color:rgba(150,183,236,.42)!important;
+  background-color:rgba(13,22,40,.9)!important;
+}
+input:focus,
+textarea:focus,
+select:focus {
+  border-color:rgba(101,230,210,.72)!important;
+  background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.025)),rgba(8,17,31,.94)!important;
+  box-shadow:0 0 0 3px rgba(101,230,210,.12),0 0 22px rgba(121,169,255,.09),inset 0 1px 0 rgba(255,255,255,.09)!important;
+}
+input:disabled,
+textarea:disabled,
+select:disabled {
+  opacity:.58;
+  cursor:not-allowed;
+}
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color:#edf3ff;
+  -webkit-box-shadow:0 0 0 1000px #101a2d inset,0 0 0 3px rgba(101,230,210,.1)!important;
+  border:1px solid rgba(101,230,210,.42)!important;
+}
+@media(prefers-reduced-motion:reduce) {
+  input,textarea,select {transition:none!important}
+}
