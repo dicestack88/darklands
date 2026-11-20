@@ -45,7 +45,7 @@ create index if not exists voice_call_signals_call_idx
   on public.voice_call_signals(call_id,created_at);
 alter table public.voice_call_signals enable row level security;
 revoke all on public.voice_call_signals from anon, authenticated;
-grant select, insert on public.voice_call_signals to authenticated;
+grant select on public.voice_call_signals to authenticated;
 
 create policy "Call recipients can read their own signalling data"
   on public.voice_call_signals for select to authenticated
@@ -64,27 +64,7 @@ create policy "Call recipients can read their own signalling data"
         )
     )
   );
-create policy "Call participants can send signalling data to the other participant"
-  on public.voice_call_signals for insert to authenticated
-  with check (
-    sender_id=(select auth.uid())
-    and recipient_id <> sender_id
-    and exists (
-      select 1 from public.voice_calls v
-      join public.conversations c on c.id=v.conversation_id
-      where v.id=call_id and v.status in ('ringing','active')
-        and c.status='accepted'
-        and (
-          (sender_id=v.caller_id and recipient_id=v.callee_id)
-          or (sender_id=v.callee_id and recipient_id=v.caller_id)
-        )
-        and not exists (
-          select 1 from public.user_blocks b
-          where (b.blocker_id=v.caller_id and b.blocked_id=v.callee_id)
-             or (b.blocker_id=v.callee_id and b.blocked_id=v.caller_id)
-        )
-    )
-  );
+drop policy if exists "Call participants can send signalling data to the other participant" on public.voice_call_signals;
 
 create or replace function public.dimension_start_voice_call(p_conversation uuid)
 returns uuid
@@ -250,6 +230,9 @@ begin
     )
   returning id into v_id;
   if v_id is null then raise exception 'The call is no longer available.'; end if;
+  if (select count(*) from public.voice_call_signals where call_id=p_call and sender_id=auth.uid()) > 150 then
+    raise exception 'Too many connection updates for this call.';
+  end if;
   return v_id;
 end;
 $$;
