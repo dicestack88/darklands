@@ -10,6 +10,7 @@
   const input=$("discover-search-input");
   const page=name=>new URL(name,config.SITE_URL).toString();
   const initials=name=>(name||"D").trim().split(/\s+/).slice(0,2).map(part=>part[0]||"").join("").toUpperCase();
+  const roleBadge=role=>{const value=["owner","moderator","supporter","member"].includes(role)?role:"member";const badge=document.createElement("span");badge.className="dimension-role-badge role-"+value;badge.textContent=({owner:"OWNER",moderator:"MODERATOR",supporter:"SUPPORTER",member:"MEMBER"})[value];return badge;};
   let searchTimer=null;
   let searchSequence=0;
 
@@ -23,7 +24,7 @@
       const image=document.createElement("img");image.src=profile.avatar_url;image.alt="";image.loading="lazy";avatar.append(image);
     }else avatar.textContent=initials(profile.display_name);
     const info=document.createElement("span");info.className="discover-creator-info";
-    const name=document.createElement("strong");name.textContent=profile.display_name||"Dimension member";
+    const name=document.createElement("strong");name.textContent=profile.display_name||"Dimension member";name.append(roleBadge(profile.role));
     const handle=document.createElement("small");handle.textContent="@"+profile.username;
     info.append(name,handle);
     const arrow=document.createElement("span");arrow.className="discover-arrow";arrow.textContent="↗";
@@ -55,6 +56,7 @@
 
       const creatorMap=new Map();
       for(const profile of [...(byName.data||[]),...(byHandle.data||[])])creatorMap.set(profile.id,profile);
+      if(creatorMap.size){const ids=[...creatorMap.keys()];const {data:roles,error:roleError}=await client.from("dimension_member_roles").select("user_id,role").in("user_id",ids);if(roleError)throw roleError;const roleMap=new Map((roles||[]).map(row=>[row.user_id,row.role]));for(const profile of creatorMap.values())profile.role=roleMap.get(profile.id)||"member";}
       const creatorSection=document.createElement("section");creatorSection.className="discover-result-section";
       const creatorHeading=document.createElement("h3");creatorHeading.textContent="Creators";
       const creatorGrid=document.createElement("div");creatorGrid.className="discover-creator-grid";
@@ -70,8 +72,11 @@
         const ids=[...new Set(clips.map(clip=>clip.user_id))];
         const {data:profiles,error:profilesError}=await client.from("profiles").select("id,username,display_name").in("id",ids);
         if(profilesError)throw profilesError;
+        const {data:roles,error:roleError}=await client.from("dimension_member_roles").select("user_id,role").in("user_id",ids);
+        if(roleError)throw roleError;
         if(requestId!==searchSequence)return;
-        const profileMap=new Map((profiles||[]).map(profile=>[profile.id,profile]));
+        const roleMap=new Map((roles||[]).map(row=>[row.user_id,row.role]));
+        const profileMap=new Map((profiles||[]).map(profile=>[profile.id,{...profile,role:roleMap.get(profile.id)||"member"}]));
         for(const clip of clips){
           const {data:signed,error:signedError}=await client.storage.from("darklands-clips").createSignedUrl(clip.storage_path,900);
           if(requestId!==searchSequence)return;
@@ -81,7 +86,7 @@
           const details=document.createElement("div");details.className="discover-clip-details";
           const caption=document.createElement("p");caption.textContent=clip.caption||"A community clip";
           const profile=profileMap.get(clip.user_id);
-          const creator=document.createElement("a");creator.className="discover-clip-creator";creator.textContent=profile?"@"+profile.username:"Dimension member";
+          const creator=document.createElement("a");creator.className="discover-clip-creator";creator.textContent=profile?"@"+profile.username:"Dimension member";if(profile)creator.append(roleBadge(profile.role));
           if(profile?.username)creator.href=page("profile.html")+"?u="+encodeURIComponent(profile.username);
           details.append(caption,creator);card.append(video,details);clipGrid.append(card);
         }
