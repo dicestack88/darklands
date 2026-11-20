@@ -37,6 +37,7 @@
   const page = name => new URL(name, config.SITE_URL).toString();
   const formatDate = value => new Date(value).toLocaleDateString(undefined, { month: "short", day: "numeric" });
   const initials = name => (name || "D").trim().split(/\s+/).slice(0, 2).map(part => part[0] || "").join("").toUpperCase();
+  const roleBadge=role=>{const value=["owner","moderator","supporter","member"].includes(role)?role:"member";const badge=document.createElement("span");badge.className="dimension-role-badge role-"+value;badge.textContent=({owner:"OWNER",moderator:"MODERATOR",supporter:"SUPPORTER",member:"MEMBER"})[value];return badge;};
   const formatMB = bytes => (bytes / (1024 * 1024)).toFixed(1).replace(/\.0$/, "");
   async function getStorageUsage() {
     const { data, error } = await client.storage.from("darklands-clips").list(currentUser.id, { limit: 1000 });
@@ -256,6 +257,7 @@
     display.textContent = profile?.display_name || "Darklands member";
     const username = document.createElement("span");
     username.textContent = "@" + (profile?.username || "member");
+    display.append(roleBadge(profile?.role));
     identity.append(display, username);
     creator.append(avatar, identity);
 
@@ -387,14 +389,17 @@
       else {
         const ids=[...new Set(data.map(item=>item.user_id))];
         const {data:authors}=await client.from("profiles").select("id,username,display_name").in("id",ids);
-        const authorMap=new Map((authors||[]).map(author=>[author.id,author]));
+        const {data:authorRoles,error:authorRolesError}=await client.from("dimension_member_roles").select("user_id,role").in("user_id",ids);
+        if(authorRolesError)throw authorRolesError;
+        const authorRoleMap=new Map((authorRoles||[]).map(row=>[row.user_id,row.role]));
+        const authorMap=new Map((authors||[]).map(author=>[author.id,{...author,role:authorRoleMap.get(author.id)||"member"}]));
         const roots=data.filter(item=>!item.parent_comment_id);
         const replies=new Map();
         for(const item of data.filter(item=>item.parent_comment_id)){if(!replies.has(item.parent_comment_id))replies.set(item.parent_comment_id,[]);replies.get(item.parent_comment_id).push(item);}
         const renderComment=(item,isReply=false)=>{
           const row=document.createElement("article");row.className="clip-comment"+(isReply?" clip-comment-reply":"");
           const authorProfile=authorMap.get(item.user_id);
-          const author=document.createElement("strong");author.textContent=authorProfile?.display_name||"Darklands member";
+          const author=document.createElement("strong");author.textContent=authorProfile?.display_name||"Darklands member";author.append(roleBadge(authorProfile?.role));
           const handle=document.createElement("span");handle.className="clip-comment-handle";handle.textContent="@"+(authorProfile?.username||"member")+" · "+new Date(item.created_at).toLocaleString(undefined,{dateStyle:"medium",timeStyle:"short"});
           const body=document.createElement("p");body.textContent=item.body;
           const controls=document.createElement("div");controls.className="clip-comment-controls";
@@ -524,7 +529,10 @@
         .select("id, username, display_name, avatar_url")
         .in("id", userIds);
       if (profileError) throw profileError;
-      const profileMap = new Map((profiles || []).map(profile => [profile.id, profile]));
+      const {data:roleRows,error:roleError}=await client.from("dimension_member_roles").select("user_id,role").in("user_id",userIds);
+      if(roleError)throw roleError;
+      const roleMap=new Map((roleRows||[]).map(row=>[row.user_id,row.role]));
+      const profileMap = new Map((profiles || []).map(profile => [profile.id, {...profile,role:roleMap.get(profile.id)||"member"}]));
       const clipIds = clips.map(clip => clip.id);
       const [{ data: likeRows, error: likesError }, { data: commentRows, error: commentsError }, { data: saveRows, error: savesError }, { data: repostRows, error: repostsError }] = await Promise.all([
         client.from("clip_likes").select("clip_id, user_id").in("clip_id", clipIds),
