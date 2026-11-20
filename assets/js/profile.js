@@ -58,7 +58,7 @@
       reportButton.addEventListener("click",async()=>{
         const reason=window.prompt("Report reason: spam, harassment, inappropriate, privacy, impersonation, or other","other");
         if(reason===null)return;
-        const normalized=reason.trim().toLowerCase().replace(/\\s+/g,"_");
+        const normalized=reason.trim().toLowerCase().replace(/\s+/g,"_");
         if(!["spam","harassment","inappropriate","privacy","impersonation","other"].includes(normalized)){showError("Please enter one of the listed report reasons.");return;}
         const details=window.prompt("Optional details (max 500 characters):","")||"";
         reportButton.disabled=true;
