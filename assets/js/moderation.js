@@ -97,6 +97,14 @@
       button("Action taken","approve",()=>review("actioned")),
       button("Dismiss","reject",()=>review("dismissed"))
     );
+    if(contextType==="message_report"){
+      actions.append(button("Delete reported message","reject",async()=>{
+        if(!window.confirm("Permanently delete the specific message attached to this report?"))return;
+        const reason=(note.value.trim()||report.reason||"Reported message").slice(0,500);
+        const {error}=await db.rpc("dimension_moderator_delete_reported_message",{p_report_id:report.id,p_reason:reason});
+        if(error)throw error;say("Reported message deleted.");await loadQueue();await loadHistory();
+      }));
+    }
     if(targetUserId){
       const reason=("Reported for "+String(report.reason||"a community guidelines concern").replaceAll("_"," ")+(report.details?": "+report.details:"")).slice(0,500);
       actions.append(

@@ -387,12 +387,13 @@
     const loadComments = async () => {
       commentsList.replaceChildren();
       const loading = document.createElement("p"); loading.className = "clip-comments-empty"; loading.textContent = "Loading comments…"; commentsList.append(loading);
-      const [{ data, error }, { data: heartRows, error: heartError }] = await Promise.all([
+      const [{ data, error }, { data: heartRows, error: heartError }, { data: ownRole, error: ownRoleError }] = await Promise.all([
         client.from("clip_comments").select("id, user_id, body, created_at, parent_comment_id").eq("clip_id", clip.id).order("created_at", { ascending: true }).limit(150),
-        client.from("clip_comment_likes").select("comment_id, user_id").limit(1000)
+        client.from("clip_comment_likes").select("comment_id, user_id").limit(1000),
+        client.from("dimension_member_roles").select("role").eq("user_id", currentUser.id).maybeSingle()
       ]);
       commentsList.replaceChildren();
-      if (error || heartError) { const failed=document.createElement("p");failed.className="clip-comments-empty";failed.textContent="Comments couldn't load. Please try again.";commentsList.append(failed);return; }
+      if (error || heartError || ownRoleError) { const failed=document.createElement("p");failed.className="clip-comments-empty";failed.textContent="Comments couldn't load. Please try again.";commentsList.append(failed);return; }
       if (!data?.length) { const empty=document.createElement("p");empty.className="clip-comments-empty";empty.textContent="No comments yet. Start the conversation.";commentsList.append(empty); }
       else {
         const ids=[...new Set(data.map(item=>item.user_id))];
@@ -422,6 +423,19 @@
             heart.disabled=false;
           });
           controls.append(heart);
+          if(["owner","moderator"].includes(ownRole?.role)){
+            const remove=document.createElement("button");remove.type="button";remove.className="clip-comment-control";remove.textContent="Delete";
+            remove.addEventListener("click",async()=>{
+              if(remove.disabled||!window.confirm("Delete this comment and its replies? This cannot be undone."))return;
+              const reason=(window.prompt("Reason for moderator deletion (required):","Community guidelines")||"").trim();
+              if(reason.length<3){say("Enter a reason of at least 3 characters.");return;}
+              remove.disabled=true;remove.textContent="Deleting…";
+              const {error}=await client.rpc("dimension_moderator_delete_comment",{p_comment_id:item.id,p_reason:reason.slice(0,500)});
+              if(error){remove.disabled=false;remove.textContent="Delete";say(error.message||"Couldn't delete this comment.");return;}
+              say("Comment deleted.");await loadComments();
+            });
+            controls.append(remove);
+          }
           if(item.user_id!==currentUser.id){
             const report=document.createElement("button");report.type="button";report.className="clip-comment-control";report.textContent="Report";
             report.addEventListener("click",async()=>{
