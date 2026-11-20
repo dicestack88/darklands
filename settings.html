@@ -4,67 +4,69 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#090b12">
-  <meta name="description" content="Manage your Dicestack Dimension account preferences and security settings.">
-  <title>Account settings — Dicestack Dimension</title>
+  <meta name="description" content="Manage your Dicestack Dimension account and messaging preferences.">
+  <title>Settings — Dicestack Dimension</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script><script src="assets/js/supabase-config.js" defer></script><script src="assets/js/app.js" defer></script><script src="assets/js/message-settings.js" defer></script>
-<script defer src="assets/js/theme.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="assets/js/supabase-config.js"></script>
+  <script defer src="assets/js/theme.js"></script>
+  <script defer src="assets/js/settings-page.js"></script>
 </head>
 <body class="settings-page">
   <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
   <header class="site-header">
     <a class="brand" href="./" aria-label="Dicestack Dimension home"><span class="brand-mark">D</span><span>DICESTACK DIMENSION</span></a>
-    <nav class="header-nav" aria-label="Main navigation"><a href="messages.html">Messages</a><a href="clips.html">Clips</a><a href="./">Home</a><a class="nav-login" href="login.html">Log in</a><a class="nav-register button button-small" href="register.html">Create account <span aria-hidden="true">↗</span></a></nav>
   </header>
   <main class="settings-shell">
-    <a class="back-link settings-back" href="./">← Back to Dicestack Dimension</a>
     <div class="settings-heading">
-      <div><div class="eyebrow">YOUR ACCOUNT</div><h1>Settings<span>.</span></h1><p>Manage your profile, preferences and account security.</p></div>
+      <div><div class="eyebrow">YOUR ACCOUNT</div><h1>Settings<span>.</span></h1><p>Manage your account details and messaging preferences.</p></div>
       <div class="settings-avatar" aria-hidden="true">D</div>
     </div>
-    <div class="settings-layout">
-      <aside class="settings-sidebar" aria-label="Settings sections">
-        <a class="settings-nav active" href="#profile">◎ <span>Profile</span></a>
-        <a class="settings-nav" href="#security">◇ <span>Security</span></a>
-        <a class="settings-nav" href="#privacy">◈ <span>Privacy</span></a>
-        <a class="settings-nav" href="#preferences">☼ <span>Preferences</span></a>
-      </aside>
-      <div class="settings-content">
-        <section class="settings-panel" id="profile">
-          <div class="settings-panel-heading"><div><div class="eyebrow">01 / IDENTITY</div><h2>Profile details</h2><p>Choose how people see you around Dicestack Dimension.</p></div></div>
-          <div class="profile-preview"><div class="profile-avatar">D</div><div><strong>Your display name</strong><span>@yourusername</span></div><span class="preview-tag">PREVIEW</span></div>
-          <form class="settings-form" data-demo-form>
-            <div class="settings-field"><label for="display-name">Display name</label><input id="display-name" type="text" placeholder="Your name" autocomplete="nickname"></div>
-            <div class="settings-field"><label for="username">Username</label><input id="username" type="text" placeholder="@username" autocomplete="username"></div>
-            <div class="settings-field"><label for="bio">About you</label><textarea id="bio" rows="3" placeholder="A little about yourself..."></textarea><small>Keep personal information private. You can change this later.</small></div>
-            <div class="settings-actions"><p class="form-message" aria-live="polite"></p><button class="button" type="submit">Save changes <span aria-hidden="true">↗</span></button></div>
-          </form>
-        </section>
-        <section class="settings-panel" id="security">
-          <div class="settings-panel-heading"><div><div class="eyebrow">02 / PROTECTION</div><h2>Account security</h2><p>Control how you sign in and protect your account.</p></div><span class="settings-status">SECURITY</span></div>
-          <div class="security-row"><div class="security-symbol">✉</div><div class="security-copy"><strong>Email verification</strong><span>Your email address will need to be verified before your account is activated.</span><em class="required-label">REQUIRED FOR ALL ACCOUNTS</em></div><span class="locked-label">REQUIRED</span></div>
-          <div class="security-row security-row-toggle"><div class="security-symbol">⌑</div><div class="security-copy"><strong>Two-factor authentication</strong><span>Add an extra verification step when signing in. This is optional and can be changed at any time.</span><em class="optional-label">OPTIONAL</em><p class="toggle-feedback" data-twofa-status aria-live="polite">Currently off — sign-in will use your normal login method.</p></div><label class="switch" for="twofa-toggle"><input id="twofa-toggle" type="checkbox" aria-describedby="twofa-description"><span class="switch-track"></span><span class="sr-only">Enable two-factor authentication</span></label></div>
-          <p id="twofa-description" class="settings-footnote">This is a visual preview. Enabling the switch here does not activate real two-factor authentication yet.</p>
-          <div class="security-row"><div class="security-symbol">↻</div><div class="security-copy"><strong>Password &amp; recovery</strong><span>Change your password or recover access if you get locked out.</span></div><span class="coming-label">COMING LATER</span></div>
-        </section>
-        <section class="settings-panel" id="privacy">
-          <div class="settings-panel-heading"><div><div class="eyebrow">03 / CONTROL</div><h2>Privacy</h2><p>Decide what information is visible to other members.</p></div></div>
-          <div class="preference-row"><div><strong>Profile visibility</strong><span>Choose who can view your profile.</span></div><select aria-label="Profile visibility" disabled><option>Public (planned)</option></select></div>
-          <div class="preference-row message-privacy-row"><div><strong>Who can message me?</strong><span>Choose who can start a conversation with you.</span></div><select id="message-privacy-setting" aria-label="Who can message me"><option value="requests">Everyone — message requests</option><option value="mutuals">Mutual followers only</option><option value="following">People I follow — requests</option></select></div><p id="message-privacy-description" class="settings-footnote">New conversations from eligible members will follow this rule. Existing accepted chats stay available unless you block someone.</p><div class="settings-actions"><p id="message-privacy-status" class="form-message" role="status" aria-live="polite"></p><button id="save-message-privacy" class="button" type="button">Save messaging privacy</button></div>
-        </section>
-        <section class="settings-panel" id="preferences">
-          <div class="settings-panel-heading"><div><div class="eyebrow">04 / EXPERIENCE</div><h2>Preferences</h2><p>Make Dicestack Dimension feel the way you want it to.</p></div></div>
-          <div class="preference-row"><div><strong>Appearance</strong><span>Choose your interface theme.</span></div><select aria-label="Appearance theme" disabled><option>Dark (current)</option><option>Light (planned)</option><option>System (planned)</option></select></div>
-          <div class="preference-row"><div><strong>Email notifications</strong><span>Updates and account-related messages.</span></div><span class="coming-label">COMING LATER</span></div>
-        </section>
-        <div class="settings-disclaimer"><span>◈</span><p><strong>Early preview</strong><br>Some account controls remain previews. Your messaging privacy preference is saved to your account and enforced by the messaging database.</p></div>
+
+    <section class="settings-panel settings-account-panel" aria-labelledby="account-heading">
+      <div class="settings-panel-heading"><div><div class="eyebrow">01 / ACCOUNT</div><h2 id="account-heading">Account information</h2><p>Your sign-in and profile details.</p></div></div>
+      <div class="settings-info-grid">
+        <div><span class="settings-info-label">Signed-in email</span><strong id="settings-email">Loading…</strong></div>
+        <div><span class="settings-info-label">Sign-in method</span><strong id="settings-provider">Loading…</strong></div>
+        <div><span class="settings-info-label">Username</span><strong id="settings-username">Loading…</strong></div>
+        <div><span class="settings-info-label">Display name</span><strong id="settings-display-name">Loading…</strong></div>
       </div>
-    </div>
+      <p id="settings-account-status" class="settings-footnote" role="status" aria-live="polite">Checking your account…</p>
+      <a class="button settings-account-link" href="app.html">Manage my profile <span aria-hidden="true">↗</span></a>
+    </section>
+
+    <section class="settings-panel" id="privacy" aria-labelledby="privacy-heading">
+      <div class="settings-panel-heading"><div><div class="eyebrow">02 / PRIVACY</div><h2 id="privacy-heading">Messaging privacy</h2><p>Choose who can start a conversation with you.</p></div></div>
+      <div class="preference-row message-privacy-row">
+        <div><strong>Who can message me?</strong><span>New conversations follow this rule. Existing accepted chats remain available unless you block someone.</span></div>
+        <select id="message-privacy-setting" aria-label="Who can message me" disabled>
+          <option value="requests">Everyone — message requests</option>
+          <option value="mutuals">Mutual followers only</option>
+          <option value="following">People I follow — requests</option>
+        </select>
+      </div>
+      <div class="settings-actions">
+        <p id="message-privacy-status" class="form-message" role="status" aria-live="polite">Loading your saved preference…</p>
+        <button id="save-message-privacy" class="button" type="button" disabled>Save preference</button>
+      </div>
+    </section>
+
+    <section class="settings-panel" id="appearance" aria-labelledby="appearance-heading">
+      <div class="settings-panel-heading"><div><div class="eyebrow">03 / EXPERIENCE</div><h2 id="appearance-heading">Appearance</h2><p>Change the look of Dicestack Dimension.</p></div></div>
+      <div class="preference-row"><div><strong>Colour theme</strong><span>Your choice is saved in this browser and applies across the site.</span></div><span class="settings-theme-hint">Use the Light mode / Dark mode control in the navigation bar.</span></div>
+    </section>
+
+    <section class="settings-panel" aria-labelledby="security-heading">
+      <div class="settings-panel-heading"><div><div class="eyebrow">04 / SECURITY</div><h2 id="security-heading">Sign-in security</h2><p>How your account is authenticated.</p></div></div>
+      <div class="security-row"><div class="security-symbol">G</div><div class="security-copy"><strong>Google sign-in</strong><span>Dicestack Dimension uses your Google account to sign you in. Passwords and Google account verification are managed by Google.</span></div><span class="settings-status">CONNECTED</span></div>
+      <p class="settings-footnote">There is no separate Dicestack Dimension email-verification step. Two-factor authentication and password changes are managed through your Google account settings.</p>
+    </section>
+    <p class="settings-page-note">Only settings that are currently supported are shown here. More controls will appear when they are ready.</p>
   </main>
   <footer class="site-footer"><span>© 2026 DICESTACK DIMENSION</span><span>A DICESTACK88 PROJECT</span><a href="https://www.youtube.com/@dicestack88" target="_blank" rel="noreferrer">DICESTACK88 ↗</a></footer>
-<script src="assets/js/navigation.js"></script>
+  <script src="assets/js/navigation.js"></script>
 </body>
 </html>

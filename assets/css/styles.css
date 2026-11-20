@@ -193,3 +193,22 @@ input:focus,textarea:focus,select:focus{
 .header-nav,.clips-header-nav,.creator-nav{min-width:0;flex-wrap:wrap;align-items:center}
 .theme-toggle{flex:0 0 auto}
 button{font-family:var(--font)}
+
+/* Settings page — only show controls that are actually implemented */
+.settings-account-panel { position: relative; }
+.settings-info-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
+.settings-info-grid>div { min-width:0; padding:15px; border:1px solid var(--line); border-radius:9px; background:rgba(8,12,20,.34); }
+.settings-info-label { display:block; margin-bottom:7px; color:var(--muted); font-size:10px; }
+.settings-info-grid strong { display:block; overflow-wrap:anywhere; color:var(--text); font-size:13px; }
+.settings-account-link { min-height:40px; margin-top:12px; }
+.settings-theme-hint { max-width:290px; color:#aab8e8; font-size:10px; line-height:1.6; text-align:right; }
+.settings-page-note { margin:0; color:#778297; font-size:10px; line-height:1.6; text-align:center; }
+.settings-page .settings-footnote { padding:10px 0 0; }
+.settings-page .settings-actions { margin-top:14px; }
+.settings-page .settings-actions .button { min-height:40px; }
+.settings-page button:disabled,.settings-page select:disabled { opacity:.55; cursor:not-allowed; }
+@media(max-width:560px) {
+ .settings-info-grid { grid-template-columns:1fr; gap:10px; }
+ .settings-theme-hint { text-align:left; }
+ .settings-page .preference-row { align-items:flex-start; }
+}
