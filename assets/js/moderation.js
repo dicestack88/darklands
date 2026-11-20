@@ -1,297 +1,204 @@
 (() => {
-  const config = window.DARKLANDS_CONFIG;
-  const keyReady = config && config.SUPABASE_ANON_KEY && !config.SUPABASE_ANON_KEY.includes("PASTE_YOUR_");
-  const clientReady = keyReady && window.supabase && window.supabase.createClient;
-  const client = clientReady ? window.supabase.createClient(config.SUPABASE_URL, config.SUPABASE_ANON_KEY) : null;
-  const status = document.getElementById("moderation-status");
-  const content = document.getElementById("moderation-content");
-  const clipsRoot = document.getElementById("moderation-clips");
-  const reportsRoot = document.getElementById("moderation-reports");
-  const roleSection = document.getElementById("moderation-role-section");
-  const roleSearch = document.getElementById("moderation-role-search");
-  const roleQuery = document.getElementById("moderation-role-query");
-  const roleResults = document.getElementById("moderation-role-results");
-  const refreshButton = document.getElementById("moderation-refresh");
-  const logoutButton = document.getElementById("moderation-logout");
-  const verified = user => Boolean(user && (user.email_confirmed_at || user.confirmed_at));
-  const page = name => new URL(name, config.SITE_URL).toString();
-  const say = message => { status.textContent = message; };
-  const date = value => new Date(value).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
-
-  function empty(root, message) {
-    const node = document.createElement("p");
-    node.className = "moderation-empty";
-    node.textContent = message;
-    root.replaceChildren(node);
+  "use strict";
+  const config=window.DARKLANDS_CONFIG;
+  const ready=config?.SUPABASE_URL&&config?.SUPABASE_ANON_KEY&&!config.SUPABASE_ANON_KEY.includes("PASTE_YOUR_")&&window.supabase?.createClient;
+  const db=ready?window.supabase.createClient(config.SUPABASE_URL,config.SUPABASE_ANON_KEY):null;
+  const $=id=>document.getElementById(id);
+  const status=$("moderation-status"),contentRoot=$("moderation-content");
+  const roots={
+    clips:$("moderation-clips"),clipReports:$("moderation-reports"),
+    messageReports:$("moderation-message-reports"),contentReports:$("moderation-content-reports"),
+    appeals:$("moderation-appeals"),history:$("moderation-history")
+  };
+  const roleSection=$("moderation-role-section"),roleSearch=$("moderation-role-search"),
+    roleQuery=$("moderation-role-query"),roleResults=$("moderation-role-results");
+  const verified=user=>Boolean(user&&(user.email_confirmed_at||user.confirmed_at));
+  const page=name=>new URL(name,config.SITE_URL).toString();
+  const say=message=>{status.textContent=message;};
+  const date=value=>new Date(value).toLocaleString(undefined,{dateStyle:"medium",timeStyle:"short"});
+  const empty=(root,message)=>{const p=document.createElement("p");p.className="moderation-empty";p.textContent=message;root.replaceChildren(p);};
+  const node=(tag,cls,text)=>{const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el;};
+  function button(label,kind,handler){
+    const b=node("button","moderation-action "+(kind||""),label);b.type="button";
+    b.addEventListener("click",async()=>{b.disabled=true;const old=b.textContent;b.textContent="Working…";try{await handler();}catch(e){say(e.message||"Action failed. Refresh and try again.");b.disabled=false;b.textContent=old;}});
+    return b;
   }
-
-  function actionButton(label, kind, handler) {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "moderation-action " + (kind || "");
-    button.textContent = label;
-    button.addEventListener("click", async () => {
-      button.disabled = true;
-      const oldLabel = button.textContent;
-      button.textContent = "Working…";
-      try {
-        await handler();
-        await loadQueue();
-      } catch (error) {
-        say(error.message || "That action couldn't be completed. Please refresh and try again.");
-        button.disabled = false;
-        button.textContent = oldLabel;
-      }
-    });
-    return button;
-  }
-
-  async function signedVideo(path) {
-    const { data, error } = await client.storage.from("darklands-clips").createSignedUrl(path, 900);
-    if (error || !data?.signedUrl) throw new Error("A clip video couldn't be opened. Check the moderator storage policy.");
+  async function signedVideo(path){
+    const {data,error}=await db.storage.from("darklands-clips").createSignedUrl(path,900);
+    if(error||!data?.signedUrl)throw new Error("Video preview unavailable.");
     return data.signedUrl;
   }
-
-  async function renderClip(clip) {
-    const card = document.createElement("article");
-    card.className = "moderation-card";
-    const video = document.createElement("video");
-    video.className = "moderation-video";
-    video.controls = true;
-    video.preload = "metadata";
-    video.src = await signedVideo(clip.storage_path);
-    video.setAttribute("aria-label", "Clip awaiting moderation");
-
-    const body = document.createElement("div");
-    body.className = "moderation-card-body";
-    const meta = document.createElement("div");
-    meta.className = "moderation-meta";
-    const pill = document.createElement("span");
-    pill.className = "moderation-pill";
-    pill.textContent = clip.status.toUpperCase();
-    const time = document.createElement("time");
-    time.textContent = date(clip.created_at);
-    meta.append(pill, time);
-
-    const caption = document.createElement("p");
-    caption.className = "moderation-caption";
-    caption.textContent = clip.caption || "No caption";
-    const id = document.createElement("p");
-    id.className = "moderation-id";
-    id.textContent = "Clip ID · " + clip.id;
-    const actions = document.createElement("div");
-    actions.className = "moderation-actions";
+  async function renderClip(clip){
+    const card=node("article","moderation-card"),video=node("video","moderation-video");
+    video.controls=true;video.preload="metadata";video.src=await signedVideo(clip.storage_path);
+    const body=node("div","moderation-card-body"),meta=node("div","moderation-meta");
+    meta.append(node("span","moderation-pill",String(clip.status).toUpperCase()),node("time","",date(clip.created_at)));
+    const actions=node("div","moderation-actions");
     actions.append(
-      actionButton("Approve clip", "approve", async () => {
-        const { error } = await client.rpc("moderate_clip", { p_clip_id: clip.id, p_new_status: "approved" });
-        if (error) throw error;
-        say("Clip approved.");
-      }),
-      actionButton("Reject clip", "reject", async () => {
-        const { error } = await client.rpc("moderate_clip", { p_clip_id: clip.id, p_new_status: "rejected" });
-        if (error) throw error;
-        say("Clip rejected.");
-      })
+      button("Approve clip","approve",async()=>{const {error}=await db.rpc("moderate_clip",{p_clip_id:clip.id,p_new_status:"approved"});if(error)throw error;say("Clip approved.");await loadQueue();}),
+      button("Reject clip","reject",async()=>{const {error}=await db.rpc("moderate_clip",{p_clip_id:clip.id,p_new_status:"rejected"});if(error)throw error;say("Clip rejected.");await loadQueue();})
     );
-    body.append(meta, caption, id, actions);
-    card.append(video, body);
-    return card;
+    body.append(meta,node("p","moderation-caption",clip.caption||"No caption"),node("p","moderation-id","Clip · "+clip.id),actions);
+    card.append(video,body);return card;
   }
-
-  async function renderReport(report, clip) {
-    const card = document.createElement("article");
-    card.className = "moderation-report";
-    const body = document.createElement("div");
-    body.className = "moderation-report-body";
-    const meta = document.createElement("div");
-    meta.className = "moderation-meta";
-    const pill = document.createElement("span");
-    pill.className = "moderation-pill";
-    pill.textContent = report.reason.replaceAll("_", " ").toUpperCase();
-    const time = document.createElement("time");
-    time.textContent = date(report.created_at);
-    meta.append(pill, time);
-
-    const title = document.createElement("h3");
-    title.className = "moderation-report-title";
-    title.textContent = "Community report";
-    const details = document.createElement("p");
-    details.className = "moderation-report-details";
-    details.textContent = report.details || "No additional details provided.";
-    const target = document.createElement("div");
-    target.className = "moderation-report-clip";
-    const targetTitle = document.createElement("strong");
-    targetTitle.textContent = "Reported clip";
-    const targetCaption = document.createElement("p");
-    targetCaption.textContent = clip ? (clip.caption || "No caption") + " · Current status: " + clip.status : "The reported clip is no longer available.";
-    target.append(targetTitle, targetCaption);
-
-    const note = document.createElement("textarea");
-    note.className = "moderation-note";
-    note.maxLength = 500;
-    note.placeholder = "Optional moderator note (max 500 characters)";
-    note.value = report.moderator_note || "";
-    note.setAttribute("aria-label", "Moderator note for report");
-    const actions = document.createElement("div");
-    actions.className = "moderation-actions";
-    const save = nextStatus => async () => {
-      const { error } = await client.from("clip_reports")
-        .update({ review_status: nextStatus, moderator_note: note.value.trim() })
-        .eq("id", report.id)
-        .select("id")
-        .single();
-      if (error) throw error;
-      say("Report marked " + nextStatus + ".");
+  async function applyAccountAction(userId,action,reason,contextType,contextId,duration){
+    const {error}=await db.rpc("dimension_moderation_apply_action",{
+      p_target_user_id:userId,p_action:action,p_reason:reason||"Community guidelines review",
+      p_duration_hours:duration??null,p_context_type:contextType||null,p_context_id:contextId||null
+    });
+    if(error)throw error;
+    say(action==="warning"?"Warning recorded.":action==="timeout"?"Temporary restriction applied.":"Account suspension applied.");
+    await Promise.all([loadQueue(),loadHistory()]);
+  }
+  function renderReportCard({report,targetUserId,targetLabel,table,contextType}){
+    const card=node("article","moderation-report"),body=node("div","moderation-report-body");
+    const meta=node("div","moderation-meta");
+    meta.append(node("span","moderation-pill",String(report.reason||"report").replaceAll("_"," ").toUpperCase()),node("time","",date(report.created_at)));
+    const details=node("p","moderation-report-details",report.details||"No additional details provided.");
+    const target=node("div","moderation-report-clip");
+    target.append(node("strong","","Reported "+(targetLabel||"item")),node("p","",report.target_summary||("Account ID · "+(targetUserId||"unavailable"))));
+    const note=node("textarea","moderation-note");note.maxLength=500;note.placeholder="Optional moderator note (max 500 characters)";note.value=report.moderator_note||"";
+    note.setAttribute("aria-label","Moderator note");
+    const actions=node("div","moderation-actions");
+    const review=async nextStatus=>{
+      const {error}=await db.from(table).update({review_status:nextStatus,moderator_note:note.value.trim()}).eq("id",report.id).select("id").single();
+      if(error)throw error;say("Report marked "+nextStatus+".");await loadQueue();await loadHistory();
     };
     actions.append(
-      actionButton("Mark reviewed", "", save("reviewed")),
-      actionButton("Action taken", "approve", save("actioned")),
-      actionButton("Dismiss report", "reject", save("dismissed"))
+      button("Mark reviewed","",()=>review("reviewed")),
+      button("Action taken","approve",()=>review("actioned")),
+      button("Dismiss","reject",()=>review("dismissed"))
     );
-    body.append(meta, title, details, target, note, actions);
-    card.append(body);
-    return card;
+    if(targetUserId){
+      const reason="Reported for "+String(report.reason||"a community guidelines concern").replaceAll("_"," ");
+      actions.append(
+        button("Warn account","",()=>applyAccountAction(targetUserId,"warning",reason,contextType,report.id,null)),
+        button("Timeout 24h","",()=>applyAccountAction(targetUserId,"timeout",reason,contextType,report.id,24)),
+        button("Suspend account","reject",()=>applyAccountAction(targetUserId,"suspension",reason,contextType,report.id,null))
+      );
+    }
+    body.append(meta,node("h3","moderation-report-title",targetLabel||"Community report"),details,target,note,actions);
+    card.append(body);return card;
   }
-
-  async function loadQueue() {
-    say("Loading moderation queue…");
-    clipsRoot.setAttribute("aria-busy", "true");
-    reportsRoot.setAttribute("aria-busy", "true");
-    try {
-      const [clipResult, reportResult] = await Promise.all([
-        client.from("clips").select("id, caption, storage_path, status, created_at").eq("status", "pending").order("created_at", { ascending: true }),
-        client.from("clip_reports").select("id, clip_id, reason, details, created_at, review_status, moderator_note").eq("review_status", "open").order("created_at", { ascending: true })
+  async function loadQueue(){
+    say("Loading moderation queues…");
+    Object.values(roots).slice(0,4).forEach(root=>root?.setAttribute("aria-busy","true"));
+    try{
+      const [pending,clipReports,messageReports,contentReports]=await Promise.all([
+        db.from("clips").select("id,user_id,caption,storage_path,status,created_at").eq("status","pending").order("created_at",{ascending:true}),
+        db.from("clip_reports").select("id,clip_id,reason,details,created_at,review_status,moderator_note").eq("review_status","open").order("created_at",{ascending:true}),
+        db.from("message_reports").select("id,reporter_id,conversation_id,reason,details,created_at,review_status,moderator_note").eq("review_status","open").order("created_at",{ascending:true}),
+        db.from("dimension_content_reports").select("id,target_type,target_id,target_user_id,reason,details,created_at,review_status,moderator_note").eq("review_status","open").order("created_at",{ascending:true})
       ]);
-      if (clipResult.error) throw clipResult.error;
-      if (reportResult.error) throw reportResult.error;
-
-      clipsRoot.replaceChildren();
-      if (!clipResult.data?.length) {
-        empty(clipsRoot, "The review queue is clear. No pending clips.");
-      } else {
-        for (const clip of clipResult.data) {
-          try { clipsRoot.append(await renderClip(clip)); }
-          catch (error) {
-            const failed = document.createElement("p");
-            failed.className = "moderation-empty";
-            failed.textContent = "Clip " + clip.id + " was found, but its video preview failed to load.";
-            clipsRoot.append(failed);
-          }
+      for(const r of [pending,clipReports,messageReports,contentReports])if(r.error)throw r.error;
+      roots.clips.replaceChildren();
+      if(!pending.data?.length)empty(roots.clips,"The review queue is clear. No pending clips.");
+      else for(const clip of pending.data){try{roots.clips.append(await renderClip(clip));}catch(_){roots.clips.append(node("p","moderation-empty","Clip "+clip.id+" was found, but its preview failed to load."));}}
+      const clipIds=[...new Set((clipReports.data||[]).map(r=>r.clip_id))];
+      let clipMap=new Map();
+      if(clipIds.length){
+        const {data,error}=await db.from("clips").select("id,user_id,caption,status").in("id",clipIds);
+        if(error)throw error;clipMap=new Map((data||[]).map(c=>[c.id,c]));
+      }
+      roots.clipReports.replaceChildren();
+      if(!clipReports.data?.length)empty(roots.clipReports,"No open clip reports.");
+      else for(const report of clipReports.data){
+        const clip=clipMap.get(report.clip_id);
+        const item={...report,target_summary:clip?(clip.caption||"No caption")+" · Status: "+clip.status:"Reported clip unavailable"};
+        roots.clipReports.append(renderReportCard({report:item,targetUserId:clip?.user_id,targetLabel:"Clip report",table:"clip_reports",contextType:"clip_report"}));
+      }
+      roots.messageReports.replaceChildren();
+      if(!messageReports.data?.length)empty(roots.messageReports,"No open message reports.");
+      else{
+        const ids=[...new Set(messageReports.data.map(r=>r.conversation_id))];
+        const {data:conversations,error}=await db.from("conversations").select("id,user_one,user_two").in("id",ids);
+        if(error)throw error;
+        const map=new Map((conversations||[]).map(c=>[c.id,c]));
+        for(const report of messageReports.data){
+          const convo=map.get(report.conversation_id);
+          const target=convo?(convo.user_one===report.reporter_id?convo.user_two:convo.user_one):null;
+          roots.messageReports.append(renderReportCard({report,targetUserId:target,targetLabel:"Message report",table:"message_reports",contextType:"message_report"}));
         }
       }
-
-      reportsRoot.replaceChildren();
-      if (!reportResult.data?.length) {
-        empty(reportsRoot, "No open community reports.");
-      } else {
-        const ids = [...new Set(reportResult.data.map(report => report.clip_id))];
-        const { data: clips, error: lookupError } = await client.from("clips")
-          .select("id, caption, status").in("id", ids);
-        if (lookupError) throw lookupError;
-        const clipMap = new Map((clips || []).map(clip => [clip.id, clip]));
-        for (const report of reportResult.data) reportsRoot.append(await renderReport(report, clipMap.get(report.clip_id)));
+      roots.contentReports.replaceChildren();
+      if(!contentReports.data?.length)empty(roots.contentReports,"No open account or comment reports.");
+      else for(const report of contentReports.data){
+        const item={...report,target_summary:report.target_type==="account"?"Reported member account":"Comment · "+report.target_id};
+        roots.contentReports.append(renderReportCard({report:item,targetUserId:report.target_user_id,targetLabel:report.target_type==="account"?"Account report":"Comment report",table:"dimension_content_reports",contextType:report.target_type}));
       }
-      say("Moderator access verified. Queue updated.");
-    } finally {
-      clipsRoot.removeAttribute("aria-busy");
-      reportsRoot.removeAttribute("aria-busy");
+      say("Moderator access verified. All report queues are up to date.");
+    }finally{Object.values(roots).slice(0,4).forEach(root=>root?.removeAttribute("aria-busy"));}
+  }
+  async function loadAppeals(){
+    const root=roots.appeals;
+    const {data,error}=await db.from("dimension_moderation_appeals").select("id,action_id,user_id,appeal_text,submitted_at,status,moderator_note").eq("status","open").order("submitted_at",{ascending:true}).limit(100);
+    if(error)throw error;root.replaceChildren();
+    if(!data?.length){empty(root,"No open appeals.");return;}
+    for(const appeal of data){
+      const card=node("article","moderation-report"),body=node("div","moderation-report-body");
+      body.append(node("div","moderation-meta","SUBMITTED "+date(appeal.submitted_at)),node("h3","moderation-report-title","Appeal"),node("p","moderation-report-details",appeal.appeal_text),node("p","moderation-id","Member · "+appeal.user_id));
+      const note=node("textarea","moderation-note");note.maxLength=500;note.placeholder="Optional decision note";
+      const actions=node("div","moderation-actions");
+      for(const [decision,label,kind] of [["accepted","Accept appeal","approve"],["denied","Deny appeal","reject"]]){
+        actions.append(button(label,kind,async()=>{
+          const {error}=await db.rpc("dimension_review_moderation_appeal",{p_appeal_id:appeal.id,p_decision:decision,p_moderator_note:note.value.trim()});
+          if(error)throw error;say("Appeal "+decision+".");await loadAppeals();await loadHistory();
+        }));
+      }
+      body.append(note,actions);card.append(body);root.append(card);
     }
   }
-
-  async function loadRoleMembers(query="") {
+  async function loadHistory(){
+    const root=roots.history;
+    const {data,error}=await db.from("dimension_moderation_actions").select("id,target_user_id,moderator_id,action_type,reason,moderator_note,context_type,created_at").order("created_at",{ascending:false}).limit(60);
+    if(error)throw error;root.replaceChildren();
+    if(!data?.length){empty(root,"No moderation actions have been recorded.");return;}
+    for(const item of data){
+      const card=node("article","moderation-history-row");
+      const title=node("strong","",String(item.action_type).replaceAll("_"," ").toUpperCase());
+      const when=node("time","",date(item.created_at));
+      const reason=node("p","moderation-report-details",item.reason||"No reason recorded");
+      const ids=node("p","moderation-id","Member · "+item.target_user_id+"  |  Moderator · "+(item.moderator_id||"deleted account"));
+      card.append(title,when,reason,ids);root.append(card);
+    }
+  }
+  async function loadRoleMembers(query=""){
     if(!roleResults)return;
     roleResults.setAttribute("aria-busy","true");
-    const {data,error}=await client.rpc("dimension_search_role_members",{p_query:query});
-    roleResults.removeAttribute("aria-busy");
-    if(error)throw error;
-    roleResults.replaceChildren();
+    const {data,error}=await db.rpc("dimension_search_role_members",{p_query:query});
+    roleResults.removeAttribute("aria-busy");if(error)throw error;roleResults.replaceChildren();
     if(!data?.length){empty(roleResults,"No matching members found.");return;}
     for(const member of data){
-      const row=document.createElement("article");
-      row.className="moderation-role-row";
-      const identity=document.createElement("div");
-      identity.className="moderation-role-identity";
-      const name=document.createElement("strong");
-      name.textContent=member.display_name||member.username;
-      const handle=document.createElement("span");
-      handle.textContent="@"+member.username;
-      identity.append(name,handle);
-      const controls=document.createElement("div");
-      controls.className="moderation-role-controls";
-      const select=document.createElement("select");
-      select.className="moderation-role-select";
+      const row=node("article","moderation-role-row"),identity=node("div","moderation-role-identity");
+      identity.append(node("strong","",member.display_name||member.username),node("span","","@"+member.username));
+      const controls=node("div","moderation-role-controls"),select=node("select","moderation-role-select");
       select.setAttribute("aria-label","Role for @"+member.username);
-      for(const [value,label] of [["member","Member"],["supporter","Supporter"],["moderator","Moderator"]]){
-        const option=document.createElement("option");option.value=value;option.textContent=label;select.append(option);
-      }
+      for(const [value,label] of [["member","Member"],["supporter","Supporter"],["moderator","Moderator"]]){const option=node("option","",label);option.value=value;select.append(option);}
       const isOwner=member.role==="owner";
-      if(isOwner){
-        select.replaceChildren();
-        const option=document.createElement("option");option.value="owner";option.textContent="Owner";select.append(option);
-        select.disabled=true;
-      }else select.value=member.role||"member";
-      const save=document.createElement("button");
-      save.type="button";save.className="moderation-action approve";save.textContent=isOwner?"Protected":"Save role";
-      save.disabled=isOwner;
-      save.addEventListener("click",async()=>{
-        save.disabled=true;save.textContent="Saving…";
-        const {error:saveError}=await client.rpc("dimension_set_member_role",{p_user_id:member.user_id,p_role:select.value});
-        if(saveError){say(saveError.message||"The member role could not be updated.");save.disabled=false;save.textContent="Save role";return;}
-        say("Updated @"+member.username+"'s role.");
-        await loadRoleMembers(roleQuery.value.trim());
+      if(isOwner){select.replaceChildren();const option=node("option","","Owner");option.value="owner";select.append(option);select.disabled=true;}
+      else select.value=member.role||"member";
+      const save=button(isOwner?"Protected":"Save role","approve",async()=>{
+        const {error}=await db.rpc("dimension_set_member_role",{p_user_id:member.user_id,p_role:select.value});
+        if(error)throw error;say("Updated @"+member.username+"'s role.");await loadRoleMembers(roleQuery.value.trim());
       });
-      controls.append(select,save);
-      row.append(identity,controls);
-      roleResults.append(row);
+      save.disabled=isOwner;controls.append(select,save);row.append(identity,controls);roleResults.append(row);
     }
   }
-
-  async function start() {
-    if (!client) { say("Account services aren't configured. Please try again later."); return; }
-    try {
-      const { data, error } = await client.auth.getUser();
-      const user = data?.user;
-      if (error || !verified(user)) {
-        await client.auth.signOut();
-        window.location.replace(page("login.html"));
-        return;
-      }
-      const [{data:isModerator,error:accessError},{data:isOwner,error:ownerError}]=await Promise.all([
-        client.rpc("is_darklands_moderator"),
-        client.rpc("dimension_is_owner")
-      ]);
-      if(accessError)throw accessError;
-      if(ownerError)throw ownerError;
-      if(isModerator!==true){
-        say("Access denied. This account does not have moderation access.");
-        return;
-      }
-      content.hidden=false;
-      if(isOwner===true&&roleSection){
-        roleSection.hidden=false;
-        await loadRoleMembers("");
-      }
-      await loadQueue();
-    } catch (error) {
-      say(error.message || "We couldn't verify moderator access. Please try again later.");
-    }
+  async function start(){
+    if(!db){say("Account services aren't configured. Please try again later.");return;}
+    try{
+      const {data,error}=await db.auth.getUser(),user=data?.user;
+      if(error||!verified(user)){await db.auth.signOut();location.replace(page("login.html"));return;}
+      const [{data:isMod,error:modError},{data:isOwner,error:ownerError}]=await Promise.all([db.rpc("is_darklands_moderator"),db.rpc("dimension_is_owner")]);
+      if(modError)throw modError;if(ownerError)throw ownerError;
+      if(isMod!==true){say("Access denied. This account does not have moderation access.");return;}
+      contentRoot.hidden=false;
+      if(isOwner===true&&roleSection){roleSection.hidden=false;await loadRoleMembers("");}
+      await Promise.all([loadQueue(),loadAppeals(),loadHistory()]);
+    }catch(e){say(e.message||"We couldn't verify moderator access.");}
   }
-
-  if(roleSearch)roleSearch.addEventListener("submit",event=>{
-    event.preventDefault();
-    loadRoleMembers(roleQuery.value.trim()).catch(error=>say(error.message||"Member search failed."));
-  });
-  if (refreshButton) refreshButton.addEventListener("click", () => loadQueue().catch(error => say(error.message || "Refresh failed.")));
-  if (logoutButton && client) logoutButton.addEventListener("click", async () => {
-    logoutButton.disabled = true;
-    const { error } = await client.auth.signOut();
-    if (error) {
-      logoutButton.disabled = false;
-      say("Could not sign out. Please try again.");
-      return;
-    }
-    window.location.replace(page("login.html"));
-  });
-
+  if(roleSearch)roleSearch.addEventListener("submit",e=>{e.preventDefault();loadRoleMembers(roleQuery.value.trim()).catch(err=>say(err.message));});
+  $("moderation-refresh")?.addEventListener("click",()=>Promise.all([loadQueue(),loadAppeals(),loadHistory()]).catch(e=>say(e.message||"Refresh failed.")));
+  $("moderation-logout")?.addEventListener("click",async()=>{const {error}=await db.auth.signOut();if(error){say("Could not sign out.");return;}location.replace(page("login.html"));});
   start();
 })();
