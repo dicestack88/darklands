@@ -323,6 +323,7 @@
     const repost = document.createElement("button");
     repost.type = "button";
     repost.className = "clip-action clip-repost";
+    repost.title = "Repost instantly — no separate approval required. The original clip must already be approved.";
     let reposted = repostRows.some(row => row.user_id === currentUser.id);
     const paintRepost = () => { repost.classList.toggle("liked", reposted); repost.innerHTML = '<span aria-hidden="true">⟳</span><small>' + (repostRows.length + (reposted && !repostRows.some(row => row.user_id === currentUser.id) ? 1 : 0)) + ' · ' + (reposted ? "Reposted" : "Repost") + '</small>'; };
     paintRepost();
