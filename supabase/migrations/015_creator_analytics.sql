@@ -77,14 +77,14 @@ begin
       'clips',(select count(*) from public.clips c where c.user_id=v_target and c.status='approved')
     ),
     'daily', coalesce((
-      select jsonb_agg(jsonb_build_object('date',d.day::date,'views',coalesce(x.views,0)) order by d.day)
+      select jsonb_agg(jsonb_build_object('date',d.day::date,'views',coalesce(x.view_count,0)) order by d.day)
       from generate_series(greatest(date_trunc('day',v_cutoff),date_trunc('day',now())-interval '29 days'),date_trunc('day',now()),interval '1 day') d(day)
       left join (
-        select date_trunc('day',v.viewed_at) day,count(*) views
+        select date_trunc('day',v.viewed_at) as view_day, count(*) as view_count
         from public.clip_views v join public.clips c on c.id=v.clip_id
         where c.user_id=v_target and c.status='approved' and v.viewed_at>=greatest(v_cutoff,now()-interval '30 days')
         group by 1
-      ) x on x.day=d.day
+      ) x on x.view_day=d.day
     ),'[]'::jsonb),
     'clips', coalesce((
       select jsonb_agg(jsonb_build_object(
