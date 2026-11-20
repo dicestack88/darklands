@@ -5,6 +5,7 @@
   const $=id=>document.getElementById(id);
   const status=$("notifications-status"),list=$("notifications-list"),readAll=$("notifications-read-all");
   const page=name=>new URL(name,config.SITE_URL).toString();
+  const roleBadge=role=>{const value=["owner","moderator","supporter","member"].includes(role)?role:"member";const badge=document.createElement("span");badge.className="dimension-role-badge role-"+value;badge.textContent=({owner:"OWNER",moderator:"MODERATOR",supporter:"SUPPORTER",member:"MEMBER"})[value];return badge;};
   const copy={
     clip_like:"liked your clip",comment:"commented on your clip",comment_reply:"replied to your comment",
     comment_like:"hearted your comment",clip_repost:"reposted your clip",follow:"started following you",message:"sent you a message",message_request:"sent you a message request"
@@ -21,7 +22,10 @@
     const ids=[...new Set(rows.map(row=>row.actor_id))];
     const {data:profiles,error:profileError}=await client.from("profiles").select("id,username,display_name,avatar_url").in("id",ids);
     if(profileError){empty("We couldn't load the people behind these notifications.");message("Please refresh and try again.");return;}
-    const byId=new Map((profiles||[]).map(profile=>[profile.id,profile]));
+    const {data:roles,error:roleError}=await client.from("dimension_member_roles").select("user_id,role").in("user_id",ids);
+    if(roleError){empty("We couldn't load member role badges.");message("Please refresh and try again.");return;}
+    const roleMap=new Map((roles||[]).map(row=>[row.user_id,row.role]));
+    const byId=new Map((profiles||[]).map(profile=>[profile.id,{...profile,role:roleMap.get(profile.id)||"member"}]));
     list.replaceChildren();
     for(const row of rows){
       const actor=byId.get(row.actor_id),item=document.createElement("a");
@@ -32,6 +36,7 @@
       else avatar.textContent=(actor?.display_name||"D").trim().split(/\s+/).slice(0,2).map(x=>x[0]||"").join("").toUpperCase();
       const body=document.createElement("span");body.className="notification-copy";
       const line=document.createElement("span"),name=document.createElement("strong");name.textContent=actor?.display_name||"A Dimension member";
+      name.append(roleBadge(actor?.role));
       line.append(name,document.createTextNode(" "+(copy[row.type]||"interacted with you")));
       const time=document.createElement("small");time.textContent=new Date(row.created_at).toLocaleString(undefined,{dateStyle:"medium",timeStyle:"short"});
       body.append(line,time);
