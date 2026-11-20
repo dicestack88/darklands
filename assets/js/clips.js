@@ -507,7 +507,29 @@
         if (error.name !== "AbortError") say("Sharing isn't available in this browser.");
       }
     });
-    actions.append(like, comment, save, repost, share, fullscreen);
+    const reportClip = document.createElement("button");
+    reportClip.type = "button";
+    reportClip.className = "clip-action";
+    reportClip.innerHTML = '<span aria-hidden="true">⚑</span><small>Report</small>';
+    reportClip.setAttribute("aria-label", "Report this clip");
+    reportClip.addEventListener("click", async event => {
+      event.stopPropagation();
+      const reason = window.prompt("Report reason: spam, harassment, inappropriate, privacy, or other", "other");
+      if (reason === null) return;
+      const normalized = reason.trim().toLowerCase().replace(/\\s+/g, "_");
+      if (!["spam", "harassment", "inappropriate", "privacy", "other"].includes(normalized)) {
+        say("Please enter one of the listed report reasons.");
+        return;
+      }
+      const details = window.prompt("Optional details (max 500 characters):", "") || "";
+      reportClip.disabled = true;
+      const { error } = await client.from("clip_reports").insert({
+        clip_id: clip.id, reporter_id: currentUser.id, reason: normalized, details: details.slice(0, 500)
+      });
+      reportClip.disabled = false;
+      say(error ? (error.message || "Couldn't submit this report.") : "Clip report submitted. Thanks for helping keep Dimension safe.");
+    });
+    actions.append(like, comment, save, repost, share, reportClip, fullscreen);
 
     const hint = document.createElement("span");
     hint.className = "clip-play-hint";
