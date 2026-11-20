@@ -31,7 +31,7 @@
       if(actor?.avatar_url&&/^https?:\/\//i.test(actor.avatar_url)){const img=document.createElement("img");img.src=actor.avatar_url;img.alt="";avatar.append(img);}
       else avatar.textContent=(actor?.display_name||"D").trim().split(/\s+/).slice(0,2).map(x=>x[0]||"").join("").toUpperCase();
       const body=document.createElement("span");body.className="notification-copy";
-      const line=document.createElement("span"),name=document.createElement("strong");name.textContent=actor?.display_name||"A Darklands member";
+      const line=document.createElement("span"),name=document.createElement("strong");name.textContent=actor?.display_name||"A Dimension member";
       line.append(name,document.createTextNode(" "+(copy[row.type]||"interacted with you")));
       const time=document.createElement("small");time.textContent=new Date(row.created_at).toLocaleString(undefined,{dateStyle:"medium",timeStyle:"short"});
       body.append(line,time);
