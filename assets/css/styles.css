@@ -212,3 +212,10 @@ button{font-family:var(--font)}
  .settings-theme-hint { text-align:left; }
  .settings-page .preference-row { align-items:flex-start; }
 }
+
+/* Member role badges */
+.dimension-role-badge{display:inline-flex;align-items:center;vertical-align:middle;margin-left:7px;padding:3px 6px;border:1px solid rgba(173,190,231,.22);border-radius:6px;background:rgba(148,163,184,.12);color:#cbd5e1;font:700 8px/1.1 var(--font);letter-spacing:.08em;white-space:nowrap;text-shadow:none}
+.dimension-role-badge.role-owner{border-color:rgba(250,204,21,.4);background:rgba(250,204,21,.13);color:#fde68a}
+.dimension-role-badge.role-moderator{border-color:rgba(96,165,250,.4);background:rgba(59,130,246,.14);color:#93c5fd}
+.dimension-role-badge.role-supporter{border-color:rgba(232,121,249,.4);background:rgba(217,70,239,.13);color:#f0abfc}
+.dimension-role-badge.role-member{border-color:rgba(148,163,184,.24);background:rgba(148,163,184,.1);color:#cbd5e1}
