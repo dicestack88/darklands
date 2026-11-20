@@ -49,7 +49,11 @@
   if(config?.SUPABASE_URL&&config?.SUPABASE_ANON_KEY&&window.supabase?.createClient){
     const client=window.supabase.createClient(config.SUPABASE_URL,config.SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true}});
     client.auth.getUser().then(async({data})=>{
-      if(!data?.user)return;
+      const signedIn=Boolean(data?.user);
+      nav.querySelectorAll(".nav-login,.nav-register").forEach(link=>{
+        link.hidden=signedIn;
+      });
+      if(!signedIn)return;
       const {data:isModerator,error}=await client.rpc("is_darklands_moderator");
       if(!error&&isModerator===true)moderatorLink.hidden=false;
     }).catch(()=>{});
