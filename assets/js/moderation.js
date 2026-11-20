@@ -14,6 +14,7 @@
   let signedInUser=null,isModerator=false;
   const roleSection=$("moderation-role-section"),roleSearch=$("moderation-role-search"),
     roleQuery=$("moderation-role-query"),roleResults=$("moderation-role-results");
+  const memberSearch=$("moderation-member-search"),memberQuery=$("moderation-member-query"),memberResults=$("moderation-member-results");
   const verified=user=>Boolean(user&&(user.email_confirmed_at||user.confirmed_at));
   const page=name=>new URL(name,config.SITE_URL).toString();
   const say=message=>{status.textContent=message;};
@@ -130,12 +131,15 @@
         roots.contentReports.append(renderReportCard({report:item,targetUserId:report.target_user_id,targetLabel:report.target_type==="account"?"Account report":"Comment report",table:"dimension_content_reports",contextType:report.target_type}));
       }
       say("Moderator access verified. All report queues are up to date.");
+    }catch(error){
+      for(const root of [roots.clips,roots.clipReports,roots.messageReports,roots.contentReports])empty(root,"Couldn’t load this queue: "+(error.message||"Unknown database error"));
+      throw error;
     }finally{Object.values(roots).slice(0,4).forEach(root=>root?.removeAttribute("aria-busy"));}
   }
   async function loadAppeals(){
     const root=roots.appeals;
     const {data,error}=await db.from("dimension_moderation_appeals").select("id,action_id,user_id,appeal_text,submitted_at,status,moderator_note").eq("status","open").order("submitted_at",{ascending:true}).limit(100);
-    if(error)throw error;root.replaceChildren();
+    if(error){empty(root,"Couldn’t load appeals: "+error.message);throw error;}root.replaceChildren();
     if(!data?.length){empty(root,"No open appeals.");return;}
     for(const appeal of data){
       const card=node("article","moderation-report"),body=node("div","moderation-report-body");
@@ -154,7 +158,7 @@
   async function loadHistory(){
     const root=roots.history;
     const {data,error}=await db.from("dimension_moderation_actions").select("id,target_user_id,moderator_id,action_type,reason,moderator_note,context_type,created_at").order("created_at",{ascending:false}).limit(60);
-    if(error)throw error;root.replaceChildren();
+    if(error){empty(root,"Couldn’t load moderation history: "+error.message);throw error;}root.replaceChildren();
     if(!data?.length){empty(root,"No moderation actions have been recorded.");return;}
     for(const item of data){
       const card=node("article","moderation-history-row");
@@ -165,6 +169,42 @@
       card.append(title,when,reason,ids);root.append(card);
     }
   }
+  async function loadMemberSearch(query){
+    const q=String(query||"").trim();
+    if(q.length<2){empty(memberResults,"Enter at least 2 characters to search for a member.");return;}
+    memberResults.setAttribute("aria-busy","true");
+    const {data,error}=await db.rpc("dimension_moderation_search_members",{p_query:q});
+    memberResults.removeAttribute("aria-busy");
+    if(error){empty(memberResults,"Member search failed: "+error.message);throw error;}
+    memberResults.replaceChildren();
+    if(!data?.length){empty(memberResults,"No matching members found.");return;}
+    for(const member of data){
+      const card=node("article","moderation-member-row"),identity=node("div","moderation-member-identity");
+      identity.append(node("strong","",member.display_name||member.username),node("span","","@"+member.username+" · "+String(member.role||"member").toUpperCase()));
+      if(member.has_active_restriction)identity.append(node("span","moderation-member-restricted","ACTIVE RESTRICTION"));
+      const controls=node("div","moderation-member-actions");
+      const reason=node("textarea","moderation-note");reason.maxLength=500;reason.placeholder="Required reason (at least 3 characters)";
+      reason.setAttribute("aria-label","Reason for moderation action on @"+member.username);
+      const act=(action,duration,label,kind,confirmText)=>{
+        controls.append(button(label,kind,async()=>{
+          const why=reason.value.trim();
+          if(why.length<3)throw new Error("Enter a reason of at least 3 characters first.");
+          if(confirmText&&!window.confirm(confirmText))return;
+          await applyAccountAction(member.user_id,action,why,"member_lookup",null,duration);
+          await loadMemberSearch(memberQuery.value.trim());
+        }));
+      };
+      act("warning",null,"Warn","",null);
+      act("timeout",24,"Timeout 24h","",null);
+      act("timeout",168,"Timeout 7d","",null);
+      act("suspension",720,"Suspend 30d","reject","Suspend @"+member.username+" for 30 days?");
+      act("suspension",8760,"Suspend 1 year","reject","Suspend @"+member.username+" for one year?");
+      act("suspension",null,"Suspend indefinitely","reject","Indefinitely suspend @"+member.username+"? This has no automatic expiry.");
+      if(member.has_active_restriction)act("restriction_lifted",null,"Lift restriction","approve","Lift @"+member.username+"'s active restriction?");
+      card.append(identity,reason,controls);memberResults.append(card);
+    }
+  }
+
   async function loadRoleMembers(query=""){
     if(!roleResults)return;
     roleResults.setAttribute("aria-busy","true");
@@ -259,6 +299,7 @@
       }
     }catch(e){say(e.message||"We couldn't verify moderator access.");}
   }
+  if(memberSearch)memberSearch.addEventListener("submit",e=>{e.preventDefault();loadMemberSearch(memberQuery.value).catch(err=>say(err.message));});
   if(roleSearch)roleSearch.addEventListener("submit",e=>{e.preventDefault();loadRoleMembers(roleQuery.value.trim()).catch(err=>say(err.message));});
   $("moderation-refresh")?.addEventListener("click",()=>Promise.all([loadMemberView(signedInUser),...(isModerator?[loadQueue(),loadAppeals(),loadHistory()]:[])]).catch(e=>say(e.message||"Refresh failed.")));
   $("moderation-logout")?.addEventListener("click",async()=>{const {error}=await db.auth.signOut();if(error){say("Could not sign out.");return;}location.replace(page("login.html"));});
