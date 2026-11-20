@@ -305,7 +305,6 @@ as $$
 declare
   v_actor uuid := (select auth.uid());
   v_appeal public.dimension_moderation_appeals%rowtype;
-  v_action public.dimension_moderation_actions%rowtype;
 begin
   if v_actor is null or not (select public.is_darklands_moderator()) then
     raise exception 'Moderator access required.' using errcode='42501';
@@ -313,7 +312,6 @@ begin
   if p_decision not in ('accepted','denied') then raise exception 'Choose accepted or denied.' using errcode='22023'; end if;
   select * into v_appeal from public.dimension_moderation_appeals where id=p_appeal_id for update;
   if not found or v_appeal.status<>'open' then raise exception 'Open appeal not found.' using errcode='P0002'; end if;
-  select * into v_action from public.dimension_moderation_actions where id=v_appeal.action_id;
   if coalesce((select role from public.dimension_member_roles where user_id=v_appeal.user_id),'member') in ('owner','moderator')
      and not (select public.dimension_is_owner()) then
     raise exception 'Owner access is required to review this appeal.' using errcode='42501';
