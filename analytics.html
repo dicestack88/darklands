@@ -13,6 +13,7 @@
 <main class="analytics-shell">
   <div class="analytics-heading"><div><span class="analytics-kicker">CREATOR STUDIO</span><h1>Analytics<span>.</span></h1><p>Understand how your clips are performing.</p></div><label class="analytics-range">Date range<select id="analytics-range"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option><option value="365">Last 12 months</option><option value="0">All time</option></select></label></div>
   <p id="analytics-status" class="analytics-status" role="status" aria-live="polite">Checking your account…</p>
+  <section id="owner-analytics-tools" class="analytics-owner-tools" hidden><label for="analytics-creator-search">Owner view · Creator account</label><form id="analytics-creator-form"><input id="analytics-creator-search" type="search" maxlength="60" placeholder="Search username or display name"><button type="submit">Find creator</button></form><select id="analytics-creator-select" aria-label="Choose creator" hidden></select></section>
   <section id="analytics-dashboard" hidden>
     <div class="analytics-stat-grid">
       <article class="analytics-stat"><span>VIDEO VIEWS</span><strong id="stat-views">0</strong><small>Recorded plays</small></article>
