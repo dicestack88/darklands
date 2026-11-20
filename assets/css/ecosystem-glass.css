@@ -99,3 +99,16 @@ html[data-glass-mode="liquid"] .dimension-unified-nav {
   -webkit-backdrop-filter: blur(28px) saturate(1.8) !important;
   backdrop-filter: blur(28px) saturate(1.8) !important;
 }
+
+/* The header is the single navigation surface; the nav itself is only its contents.
+   Keeping a second glass layer here creates the visible "navbar inside a navbar" effect. */
+.site-header:has(.dimension-unified-nav) {
+  overflow: visible;
+}
+.dimension-unified-nav {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
