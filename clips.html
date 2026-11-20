@@ -52,9 +52,10 @@
         <button class="clips-close" id="upload-close" type="button" aria-label="Close upload panel">×</button>
       </div>
       <form id="clip-upload-form" class="clip-form">
+        <p id="clips-storage-usage" class="clip-help" aria-live="polite">Account storage: checking…</p>
         <label for="clip-file">Choose a video</label>
         <input id="clip-file" name="video" type="file" accept="video/mp4,video/webm,video/quicktime" required>
-        <span class="clip-help">MP4, WebM or MOV · Maximum 50 MB</span>
+        <span class="clip-help">MP4, WebM or MOV · Maximum 15 MB · Maximum 45 seconds</span>
         <label for="clip-caption">Caption <span class="clip-optional">OPTIONAL</span></label>
         <textarea id="clip-caption" name="caption" maxlength="300" rows="3" placeholder="What's happening in this clip?"></textarea>
         <div class="clip-form-meta"><span>Keep it respectful. Don't share private information.</span><span id="clip-caption-count">0 / 300</span></div>
