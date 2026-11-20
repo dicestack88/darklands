@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090b12">
+<meta name="description" content="Private conversations and message requests on Dicestack Dimension.">
+<title>Messages — Dicestack Dimension</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css"><link rel="stylesheet" href="assets/css/messages.css">
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script defer src="assets/js/supabase-config.js"></script><script defer src="assets/js/messages.js"></script><script defer src="assets/js/notification-badge.js"></script><script defer src="assets/js/theme.js"></script>
+</head>
+<body class="auth-page messages-page">
+<header class="site-header">
+<a class="brand" href="clips.html"><span class="brand-mark">D</span><span>DICESTACK DIMENSION</span></a>
+<nav class="messages-top-nav"><a class="text-link" href="clips.html">Clips</a><a class="text-link" href="notifications.html">Notifications</a><a class="text-link" href="app.html">My account</a><button class="button button-small" id="messages-logout" type="button">Log out</button></nav>
+</header>
+<main class="messages-shell">
+<section class="messages-titlebar"><div><span class="clips-kicker">YOUR PRIVATE SPACE</span><h1>Messages<span>.</span></h1><p>Conversations, requests and the people you connect with.</p></div><div class="presence-control"><span class="presence-indicator" id="my-presence-dot"></span><label for="my-presence">Your status</label><select id="my-presence"><option value="online">Online</option><option value="idle">Idle</option><option value="dnd">Do Not Disturb</option><option value="offline">Offline</option></select></div></section>
+<p id="messages-status" class="messages-status" role="status" aria-live="polite">Checking your sign-in…</p>
+<div class="messages-workspace">
+<aside class="messages-sidebar">
+<div class="messages-sidebar-top"><div class="messages-tabs" role="tablist" aria-label="Message folders"><button class="message-tab active" data-folder="chats" type="button">Chats</button><button class="message-tab" data-folder="requests" type="button">Requests <span id="request-count" class="request-count" hidden>0</span></button></div><button id="new-message" class="new-message-button" type="button" aria-label="New message">＋</button></div>
+<label class="conversation-search"><span>⌕</span><input id="conversation-search" type="search" maxlength="50" placeholder="Search conversations…" autocomplete="off"></label>
+<div id="conversation-list" class="conversation-list"><p class="message-empty">Your conversations will appear here.</p></div>
+<section class="blocked-section"><button id="blocked-toggle" class="blocked-toggle" type="button">Blocked accounts <span>⌄</span></button><div id="blocked-list" class="blocked-list" hidden></div></section>
+</aside>
+<section class="chat-panel" aria-label="Conversation">
+<div id="chat-empty" class="chat-empty"><div class="chat-empty-symbol">✳</div><h2>Your next conversation starts here.</h2><p>Choose a chat, accept a request, or find a creator to message.</p><button id="empty-new-message" class="button" type="button">Start a conversation ↗</button></div>
+<div id="chat-active" class="chat-active" hidden>
+<header class="chat-header"><div class="chat-person"><span id="chat-avatar" class="chat-avatar">D</span><div><strong id="chat-name">Member</strong><span id="chat-presence" class="chat-presence">Offline</span></div></div><div class="chat-actions"><button id="chat-report" class="icon-action" type="button" title="Report conversation">⚑</button><button id="chat-block" class="icon-action danger-action" type="button" title="Block member">⊘</button></div></header>
+<div id="request-banner" class="request-banner" hidden><div><strong>Message request</strong><p>This member wants to start a conversation. Accept to reply, or decline it.</p></div><div class="request-actions"><button id="accept-request" class="button button-small" type="button">Accept</button><button id="decline-request" class="subtle-button" type="button">Decline</button></div></div>
+<div id="message-stream" class="message-stream" aria-live="polite"><p class="message-empty">Loading messages…</p></div>
+<form id="message-form" class="message-composer" hidden><div class="composer-tools"><button id="emoji-toggle" class="emoji-toggle" type="button" aria-label="Choose emoji">☺</button><div id="emoji-picker" class="emoji-picker" hidden></div></div><textarea id="message-input" rows="1" maxlength="1000" placeholder="Write a message…" aria-label="Write a message"></textarea><span id="message-length" class="message-length">0/1000</span><button class="send-button" type="submit" aria-label="Send message">➤</button></form>
+<p id="chat-note" class="chat-note">Be respectful. Never share passwords, verification codes or private information.</p>
+</div>
+</section>
+</div>
+<dialog id="new-message-dialog" class="message-dialog"><form method="dialog"><button class="dialog-close" aria-label="Close">×</button></form><span class="clips-kicker">NEW CONVERSATION</span><h2>Find a member</h2><p>Search by username or display name. Your message will follow their privacy settings.</p><form id="member-search-form" class="member-search-form"><input id="member-search-input" type="search" maxlength="40" placeholder="Search members…" required><button class="button button-small" type="submit">Search</button></form><div id="member-search-results" class="member-search-results"></div></dialog>
+<dialog id="report-dialog" class="message-dialog"><form method="dialog"><button class="dialog-close" aria-label="Close">×</button></form><span class="clips-kicker">SAFETY</span><h2>Report this conversation</h2><p>Choose the reason that best describes the issue.</p><form id="report-form" class="report-form"><select id="report-reason" required><option value="spam">Spam</option><option value="harassment">Harassment or bullying</option><option value="inappropriate">Inappropriate content</option><option value="personal_information">Sharing personal information</option><option value="other">Something else</option></select><textarea id="report-details" maxlength="500" rows="3" placeholder="Optional details (max 500 characters)"></textarea><button class="button" type="submit">Submit report</button></form></dialog>
+</main>
+<footer class="site-footer"><span>© 2026 DICESTACK DIMENSION</span><span>A DICESTACK88 PROJECT</span><a href="settings.html#privacy">Messaging privacy settings ↗</a></footer>
+</body></html>
