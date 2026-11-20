@@ -1,6 +1,7 @@
 (() => {
   "use strict";
   const config = window.DARKLANDS_CONFIG;
+  const navCss = document.createElement("link");navCss.rel="stylesheet";navCss.href="assets/css/navigation.css";document.head.append(navCss);
   const links = [
     ["Home","index.html"],["Clips","clips.html"],["Messages","messages.html"],
     ["Notifications","notifications.html"],["My account","app.html"],["Settings","settings.html"]
