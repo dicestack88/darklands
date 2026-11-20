@@ -28,6 +28,7 @@
   })();
 
   const oldLogout = header.querySelector('button[id*="logout"]');
+  const logoutButton = oldLogout || document.createElement("button");
   const notificationCount = header.querySelector(".notification-nav-count");
 
   nav.replaceChildren();
@@ -92,11 +93,20 @@
   guestRegister.textContent = "Create account";
   nav.append(guestRegister);
 
-  if (oldLogout) {
-    oldLogout.classList.add("dimension-logout");
-    oldLogout.textContent = "Log out";
-    nav.append(oldLogout);
+  if (!oldLogout) {
+    logoutButton.type = "button";
+    logoutButton.id = "dimension-logout";
+    logoutButton.addEventListener("click", async () => {
+      const liveConfig = window.DARKLANDS_CONFIG;
+      if (!liveConfig?.SUPABASE_URL || !liveConfig?.SUPABASE_ANON_KEY || !window.supabase?.createClient) return;
+      const client = window.supabase.createClient(liveConfig.SUPABASE_URL, liveConfig.SUPABASE_ANON_KEY);
+      const { error } = await client.auth.signOut();
+      if (!error) location.href = "login.html";
+    });
   }
+  logoutButton.classList.add("dimension-logout");
+  logoutButton.textContent = "Log out";
+  nav.append(logoutButton);
 
   header.replaceChildren(nav);
 
@@ -132,13 +142,13 @@
         const signedIn = Boolean(data?.user);
         guestLogin.hidden = signedIn;
         guestRegister.hidden = signedIn;
-        if (oldLogout) oldLogout.hidden = !signedIn;
+        logoutButton.hidden = !signedIn;
         if (!signedIn) return;
         const { data: isModerator, error } = await client.rpc("is_darklands_moderator");
         if (!error && isModerator === true) moderatorLink.hidden = false;
       }).catch(() => {});
-    } else if (oldLogout) {
-      oldLogout.hidden = true;
+    } else {
+      logoutButton.hidden = true;
     }
   };
 
