@@ -157,7 +157,7 @@ begin
     and exists(select 1 from public.user_follows where follower_id=p_recipient and following_id=v_sender)
   ) then raise exception 'This member only accepts messages from mutual followers.'; end if;
   if v_privacy = 'following' and not exists (
-    select 1 from public.user_follows where follower_id=v_sender and following_id=p_recipient
+    select 1 from public.user_follows where follower_id=p_recipient and following_id=v_sender
   ) then raise exception 'This member only accepts requests from people they follow.'; end if;
   if exists (select 1 from public.conversations where user_one=least(v_sender,p_recipient) and user_two=greatest(v_sender,p_recipient)) then
     raise exception 'A conversation or request with this member already exists.';
