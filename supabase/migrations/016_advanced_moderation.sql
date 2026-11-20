@@ -213,6 +213,7 @@ begin
   if v_target_role='owner' or (v_target_role='moderator' and not v_is_owner) then
     raise exception 'You do not have permission to moderate this member.' using errcode='42501';
   end if;
+  perform pg_advisory_xact_lock(hashtextextended(p_target_user_id::text, 2));
   if p_action not in ('warning','timeout','suspension','restriction_lifted') then
     raise exception 'Invalid moderation action.' using errcode='22023';
   end if;
