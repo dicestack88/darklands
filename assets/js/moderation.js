@@ -70,11 +70,13 @@
       button("Dismiss","reject",()=>review("dismissed"))
     );
     if(targetUserId){
-      const reason="Reported for "+String(report.reason||"a community guidelines concern").replaceAll("_"," ");
+      const reason=("Reported for "+String(report.reason||"a community guidelines concern").replaceAll("_"," ")+(report.details?": "+report.details:"")).slice(0,500);
       actions.append(
         button("Warn account","",()=>applyAccountAction(targetUserId,"warning",reason,contextType,report.id,null)),
         button("Timeout 24h","",()=>applyAccountAction(targetUserId,"timeout",reason,contextType,report.id,24)),
-        button("Suspend account","reject",()=>applyAccountAction(targetUserId,"suspension",reason,contextType,report.id,null))
+        button("Timeout 7d","",()=>applyAccountAction(targetUserId,"timeout",reason,contextType,report.id,168)),
+        button("Suspend account","reject",()=>applyAccountAction(targetUserId,"suspension",reason,contextType,report.id,null)),
+        button("Lift restriction","",()=>applyAccountAction(targetUserId,"restriction_lifted","Restriction reviewed by moderation",contextType,report.id,null))
       );
     }
     body.append(meta,node("h3","moderation-report-title",targetLabel||"Community report"),details,target,note,actions);
