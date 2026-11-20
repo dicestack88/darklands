@@ -12,3 +12,13 @@
 .moderation-role-select{min-height:36px;padding:0 10px;border:1px solid rgba(177,191,219,.2);border-radius:7px;background:#0c111b;color:var(--text);font:10px var(--font)}
 .moderation-role-select:disabled{opacity:.7}
 @media(max-width:560px){.moderation-role-row{align-items:flex-start;flex-direction:column}.moderation-role-controls{width:100%}.moderation-role-select{flex:1}.moderation-role-search{align-items:stretch;flex-direction:column}}
+
+.moderation-history-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 16px;align-items:center;padding:14px 16px;border:1px solid var(--line);border-radius:10px;background:linear-gradient(145deg,rgba(23,30,45,.78),rgba(14,18,28,.88))}
+.moderation-history-row strong{font-size:11px;letter-spacing:.08em;color:#cbd5ff}
+.moderation-history-row time{font-size:9px;color:#8792a6}
+.moderation-history-row .moderation-report-details,.moderation-history-row .moderation-id{grid-column:1/-1;margin:0}
+.my-appeal-form{display:grid;gap:9px;margin-top:14px}
+.my-appeal-form label{font-size:10px;color:#cbd5ff;font-weight:600}
+.my-appeal-form textarea{min-height:100px}
+.my-appeal-form button{justify-self:start}
+@media(max-width:560px){.moderation-history-row{grid-template-columns:1fr}.moderation-history-row time{grid-column:1/-1}.my-appeal-form button{width:100%}}
