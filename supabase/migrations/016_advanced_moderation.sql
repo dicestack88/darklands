@@ -429,9 +429,10 @@ declare
   v_reason text;
   v_expires timestamptz;
 begin
-  if tg_table_name='clips' then v_user:=new.user_id;
-  elsif tg_table_name='clip_comments' then v_user:=new.user_id;
+  if tg_table_name in ('clips','clip_comments','clip_likes','clip_saves','clip_reposts','clip_comment_likes') then v_user:=new.user_id;
   elsif tg_table_name='messages' then v_user:=new.sender_id;
+  elsif tg_table_name='user_follows' then v_user:=new.follower_id;
+  elsif tg_table_name='conversations' then v_user:=new.requested_by;
   else return new;
   end if;
   if v_user is null then return new; end if;
@@ -456,6 +457,24 @@ create trigger dimension_restrict_comments before insert on public.clip_comments
 for each row execute function public.dimension_enforce_active_restriction();
 drop trigger if exists dimension_restrict_messages on public.messages;
 create trigger dimension_restrict_messages before insert on public.messages
+for each row execute function public.dimension_enforce_active_restriction();
+drop trigger if exists dimension_restrict_likes on public.clip_likes;
+create trigger dimension_restrict_likes before insert on public.clip_likes
+for each row execute function public.dimension_enforce_active_restriction();
+drop trigger if exists dimension_restrict_saves on public.clip_saves;
+create trigger dimension_restrict_saves before insert on public.clip_saves
+for each row execute function public.dimension_enforce_active_restriction();
+drop trigger if exists dimension_restrict_reposts on public.clip_reposts;
+create trigger dimension_restrict_reposts before insert on public.clip_reposts
+for each row execute function public.dimension_enforce_active_restriction();
+drop trigger if exists dimension_restrict_comment_likes on public.clip_comment_likes;
+create trigger dimension_restrict_comment_likes before insert on public.clip_comment_likes
+for each row execute function public.dimension_enforce_active_restriction();
+drop trigger if exists dimension_restrict_follows on public.user_follows;
+create trigger dimension_restrict_follows before insert on public.user_follows
+for each row execute function public.dimension_enforce_active_restriction();
+drop trigger if exists dimension_restrict_conversations on public.conversations;
+create trigger dimension_restrict_conversations before insert on public.conversations
 for each row execute function public.dimension_enforce_active_restriction();
 
 -- Indexes keep moderator queues responsive as reports accumulate.
