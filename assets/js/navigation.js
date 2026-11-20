@@ -43,7 +43,7 @@
       <span class="ecosystem-switcher-label">THE DICESTACK ECOSYSTEM</span>
       <a href="https://dicestack88.github.io/"><span>⌂</span><span><strong>Dicestack hub</strong><small>Main website & projects</small></span><b>↗</b></a>
       <a href="https://dicestack88.github.io/launcher.html"><span>⌘</span><span><strong>Launcher</strong><small>Eaglercraft clients & games</small></span><b>↗</b></a>
-      <a href="https://dicestack88.github.io/dicestack88youtube.html"><span>▶</span><span><strong>YouTube</strong><small>Videos & creator updates</small></span><b>↗</b></a>
+      <a href="https://dicestack88.github.io/socials.html"><span>▶</span><span><strong>YouTube</strong><small>Videos & creator updates</small></span><b>↗</b></a>
     </div>`;
   nav.append(ecosystem);
 
