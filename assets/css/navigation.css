@@ -342,3 +342,118 @@ html[data-theme="light"] .ecosystem-switcher-panel>a:hover{background:#eaf0fb}
     padding-block: 12px;
   }
 }
+
+
+/* Match the central Dicestack hub navbar: airy, transparent and text-led. */
+.site-header:has(.dimension-unified-nav) {
+  height: auto;
+  min-height: 84px;
+  box-sizing: border-box;
+  padding: 20px clamp(24px, 4.5vw, 80px);
+  background: rgba(255,255,255,.075) !important;
+  border-bottom: 1px solid rgba(255,255,255,.16) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(145%) !important;
+  backdrop-filter: blur(20px) saturate(145%) !important;
+}
+.dimension-unified-nav {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px clamp(12px, 1.4vw, 22px);
+  white-space: normal;
+}
+.dimension-unified-nav .brand {
+  margin: 0 clamp(8px, 1.2vw, 18px) 0 0;
+  font-size: 13px;
+  letter-spacing: .17em;
+}
+.dimension-ecosystem-switcher {
+  margin: 0 clamp(8px, 1.5vw, 24px) 0 0;
+}
+.dimension-unified-nav .dimension-nav-link {
+  position: relative;
+  min-height: 42px;
+  padding: 8px 2px;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  color: #c2cbe1;
+  font-weight: 600;
+  transition: color .2s ease;
+}
+.dimension-unified-nav .dimension-nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 3px;
+  width: auto;
+  height: 2px;
+  background: #65e6d2;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .2s ease;
+}
+.dimension-unified-nav .dimension-nav-link:hover {
+  color: #fff;
+  background: transparent !important;
+}
+.dimension-unified-nav .dimension-nav-link:hover::after,
+.dimension-unified-nav .dimension-nav-link[aria-current="page"]::after {
+  transform: scaleX(1);
+}
+.dimension-unified-nav .dimension-nav-link[aria-current="page"] {
+  color: #65e6d2;
+  background: transparent !important;
+  border: 0 !important;
+}
+.dimension-unified-nav .dimension-logout {
+  margin-left: auto;
+  min-height: 40px;
+  padding: 0 17px;
+  border-radius: 999px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.14), inset 0 1px rgba(255,255,255,.2);
+}
+.dimension-sidebar-toggle {
+  border-radius: 999px;
+  min-height: 40px;
+}
+@media (max-width: 1100px) {
+  .site-header:has(.dimension-unified-nav) {
+    padding-inline: 24px;
+  }
+  .dimension-unified-nav {
+    gap: 8px 14px;
+  }
+}
+@media (max-width: 900px) {
+  .site-header:has(.dimension-unified-nav) {
+    min-height: 76px;
+    padding: 16px 22px;
+  }
+  .dimension-unified-nav {
+    gap: 10px 14px;
+  }
+  .dimension-unified-nav .brand {
+    margin-right: auto;
+  }
+  .dimension-ecosystem-switcher {
+    margin: 0;
+  }
+  .dimension-unified-nav .dimension-logout {
+    margin-left: auto;
+  }
+}
+@media (max-width: 620px) {
+  .site-header:has(.dimension-unified-nav) {
+    padding: 14px 16px;
+  }
+  .dimension-unified-nav .brand {
+    width: auto;
+    margin-right: auto;
+  }
+}
