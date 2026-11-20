@@ -46,6 +46,16 @@
         </div>
         <div id="moderation-reports" class="moderation-reports"><p class="moderation-empty">Loading reports…</p></div>
       </section>
+      <section id="moderation-role-section" class="moderation-section moderation-role-section" hidden>
+        <div class="moderation-section-heading">
+          <div><span class="moderation-kicker">ACCOUNT ACCESS</span><h2>Member roles</h2><p class="moderation-role-description">Search members and assign their Dimension role. Only the Owner can manage roles.</p></div>
+        </div>
+        <form id="moderation-role-search" class="moderation-role-search">
+          <input id="moderation-role-query" type="search" maxlength="60" placeholder="Search by username or display name" aria-label="Search members by username or display name">
+          <button class="moderation-refresh" type="submit">Search members</button>
+        </form>
+        <div id="moderation-role-results" class="moderation-role-results"><p class="moderation-empty">Loading members…</p></div>
+      </section>
     </div>
   </main>
   <footer class="site-footer"><span>© 2026 DICESTACK DIMENSION</span><span>MODERATOR AREA</span></footer>
