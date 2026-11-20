@@ -332,3 +332,30 @@ begin
   end if;
 end;
 $$;
+
+
+-- Prevent message flooding even when a conversation has already been accepted.
+create or replace function public.dimension_limit_message_rate()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_recent integer;
+begin
+  select count(*) into v_recent
+  from public.messages
+  where sender_id=new.sender_id
+    and created_at > now()-interval '1 minute';
+  if v_recent >= 20 then
+    raise exception 'You are sending messages too quickly. Please wait a moment.';
+  end if;
+  return new;
+end;
+$$;
+revoke all on function public.dimension_limit_message_rate() from public,anon,authenticated;
+drop trigger if exists dimension_message_rate_limit on public.messages;
+create trigger dimension_message_rate_limit
+  before insert on public.messages
+  for each row execute function public.dimension_limit_message_rate();
