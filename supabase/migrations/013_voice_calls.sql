@@ -24,21 +24,9 @@ create index if not exists voice_calls_conversation_idx
 alter table public.voice_calls enable row level security;
 revoke all on public.voice_calls from anon, authenticated;
 grant select on public.voice_calls to authenticated;
-create policy "Conversation members can view their voice calls"
+create policy "Members can view their own voice call records"
   on public.voice_calls for select to authenticated
-  using (
-    (select auth.uid()) in (caller_id,callee_id)
-    and exists (
-      select 1 from public.conversations c
-      where c.id=conversation_id and c.status='accepted'
-        and (select auth.uid()) in (c.user_one,c.user_two)
-    )
-    and not exists (
-      select 1 from public.user_blocks b
-      where (b.blocker_id=caller_id and b.blocked_id=callee_id)
-         or (b.blocker_id=callee_id and b.blocked_id=caller_id)
-    )
-  );
+  using ((select auth.uid()) in (caller_id,callee_id));
 
 create table if not exists public.voice_call_signals (
   id uuid primary key default gen_random_uuid(),
@@ -119,6 +107,8 @@ begin
   where c.id=p_conversation and v_user in (c.user_one,c.user_two)
     and c.status='accepted';
   if v_other is null then raise exception 'Calls are only available in accepted conversations.'; end if;
+  -- Lock the pair in a stable order so simultaneous calls cannot race each other.
+  perform pg_advisory_xact_lock(hashtextextended(least(v_user::text,v_other::text)||':'||greatest(v_user::text,v_other::text),2));
 
   if exists (
     select 1 from public.user_blocks b
@@ -135,6 +125,9 @@ begin
   update public.voice_calls set status='missed',ended_at=now()
   where status='ringing' and expires_at<=now()
     and (caller_id in (v_user,v_other) or callee_id in (v_user,v_other));
+  delete from public.voice_call_signals s
+  using public.voice_calls v
+  where s.call_id=v.id and v.status='missed' and v.ended_at>now()-interval '2 seconds';
 
   if exists (
     select 1 from public.voice_calls
@@ -222,6 +215,7 @@ begin
   set status='missed',ended_at=now()
   where id=p_call and callee_id=auth.uid()
     and status='ringing' and expires_at<=now();
+  if found then delete from public.voice_call_signals where call_id=p_call; end if;
 end;
 $$;
 
