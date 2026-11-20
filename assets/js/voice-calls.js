@@ -200,7 +200,7 @@
     const {data,error}=await db.auth.getUser();
     if(error||!data?.user)return;
     user=data.user;
-    setButton();subscribeSignals();subscribeCalls();
+    setButton();say("Voice calls are in beta; some networks may not connect yet.");subscribeSignals();subscribeCalls();
     const {data:incoming}=await db.from("voice_calls").select("id,conversation_id,caller_id,callee_id,status,expires_at").eq("callee_id",user.id).eq("status","ringing").gt("expires_at",new Date().toISOString()).order("created_at",{ascending:false}).limit(1);
     if(incoming?.[0])await showIncoming(incoming[0]);
   }
