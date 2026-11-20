@@ -8,7 +8,7 @@
   let user=null,conversation=null,call=null,pc=null,localStream=null,callRowsChannel=null,signalChannel=null,pendingOffer=null,pendingIce=[],remoteAudioStream=null,muted=false,ringTimer=null,signalBusy=false;
   const say=t=>{if(ui.status)ui.status.textContent=t;};
   const otherId=()=>call?(call.caller_id===user.id?call.callee_id:call.caller_id):null;
-  const setButton=()=>{ui.button.hidden=!conversation||conversation.status!=="accepted"||!!call;ui.button.disabled=!conversation||conversation.status!=="accepted"||!!call;};
+  const setButton=()=>{const unavailable=!user||!conversation||conversation.status!=="accepted"||!!call;ui.button.hidden=unavailable;ui.button.disabled=unavailable;};
   const closeDialog=d=>{if(d?.open)d.close();};
   const sendSignal=async(type,payload)=>{
     if(!call||!otherId())return;
@@ -200,7 +200,7 @@
     const {data,error}=await db.auth.getUser();
     if(error||!data?.user)return;
     user=data.user;
-    subscribeSignals();subscribeCalls();
+    setButton();subscribeSignals();subscribeCalls();
     const {data:incoming}=await db.from("voice_calls").select("id,conversation_id,caller_id,callee_id,status,expires_at").eq("callee_id",user.id).eq("status","ringing").gt("expires_at",new Date().toISOString()).order("created_at",{ascending:false}).limit(1);
     if(incoming?.[0])await showIncoming(incoming[0]);
   }
