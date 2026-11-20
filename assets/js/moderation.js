@@ -75,8 +75,10 @@
         button("Warn account","",()=>applyAccountAction(targetUserId,"warning",reason,contextType,report.id,null)),
         button("Timeout 24h","",()=>applyAccountAction(targetUserId,"timeout",reason,contextType,report.id,24)),
         button("Timeout 7d","",()=>applyAccountAction(targetUserId,"timeout",reason,contextType,report.id,168)),
-        button("Suspend account","reject",()=>applyAccountAction(targetUserId,"suspension",reason,contextType,report.id,null)),
-        button("Lift restriction","",()=>applyAccountAction(targetUserId,"restriction_lifted","Restriction reviewed by moderation",contextType,report.id,null))
+        button("Suspend 30d","reject",()=>window.confirm("Apply a 30-day account suspension?")?applyAccountAction(targetUserId,"suspension",reason,contextType,report.id,720):undefined),
+        button("Suspend 1y","reject",()=>window.confirm("Apply a one-year account suspension?")?applyAccountAction(targetUserId,"suspension",reason,contextType,report.id,8760):undefined),
+        button("Suspend indefinitely","reject",()=>window.confirm("Apply an indefinite account suspension?")?applyAccountAction(targetUserId,"suspension",reason,contextType,report.id,null):undefined),
+        button("Lift restriction","",()=>window.confirm("Lift this member's active restriction?")?applyAccountAction(targetUserId,"restriction_lifted","Restriction reviewed by moderation",contextType,report.id,null):undefined)
       );
     }
     body.append(meta,node("h3","moderation-report-title",targetLabel||"Community report"),details,target,note,actions);
