@@ -29,7 +29,7 @@ create policy "Members can view their own moderation history"
 create table if not exists public.dimension_account_restrictions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
-  action_id uuid not null references public.dimension_moderation_actions(id) on delete restrict,
+  action_id uuid not null references public.dimension_moderation_actions(id) on delete cascade,
   restriction_type text not null check (restriction_type in ('timeout','suspension')),
   reason text not null,
   starts_at timestamptz not null default now(),
