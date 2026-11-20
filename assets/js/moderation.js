@@ -10,6 +10,8 @@
     messageReports:$("moderation-message-reports"),contentReports:$("moderation-content-reports"),
     appeals:$("moderation-appeals"),history:$("moderation-history")
   };
+  const memberRoot=$("my-moderation-content"),accessLabel=$("moderation-access-label");
+  let signedInUser=null,isModerator=false;
   const roleSection=$("moderation-role-section"),roleSearch=$("moderation-role-search"),
     roleQuery=$("moderation-role-query"),roleResults=$("moderation-role-results");
   const verified=user=>Boolean(user&&(user.email_confirmed_at||user.confirmed_at));
@@ -185,21 +187,80 @@
       save.disabled=isOwner;controls.append(select,save);row.append(identity,controls);roleResults.append(row);
     }
   }
+
+  async function loadMemberView(user){
+    const [actionsResult,restrictionsResult,appealsResult]=await Promise.all([
+      db.from("dimension_moderation_actions").select("id,action_type,reason,created_at").eq("target_user_id",user.id).order("created_at",{ascending:false}).limit(100),
+      db.from("dimension_account_restrictions").select("id,restriction_type,reason,starts_at,expires_at,active").eq("user_id",user.id).order("created_at",{ascending:false}),
+      db.from("dimension_moderation_appeals").select("id,action_id,status,appeal_text,submitted_at,reviewed_at,moderator_note").eq("user_id",user.id).order("submitted_at",{ascending:false})
+    ]);
+    for(const result of [actionsResult,restrictionsResult,appealsResult])if(result.error)throw result.error;
+    const actions=actionsResult.data||[],restrictions=restrictionsResult.data||[],appeals=appealsResult.data||[];
+    const restrictionRoot=$("my-restrictions");restrictionRoot.replaceChildren();
+    const active=restrictions.filter(r=>r.active&&(!r.expires_at||new Date(r.expires_at)>new Date()));
+    if(!active.length)empty(restrictionRoot,"No active account restrictions.");
+    else for(const restriction of active){
+      const card=node("article","moderation-report"),body=node("div","moderation-report-body");
+      body.append(node("div","moderation-meta","ACTIVE RESTRICTION"),node("h3","moderation-report-title",restriction.restriction_type.toUpperCase()),node("p","moderation-report-details",restriction.reason),node("p","moderation-id",restriction.expires_at?"Expires "+date(restriction.expires_at):"No expiry has been set."));
+      card.append(body);restrictionRoot.append(card);
+    }
+    const appealByAction=new Map(appeals.map(appeal=>[appeal.action_id,appeal]));
+    const actionRoot=$("my-actions");actionRoot.replaceChildren();
+    if(!actions.length)empty(actionRoot,"No moderation actions have been recorded.");
+    else for(const action of actions){
+      const card=node("article","moderation-report"),body=node("div","moderation-report-body");
+      body.append(node("div","moderation-meta",date(action.created_at)),node("h3","moderation-report-title",action.action_type.replaceAll("_"," ").toUpperCase()),node("p","moderation-report-details",action.reason||"No reason supplied."));
+      const eligible=["warning","timeout","suspension"].includes(action.action_type)&&new Date(action.created_at)>Date.now()-30*86400000;
+      const existing=appealByAction.get(action.id);
+      if(eligible&&!existing){
+        const form=node("form","my-appeal-form"),label=node("label","","Appeal this action");
+        const input=node("textarea","moderation-note");input.required=true;input.minLength=10;input.maxLength=2000;input.placeholder="Explain why you believe this decision should be reviewed (10–2,000 characters).";
+        const submit=node("button","moderation-action approve","Submit appeal");submit.type="submit";
+        form.append(label,input,submit);
+        form.addEventListener("submit",async event=>{
+          event.preventDefault();if(input.value.trim().length<10)return;
+          submit.disabled=true;submit.textContent="Submitting…";
+          const {error}=await db.rpc("dimension_submit_moderation_appeal",{p_action_id:action.id,p_appeal_text:input.value.trim()});
+          if(error){say(error.message||"Your appeal could not be be submitted.");submit.disabled=false;submit.textContent="Submit appeal";return;}
+          say("Your appeal has been submitted.");
+          try{await loadMemberView(user);}catch(refreshError){say(refreshError.message||"Appeal submitted, but the page could not refresh.");}
+        });
+        body.append(form);
+      }else if(existing)body.append(node("p","moderation-id","Appeal status · "+existing.status.toUpperCase()));
+      card.append(body);actionRoot.append(card);
+    }
+    const appealRoot=$("my-appeals");appealRoot.replaceChildren();
+    if(!appeals.length)empty(appealRoot,"You haven't submitted any appeals.");
+    else for(const appeal of appeals){
+      const card=node("article","moderation-report"),body=node("div","moderation-report-body");
+      body.append(node("div","moderation-meta",date(appeal.submitted_at)),node("h3","moderation-report-title","APPEAL · "+appeal.status.toUpperCase()),node("p","moderation-report-details",appeal.appeal_text));
+      if(appeal.moderator_note)body.append(node("p","moderation-id","Moderator note · "+appeal.moderator_note));
+      card.append(body);appealRoot.append(card);
+    }
+  }
   async function start(){
     if(!db){say("Account services aren't configured. Please try again later.");return;}
     try{
       const {data,error}=await db.auth.getUser(),user=data?.user;
       if(error||!verified(user)){await db.auth.signOut();location.replace(page("login.html"));return;}
-      const [{data:isMod,error:modError},{data:isOwner,error:ownerError}]=await Promise.all([db.rpc("is_darklands_moderator"),db.rpc("dimension_is_owner")]);
+      signedInUser=user;
+      memberRoot.hidden=false;
+      await loadMemberView(user);
+      const [{data:modResult,error:modError},{data:isOwner,error:ownerError}]=await Promise.all([db.rpc("is_darklands_moderator"),db.rpc("dimension_is_owner")]);
       if(modError)throw modError;if(ownerError)throw ownerError;
-      if(isMod!==true){say("Access denied. This account does not have moderation access.");return;}
-      contentRoot.hidden=false;
-      if(isOwner===true&&roleSection){roleSection.hidden=false;await loadRoleMembers("");}
-      await Promise.all([loadQueue(),loadAppeals(),loadHistory()]);
+      isModerator=modResult===true;
+      if(isModerator){
+        contentRoot.hidden=false;
+        accessLabel.hidden=false;
+        if(isOwner===true&&roleSection){roleSection.hidden=false;await loadRoleMembers("");}
+        await Promise.all([loadQueue(),loadAppeals(),loadHistory()]);
+      }else{
+        say("Your account moderation information is up to date.");
+      }
     }catch(e){say(e.message||"We couldn't verify moderator access.");}
   }
   if(roleSearch)roleSearch.addEventListener("submit",e=>{e.preventDefault();loadRoleMembers(roleQuery.value.trim()).catch(err=>say(err.message));});
-  $("moderation-refresh")?.addEventListener("click",()=>Promise.all([loadQueue(),loadAppeals(),loadHistory()]).catch(e=>say(e.message||"Refresh failed.")));
+  $("moderation-refresh")?.addEventListener("click",()=>Promise.all([loadMemberView(signedInUser),...(isModerator?[loadQueue(),loadAppeals(),loadHistory()]:[])]).catch(e=>say(e.message||"Refresh failed.")));
   $("moderation-logout")?.addEventListener("click",async()=>{const {error}=await db.auth.signOut();if(error){say("Could not sign out.");return;}location.replace(page("login.html"));});
   start();
 })();
