@@ -50,7 +50,8 @@
     ["My profile", "profile.html", ["profile.html"]],
     ["Notifications", "notifications.html", ["notifications.html"]],
     ["Home", "index.html", ["index.html", ""]],
-    ["Settings", "settings.html", ["settings.html"]]
+    ["Settings", "settings.html", ["settings.html"]],
+    ["Analytics", "analytics.html", ["analytics.html"]]
   ];
 
   const currentFile = location.pathname.split("/").filter(Boolean).pop() || "index.html";
