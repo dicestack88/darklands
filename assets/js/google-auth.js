@@ -58,7 +58,7 @@
 
       if (profileError) throw profileError;
       if (profile) {
-        window.location.replace(page("app.html"));
+        window.location.replace(page("settings.html"));
         return;
       }
 
@@ -99,7 +99,7 @@
         throw error;
       }
       message(feedback, "Profile created! Opening Dicestack Dimension…");
-      window.location.replace(page("app.html"));
+      window.location.replace(page("settings.html"));
     } catch (error) {
       message(feedback, error.message || "We couldn't create your profile. Please try again.", true);
       submit.disabled = false;
