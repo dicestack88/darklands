@@ -13,7 +13,7 @@
 
   const mount = () => {
     if (document.getElementById("darklands-theme-toggle")) return;
-    const nav = document.querySelector(".header-nav, .creator-nav, .clips-header-nav, .moderation-nav, .notifications-nav, .site-header") || document.body;
+    const nav = document.querySelector(".header-nav, .creator-nav, .clips-header-nav, .moderation-header-nav, .moderation-nav, .notifications-nav, .messages-top-nav, .dimension-unified-nav, .site-header") || document.body;
     const button = document.createElement("button");
     button.type = "button";
     button.id = "darklands-theme-toggle";
