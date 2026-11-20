@@ -22,3 +22,12 @@
 .my-appeal-form textarea{min-height:100px}
 .my-appeal-form button{justify-self:start}
 @media(max-width:560px){.moderation-history-row{grid-template-columns:1fr}.moderation-history-row time{grid-column:1/-1}.my-appeal-form button{width:100%}}
+
+.moderation-member-results{display:grid;gap:12px}
+.moderation-member-row{padding:16px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(145deg,rgba(23,30,45,.86),rgba(14,18,28,.94))}
+.moderation-member-identity{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;margin-bottom:10px}
+.moderation-member-identity strong{font:600 14px var(--display);color:#e4e9f7}
+.moderation-member-identity span{font-size:10px;color:#9ba6ba}
+.moderation-member-identity .moderation-member-restricted{color:#ffb5b5;letter-spacing:.08em}
+.moderation-member-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.moderation-member-row .moderation-note{margin-top:8px}
