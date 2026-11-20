@@ -227,3 +227,19 @@
   .clip-action { min-width: 44px; min-height: 48px; }
   .clip-action span { font-size: 29px; }
 }
+
+/* Stable dimensions for discovery search and clip action controls. */
+.clips-search-form{width:100%;min-width:0;box-sizing:border-box}
+.clips-search-form input[type="search"]{flex:1 1 0;min-width:0;width:100%;max-width:100%;box-sizing:border-box}
+.clips-search-form button{flex:0 0 auto;white-space:nowrap}
+.clip-actions{display:flex;align-items:center;justify-content:center}
+.clip-action{box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;flex:0 0 auto;overflow:visible}
+.clip-action span{display:block;line-height:1}
+.clip-action small{display:block;line-height:1.2;white-space:nowrap}
+.clip-action.clip-like span{font-family:Arial,sans-serif;font-size:32px}
+.clip-comment-control{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap}
+@media(max-width:620px){
+ .clips-search-form{gap:6px}
+ .clips-search-form button{min-width:62px;padding-inline:9px}
+ .clip-actions{gap:8px}
+}
