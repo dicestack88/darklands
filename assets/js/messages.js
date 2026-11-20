@@ -9,7 +9,7 @@
   const say=t=>{el.status.textContent=t;};
   const initials=p=>(p?.display_name||p?.username||"D").trim().split(/\s+/).slice(0,2).map(s=>s[0]||"").join("").toUpperCase();
   const presence=p=>{if(!p)return "offline";if(p.presence_status==="offline"||p.presence_status==="dnd")return p.presence_status;if(!p.last_seen_at||Date.now()-new Date(p.last_seen_at).getTime()>90000)return "offline";if(p.presence_status==="idle"||Date.now()-new Date(p.last_seen_at).getTime()>300000)return "idle";return "online";};
-  const avatar=(node,p)=>{node.replaceChildren();if(p?.avatar_url&&/^https?:\/\//i.test(p.avatar_url)){const img=document.createElement("img");img.src=p.avatar_url;img.alt="";node.append(img);}else node.textContent=initials(p);};
+  const avatar=(node,p)=>{node.replaceChildren();if(p?.avatar_url&&/^https?:\/\//i.test(p.avatar_url)){const img=document.createElement("img");img.src=p.avatar_url;img.alt="";node.append(img);}else{const fallback=document.createElement("span");fallback.className="avatar-fallback";fallback.textContent=initials(p);node.append(fallback);}};
   const otherId=c=>c.user_one===user.id?c.user_two:c.user_one;
   const profile=id=>profiles.get(id);
   const fmtTime=d=>new Date(d).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"});
