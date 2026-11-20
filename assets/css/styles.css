@@ -187,3 +187,9 @@ input:focus,textarea:focus,select:focus{
 }
 .clip-action.liked{color:#ff76a8}
 .notification-nav-count{background:#ff76a8}
+
+/* Prevent navigation controls from stretching or compressing adjacent items. */
+.site-header,.clips-topbar{min-width:0}
+.header-nav,.clips-header-nav,.creator-nav{min-width:0;flex-wrap:wrap;align-items:center}
+.theme-toggle{flex:0 0 auto}
+button{font-family:var(--font)}
