@@ -20,7 +20,7 @@
   const node=(tag,cls,text)=>{const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el;};
   function button(label,kind,handler){
     const b=node("button","moderation-action "+(kind||""),label);b.type="button";
-    b.addEventListener("click",async()=>{b.disabled=true;const old=b.textContent;b.textContent="Working…";try{await handler();}catch(e){say(e.message||"Action failed. Refresh and try again.");b.disabled=false;b.textContent=old;}});
+    b.addEventListener("click",async()=>{b.disabled=true;const old=b.textContent;b.textContent="Working…";try{await handler();b.disabled=false;b.textContent=old;}catch(e){say(e.message||"Action failed. Refresh and try again.");b.disabled=false;b.textContent=old;}});
     return b;
   }
   async function signedVideo(path){
