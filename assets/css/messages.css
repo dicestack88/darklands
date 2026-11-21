@@ -150,3 +150,26 @@
 .wallpaper-file-input{display:block;width:100%;margin-top:10px;color:var(--muted);font-size:10px}
 .wallpaper-status{min-height:16px;margin-bottom:0}
 @media(max-width:520px){.wallpaper-options{grid-template-columns:repeat(2,minmax(0,1fr))}.wallpaper-option{min-height:76px}.wallpaper-upload-label{align-items:flex-start;flex-direction:column}.wallpaper-upload-label span{text-align:left}}
+
+
+/* Search field must remain within the inbox sidebar at every breakpoint.
+   The redesigned sidebar's flex sizing previously allowed the label/input to overflow. */
+.messages-page .messages-sidebar { min-width:0; overflow:hidden; }
+.messages-page .conversation-search {
+  box-sizing:border-box; display:flex; flex:0 0 39px; width:calc(100% - 0px);
+  min-width:0; max-width:100%; align-self:stretch; overflow:hidden;
+}
+.messages-page .conversation-search > span { flex:0 0 auto; }
+.messages-page .conversation-search input {
+  box-sizing:border-box; display:block; flex:1 1 0; width:1%; min-width:0; max-width:100%;
+}
+.messages-page .messages-sidebar-top,
+.messages-page .blocked-section { min-width:0; max-width:100%; box-sizing:border-box; }
+
+/* Keep each conversation wallpaper fixed to the viewport while message content scrolls. */
+.messages-page .message-stream.has-chat-wallpaper {
+  background-attachment:fixed !important;
+  background-position:center center !important;
+  background-size:cover !important;
+  background-repeat:no-repeat !important;
+}
