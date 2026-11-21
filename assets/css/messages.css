@@ -133,3 +133,7 @@
 @keyframes voice-call-enter{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
 #voice-remote-audio{display:none}
 .messages-page [hidden]{display:none!important}
+/* Inbox rows should stay compact; the redesign grid was stretching its only row. */
+.messages-page .conversation-list{display:grid;grid-auto-rows:max-content;align-content:start;align-items:stretch;gap:7px;min-height:0}
+.messages-page .conversation-list>.conversation-row{height:auto;min-height:62px;align-self:stretch;flex:none;padding:10px 9px}
+.messages-page .conversation-list>.message-empty{height:auto;align-self:start}
