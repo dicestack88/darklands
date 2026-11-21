@@ -191,3 +191,23 @@ body::before {
 :where(.message-dialog,.dimension-feedback-dialog) textarea,
 :where(.message-dialog,.dimension-feedback-dialog) select { background:rgba(3,13,6,.78) !important; }
 @media(prefers-reduced-motion:reduce) { .messages-page *, .creator-page *, .notifications-page *, .settings-page *, .analytics-page *, .moderation-page * { scroll-behavior:auto !important; transition:none !important; animation:none !important; } }
+
+/* Actual analytics markup uses stat-grid/stat cards rather than generic dashboard cards. */
+.analytics-page .analytics-stat-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin:24px 0; }
+.analytics-page .analytics-stat { min-width:0; padding:22px; border:1px solid var(--d-edge); border-radius:4px 15px 4px 15px; background:linear-gradient(145deg,rgba(19,47,28,.86),rgba(7,19,11,.82)); }
+.analytics-page .analytics-stat span { color:var(--d-leaf); font-size:.68rem; letter-spacing:.14em; }
+.analytics-page .analytics-stat strong { display:block; margin:10px 0 3px; color:var(--d-mint); font:600 clamp(1.8rem,3vw,2.8rem) "Space Grotesk",sans-serif; }
+.analytics-page .analytics-stat small { color:var(--d-muted); }
+.analytics-page .analytics-owner-tools { margin:18px 0; padding:18px; border-left:2px solid var(--d-leaf); background:rgba(13,34,19,.64); }
+@media(max-width:850px) { .analytics-page .analytics-stat-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:480px) { .analytics-page .analytics-stat-grid { grid-template-columns:1fr; } }
+
+/* Moderation markup retains auth-page as its base class. */
+.moderation-page .moderation-shell { width:min(1480px,calc(100% - 40px)); margin-inline:auto; }
+.moderation-page .moderation-status { border-left:2px solid var(--d-leaf); padding:10px 14px; background:rgba(15,39,22,.55); }
+.moderation-page .moderation-access { color:#f0c77c; letter-spacing:.12em; font-size:.72rem; }
+
+/* All page-level headings use the same editorial type scale without flattening layouts. */
+:where(.messages-page,.creator-page,.notifications-page,.settings-page,.analytics-page,.moderation-page) :where(h1,h2) {
+  text-wrap:balance;
+}
