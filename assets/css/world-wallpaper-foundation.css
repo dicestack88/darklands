@@ -16,9 +16,10 @@ body::before {
   inset: 0;
   z-index: -2;
   pointer-events: none;
+  /* Lighter scrims let the world artwork read clearly without sacrificing contrast. */
   background-image:
-    linear-gradient(90deg, rgba(3,10,6,.62), rgba(3,10,6,.22) 48%, rgba(3,10,6,.48)),
-    linear-gradient(180deg, rgba(3,10,6,.25), transparent 28%, rgba(3,10,6,.52)),
+    linear-gradient(90deg, rgba(3,10,6,.42), rgba(3,10,6,.10) 48%, rgba(3,10,6,.28)),
+    linear-gradient(180deg, rgba(3,10,6,.14), transparent 28%, rgba(3,10,6,.34)),
     var(--dimension-world-background);
   background-position: center, center, center;
   background-size: cover, cover, cover;
@@ -31,60 +32,33 @@ body::after {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  opacity: .23;
+  opacity: .16;
   background:
-    radial-gradient(ellipse at 50% 38%, transparent 10%, rgba(0,0,0,.42) 100%),
-    linear-gradient(180deg, rgba(2,8,4,.12), transparent 35%, rgba(2,8,4,.24));
+    radial-gradient(ellipse at 50% 38%, transparent 10%, rgba(0,0,0,.30) 100%),
+    linear-gradient(180deg, rgba(2,8,4,.08), transparent 35%, rgba(2,8,4,.16));
 }
 body > main, body > .site-footer { position: relative; }
 main { background: transparent !important; }
 
 /* Each destination has its own world and visual temperature. */
-body.home-page {
-  --dimension-world-background: url("../Minecraft_Fall_Drop_Campaign_Key_Art_DotNet_Downloadable_Wallpaper_2560x1440.png");
-}
-body.discover-page {
-  --dimension-world-background: url("../wp6005476-desktop-hd-minecraft-shaders-wallpapers.jpg");
-}
-body.clips-feed-page {
-  --dimension-world-background: url("../wallpaper2.jpg");
-}
-body.messages-page {
-  --dimension-world-background: url("../wallpaper1.jpeg");
-}
-body.notifications-page {
-  --dimension-world-background: url("../wallpaper3.jpeg");
-}
-body.settings-page {
-  --dimension-world-background: url("../wallpaper4.jpeg");
-}
-body.analytics-page {
-  --dimension-world-background: url("../wallpaper5.png");
-}
-body.moderation-page {
-  --dimension-world-background: url("../wp5961371-aesthetic-minecraft-pc-wallpapers.jpg");
-}
-body.creator-page {
-  --dimension-world-background: url("../Minecraft_WildernessBound_.Net_2560x1440.png");
-}
+body.home-page { --dimension-world-background: url("../Minecraft_Fall_Drop_Campaign_Key_Art_DotNet_Downloadable_Wallpaper_2560x1440.png"); }
+body.discover-page { --dimension-world-background: url("../wp6005476-desktop-hd-minecraft-shaders-wallpapers.jpg"); }
+body.clips-feed-page { --dimension-world-background: url("../wallpaper2.jpg"); }
+body.messages-page { --dimension-world-background: url("../wallpaper1.jpeg"); }
+body.notifications-page { --dimension-world-background: url("../wallpaper3.jpeg"); }
+body.settings-page { --dimension-world-background: url("../wallpaper4.jpeg"); }
+body.analytics-page { --dimension-world-background: url("../wallpaper5.png"); }
+body.moderation-page { --dimension-world-background: url("../wp5961371-aesthetic-minecraft-pc-wallpapers.jpg"); }
+body.creator-page { --dimension-world-background: url("../Minecraft_WildernessBound_.Net_2560x1440.png"); }
 body.auth-page:not(.discover-page):not(.clips-feed-page):not(.messages-page):not(.notifications-page):not(.moderation-page):not(.creator-page) {
   --dimension-world-background: url("../Minecraft_TheGardenAwakens_DotNet_2560x1440.png");
 }
-body.auth-page:has(.register-layout) {
-  --dimension-world-background: url("../sunrise.png");
-}
-body.auth-page:has(#profile-setup-form) {
-  --dimension-world-background: url("../noon.png");
-}
-body.auth-page:has(#set-password-form) {
-  --dimension-world-background: url("../night.png");
-}
-body.auth-page:has(#connection-status) {
-  --dimension-world-background: url("../wallpaper1.jpeg");
-}
+body.auth-page:has(.register-layout) { --dimension-world-background: url("../sunrise.png"); }
+body.auth-page:has(#profile-setup-form) { --dimension-world-background: url("../noon.png"); }
+body.auth-page:has(#set-password-form) { --dimension-world-background: url("../night.png"); }
+body.auth-page:has(#connection-status) { --dimension-world-background: url("../wallpaper1.jpeg"); }
 
-/* Let the landscape read around and through the interface.
-   Keep each page's own layout; only the material treatment changes here. */
+/* Let the landscape read around and through the interface. */
 :where(
   .site-header, .dimension-unified-nav,
   .auth-card, .home-welcome, .home-bottom-panel, .home-shortcut,
@@ -112,23 +86,16 @@ body.auth-page:has(#connection-status) {
   border-color: rgba(220, 239, 211, .22) !important;
   box-shadow: 0 18px 65px rgba(0,0,0,.19), inset 0 1px rgba(255,255,255,.055);
 }
-
-/* Navigation remains readable without turning into an opaque banner. */
 .site-header, .dimension-unified-nav {
   background: rgba(5, 14, 8, .58) !important;
   border-color: rgba(220,239,211,.2) !important;
 }
-
-/* Wallpaper-backed headings get a reliable text scrim, not another solid card. */
 :where(.discover-page-heading, .clips-feed-heading, .notifications-heading, .analytics-heading) {
   text-shadow: 0 2px 24px rgba(0,0,0,.42);
 }
 :where(.discover-page-heading, .clips-side-note) {
   box-shadow: 0 20px 70px rgba(0,0,0,.2);
 }
-
-/* The page canvas remains fixed while content scrolls; mobile browsers use a
-   normal fixed viewport layer to avoid background-attachment performance costs. */
 @media (max-width: 700px) {
   body::before { background-position: center, center, 58% center; }
 }
@@ -146,22 +113,22 @@ body.auth-page:has(#connection-status) {
   }
 }
 
-/* Keep the landing and discovery mastheads tied to the page's selected world. */
+/* Mastheads retain contrast, but no longer bury the artwork. */
 .home-page .verdant-hero .hero-art {
   background-image:
-    linear-gradient(90deg,rgba(4,15,8,.88),rgba(4,15,8,.42) 52%,rgba(4,15,8,.16)),
-    linear-gradient(0deg,rgba(4,15,8,.58),transparent 46%),
+    linear-gradient(90deg,rgba(4,15,8,.72),rgba(4,15,8,.30) 52%,rgba(4,15,8,.10)),
+    linear-gradient(0deg,rgba(4,15,8,.42),transparent 46%),
     var(--dimension-world-background) !important;
 }
 .home-page .home-member .verdant-member-hero {
   background-image:
-    linear-gradient(90deg,rgba(4,16,8,.88),rgba(4,16,8,.5) 54%,rgba(4,16,8,.18)),
-    linear-gradient(0deg,rgba(4,16,8,.55),transparent),
+    linear-gradient(90deg,rgba(4,16,8,.74),rgba(4,16,8,.34) 54%,rgba(4,16,8,.12)),
+    linear-gradient(0deg,rgba(4,16,8,.40),transparent),
     var(--dimension-world-background) !important;
 }
 .discover-page .discover-page-heading {
   background-image:
-    linear-gradient(90deg,rgba(4,16,8,.9),rgba(4,16,8,.56) 60%,rgba(4,16,8,.18)),
-    linear-gradient(0deg,rgba(4,16,8,.34),transparent),
+    linear-gradient(90deg,rgba(4,16,8,.76),rgba(4,16,8,.38) 60%,rgba(4,16,8,.12)),
+    linear-gradient(0deg,rgba(4,16,8,.24),transparent),
     var(--dimension-world-background) !important;
 }
