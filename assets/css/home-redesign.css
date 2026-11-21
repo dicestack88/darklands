@@ -9,7 +9,7 @@
   background:#0a1a10; color:#f0f5ec;
 }
 .verdant-hero .hero-art {
-  position:absolute; inset:0; z-index:-2;
+  position:absolute; inset:0; z-index:0;
   background-image:linear-gradient(90deg,rgba(4,15,8,.94) 0%,rgba(4,15,8,.76) 36%,rgba(4,15,8,.2) 78%,rgba(4,15,8,.28) 100%),linear-gradient(0deg,rgba(4,15,8,.68),transparent 42%),url("../sunrise.png");
   background-size:cover; background-position:center 48%;
   transform:scale(1.015);
