@@ -9,7 +9,7 @@
     document.head.append(glassModeScript);
   }
 
-  for (const href of ["assets/css/navigation.css", "assets/css/ecosystem-glass.css", "assets/css/dimension-effects.css", "assets/css/feature-feedback.css", "assets/css/dimension-design-system.css", "assets/css/all-pages-redesign.css", "assets/css/world-wallpaper-foundation.css"]) {
+  for (const href of ["assets/css/navigation.css", "assets/css/ecosystem-glass.css", "assets/css/dimension-effects.css", "assets/css/feature-feedback.css", "assets/css/dimension-design-system.css", "assets/css/all-pages-redesign.css", "assets/css/world-wallpaper-foundation.css", "assets/css/selective-wallpaper-cards.css"]) {
     if (!document.querySelector(`link[href="${href}"]`)) {
       const link = document.createElement("link");
       link.rel = "stylesheet";
@@ -140,7 +140,6 @@
   nav.append(logoutButton);
 
   header.replaceChildren(nav);
-
 
   // Persistent but unobtrusive beta notice and feature-feedback entry point.
   if (!document.querySelector(".dimension-beta-dock")) {

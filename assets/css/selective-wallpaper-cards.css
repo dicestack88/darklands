@@ -1,0 +1,60 @@
+/* Stage 06 — a restrained set of image-backed feature surfaces.
+   Wallpaper belongs inside a few intentional moments, not every panel. */
+
+/* Home: two feature cards become small landscape windows; the third stays quiet. */
+.home-public .feature-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid rgba(205, 230, 194, .16);
+  background-size: cover;
+  background-position: center;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.025), 0 18px 48px rgba(0,0,0,.16);
+}
+.home-public .feature-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(90deg, rgba(4,13,7,.78), rgba(4,13,7,.46) 62%, rgba(4,13,7,.16)),
+              linear-gradient(0deg, rgba(4,13,7,.52), transparent 76%);
+  transition: opacity .25s ease;
+}
+.home-public .feature-card:hover::before { opacity: .78; }
+.home-public .feature-clips { background-image: url("../wallpaper2.jpg") !important; }
+.home-public .feature-discover { background-image: url("../wp6005476-desktop-hd-minecraft-shaders-wallpapers.jpg") !important; }
+/* Messages remains an editorial, text-led card so the row doesn't become noisy. */
+.home-public .feature-messages {
+  background-image: linear-gradient(145deg, rgba(31,66,39,.48), rgba(5,18,10,.94)) !important;
+}
+
+/* Discover: keep the search surface calm; let the secondary invitation carry imagery. */
+.discover-page .discover-intro {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background-image:
+    linear-gradient(90deg, rgba(5,17,9,.82) 0%, rgba(5,17,9,.66) 48%, rgba(5,17,9,.22) 100%),
+    url("../wallpaper3.jpeg") !important;
+  background-size: cover;
+  background-position: center 54%;
+  box-shadow: 0 20px 58px rgba(0,0,0,.2), inset 0 1px rgba(255,255,255,.06);
+}
+.discover-page .discover-intro > * { position: relative; z-index: 1; }
+
+/* Creator banner: use a world image only when the member has no custom banner. */
+.creator-page .creator-cover:not(.has-custom-banner) {
+  background:
+    linear-gradient(90deg, rgba(5,16,9,.36), rgba(5,16,9,.08)),
+    url("../Minecraft_WildernessBound_.Net_2560x1440.png") center 48% / cover no-repeat;
+  border-bottom-color: rgba(205,230,194,.2);
+}
+
+@media (max-width: 520px) {
+  .home-public .feature-card { background-position: 58% center; }
+  .discover-page .discover-intro {
+    background-image:
+      linear-gradient(90deg, rgba(5,17,9,.76), rgba(5,17,9,.56)),
+      url("../wallpaper3.jpeg") !important;
+  }
+}
