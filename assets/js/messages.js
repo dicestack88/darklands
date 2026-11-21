@@ -74,7 +74,7 @@
     ["Fall Drop","assets/Minecraft_Fall_Drop_Campaign_Key_Art_DotNet_Downloadable_Wallpaper_2560x1440.png"],
     ["The Garden","assets/Minecraft_TheGardenAwakens_DotNet_2560x1440.png"],
     ["Wilderness","assets/Minecraft_WildernessBound_.Net_2560x1440.png"],
-    ["Shader world","assets/wp6005476-desktop-hd-minecraft-pc-wallpapers.jpg"],
+    ["Shader world","assets/wp6005476-desktop-hd-minecraft-shaders-wallpapers.jpg"],
     ["Forest light","assets/wp5961371-aesthetic-minecraft-pc-wallpapers.jpg"],
     ["Landscape 01","assets/wallpaper1.jpeg"],["Landscape 02","assets/wallpaper2.jpg"],
     ["Landscape 03","assets/wallpaper3.jpeg"],["Landscape 04","assets/wallpaper4.jpeg"],
@@ -82,7 +82,7 @@
   ];
   function paintChatWallpaper(url){
     if(!url){el.stream.style.removeProperty("background-image");el.stream.classList.remove("has-chat-wallpaper");return;}
-    const safe=String(url).replace(/["\\\n\r]/g,"\\  let messageLoadToken=0;");
+    const safe=String(url).replaceAll("\\","%5C").replaceAll('"',"%22").replaceAll("\n","").replaceAll("\r","");
     el.stream.style.backgroundImage='linear-gradient(rgba(5,13,8,.34),rgba(5,13,8,.48)),url("'+safe+'")';
     el.stream.classList.add("has-chat-wallpaper");
   }
