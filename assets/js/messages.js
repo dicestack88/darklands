@@ -89,7 +89,9 @@
   async function loadChatWallpaper(){
     if(!current)return;
     paintChatWallpaper(null);
-    const {data,error}=await db.from("conversation_wallpapers").select("wallpaper_path").eq("conversation_id",current.id).maybeSingle();
+    const conversationId=current.id;
+    const {data,error}=await db.from("conversation_wallpapers").select("wallpaper_path").eq("conversation_id",conversationId).maybeSingle();
+    if(current?.id!==conversationId)return;
     if(error){say("Chat wallpaper settings couldn't be loaded.");return;}
     if(!data?.wallpaper_path)return;
     if(data.wallpaper_path.startsWith("builtin:")){paintChatWallpaper(data.wallpaper_path.slice(8));return;}
@@ -158,7 +160,7 @@
     await loadMessages();await loadChatWallpaper();renderList();
     if(channel)await db.removeChannel(channel);
     const openedId=current.id;
-    channel=db.channel("dimension-chat-"+openedId).on("postgres_changes",{event:"*",schema:"public",table:"messages",filter:"conversation_id=eq."+openedId},async()=>{if(current?.id!==openedId)return;await loadMessages();await loadConversations();}).on("postgres_changes",{event:"UPDATE",schema:"public",table:"profiles",filter:"id=eq."+otherId(current)},async payload=>{profiles.set(payload.new.id,payload.new);el.chatPresence.textContent=presence(payload.new).toUpperCase();el.chatPresence.dataset.status=presence(payload.new);}).subscribe();
+    channel=db.channel("dimension-chat-"+openedId).on("postgres_changes",{event:"*",schema:"public",table:"messages",filter:"conversation_id=eq."+openedId},async()=>{if(current?.id!==openedId)return;await loadMessages();await loadConversations();}).on("postgres_changes",{event:"UPDATE",schema:"public",table:"profiles",filter:"id=eq."+otherId(current)},async payload=>{profiles.set(payload.new.id,payload.new);el.chatPresence.textContent=presence(payload.new).toUpperCase();el.chatPresence.dataset.status=presence(payload.new);}).on("postgres_changes",{event:"*",schema:"public",table:"conversation_wallpapers",filter:"conversation_id=eq."+openedId},async()=>{if(current?.id===openedId)await loadChatWallpaper();}).subscribe();
   }
   function switchFolder(next){window.dispatchEvent(new Event("dimension:conversation-closed"));folder=next;el.tabs.forEach(t=>t.classList.toggle("active",t.dataset.folder===folder));current=null;el.empty.hidden=false;el.active.hidden=true;el.workspace.classList.remove("chat-open");el.wallpaperButton.hidden=true;paintChatWallpaper(null);renderList();}
   async function loadBlocked(){const {data,error}=await db.from("user_blocks").select("blocked_id,created_at").eq("blocker_id",user.id).order("created_at",{ascending:false});const box=$("blocked-list");box.replaceChildren();if(error)return;await refreshProfiles((data||[]).map(x=>x.blocked_id));if(!data?.length){const p=document.createElement("p");p.className="message-empty";p.textContent="You haven't blocked anyone.";box.append(p);return;}for(const b of data){const row=document.createElement("div");row.className="blocked-row";const name=document.createElement("span");name.textContent=profile(b.blocked_id)?.display_name||"Member";const btn=document.createElement("button");btn.className="unblock-button";btn.textContent="Unblock";btn.addEventListener("click",async()=>{const {error}=await db.rpc("dimension_unblock_member",{p_member:b.blocked_id});if(error){say("Couldn't unblock this member.");return;}await loadBlocked();say("Member unblocked.");});row.append(name,btn);box.append(row);}}
