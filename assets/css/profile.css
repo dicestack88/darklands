@@ -93,6 +93,10 @@
 .dimension-role-badge.role-supporter{border-color:rgba(213,132,255,.4);background:rgba(190,94,255,.13);color:#e1aaff}
 .dimension-role-badge.role-member{border-color:rgba(105,230,190,.3);background:rgba(75,210,165,.09);color:#9ce9ce}
 
+/* Uploaded creator banners must override the shared default wallpaper. */
+.creator-page .creator-cover.has-custom-banner{
+  background-image:linear-gradient(90deg,rgba(4,15,7,.24),rgba(4,15,7,.04)),var(--creator-cover-image)!important;
+  background-size:cover!important;background-position:center 46%!important;background-repeat:no-repeat!important;
 /* Creator covers choose a fresh local Dimension landscape when no custom banner exists. */
 .creator-page .creator-cover.has-random-wallpaper,
 .creator-page .creator-cover.has-custom-banner {

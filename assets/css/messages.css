@@ -133,20 +133,7 @@
 @keyframes voice-call-enter{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
 #voice-remote-audio{display:none}
 .messages-page [hidden]{display:none!important}
-/* Per-conversation wallpaper controls and the Instagram-style chat canvas. */
-.chat-header{position:relative}
-.chat-wallpaper-button{width:34px;height:34px;display:inline-grid;place-items:center;border:1px solid rgba(154,203,158,.35);border-radius:9px;background:rgba(82,139,86,.13);color:#c8e5c3;font-size:16px;cursor:pointer}
-.chat-wallpaper-button:hover{background:rgba(82,139,86,.24)}
-.message-stream{background-color:rgba(6,16,9,.72);background-position:center;background-size:cover;background-repeat:no-repeat;transition:background-image .2s ease}
-.message-stream.has-chat-wallpaper{background-attachment:local}
-.chat-wallpaper-dialog{width:min(560px,calc(100% - 28px))}
-.wallpaper-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:18px 0}
-.wallpaper-option{min-height:86px;display:flex;align-items:flex-end;padding:9px;border:1px solid rgba(154,203,158,.25);border-radius:10px;background-color:#102319;background-position:center;background-size:cover;color:#fff;text-align:left;cursor:pointer;overflow:hidden}
-.wallpaper-option span{font-size:10px;font-weight:700;text-shadow:0 1px 8px #000}
-.wallpaper-option:hover{border-color:#9acb9e;transform:translateY(-1px)}
-.wallpaper-option-default{align-items:center;justify-content:center;background:linear-gradient(145deg,#102319,#07110b)}
-.wallpaper-upload-label{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:8px;padding:13px;border:1px dashed rgba(154,203,158,.4);border-radius:10px;color:#d7ead6;font-size:11px;cursor:pointer}
-.wallpaper-upload-label span{color:var(--muted);font-size:9px;text-align:right}
-.wallpaper-file-input{display:block;width:100%;margin-top:10px;color:var(--muted);font-size:10px}
-.wallpaper-status{min-height:16px;margin-bottom:0}
-@media(max-width:520px){.wallpaper-options{grid-template-columns:repeat(2,minmax(0,1fr))}.wallpaper-option{min-height:76px}.wallpaper-upload-label{align-items:flex-start;flex-direction:column}.wallpaper-upload-label span{text-align:left}}
+/* Inbox rows should stay compact; the redesign grid was stretching its only row. */
+.messages-page .conversation-list{display:grid;grid-auto-rows:max-content;align-content:start;align-items:stretch;gap:7px;min-height:0}
+.messages-page .conversation-list>.conversation-row{height:auto;min-height:62px;align-self:stretch;flex:none;padding:10px 9px}
+.messages-page .conversation-list>.message-empty{height:auto;align-self:start}

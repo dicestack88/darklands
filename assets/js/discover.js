@@ -35,13 +35,9 @@
   async function search(term){
     const requestId=++searchSequence;
     const query=term.trim().replace(/[^a-zA-Z0-9 _-]/g,"").replace(/\s+/g," ").slice(0,60);
-    results.hidden=false;
-    results.replaceChildren();
+    results.hidden=false;results.replaceChildren();
     if(query.length<2){results.hidden=true;return;}
-    const loading=document.createElement("p");
-    loading.className="discover-empty";
-    loading.textContent="Searching creators and approved clips…";
-    results.append(loading);
+    const loading=document.createElement("p");loading.className="discover-empty";loading.textContent="Searching creators and approved clips…";results.append(loading);
     try{
       const pattern="%"+query+"%";
       const [byName,byHandle,clipResult]=await Promise.all([
@@ -50,55 +46,54 @@
         client.from("clips").select("id,user_id,caption,storage_path,created_at").eq("status","approved").ilike("caption",pattern).order("created_at",{ascending:false}).limit(5)
       ]);
       if(requestId!==searchSequence)return;
-      if(byName.error)throw byName.error;
-      if(byHandle.error)throw byHandle.error;
-      if(clipResult.error)throw clipResult.error;
-
+      if(byName.error)throw byName.error;if(byHandle.error)throw byHandle.error;
       const creatorMap=new Map();
-      for(const profile of [...(byName.data||[]),...(byHandle.data||[])])creatorMap.set(profile.id,profile);
-      if(creatorMap.size){const ids=[...creatorMap.keys()];const {data:roles,error:roleError}=await client.from("dimension_member_roles").select("user_id,role").in("user_id",ids);if(roleError)throw roleError;const roleMap=new Map((roles||[]).map(row=>[row.user_id,row.role]));for(const profile of creatorMap.values())profile.role=roleMap.get(profile.id)||"member";}
+      for(const p of [...(byName.data||[]),...(byHandle.data||[])])creatorMap.set(p.id,{...p,role:"member"});
+      if(creatorMap.size){
+        const ids=[...creatorMap.keys()];
+        const {data:roles}=await client.from("dimension_member_roles").select("user_id,role").in("user_id",ids);
+        if(requestId!==searchSequence)return;
+        const roleMap=new Map((roles||[]).map(r=>[r.user_id,r.role]));
+        for(const p of creatorMap.values())p.role=roleMap.get(p.id)||"member";
+      }
       const creatorSection=document.createElement("section");creatorSection.className="discover-result-section";
       const creatorHeading=document.createElement("h3");creatorHeading.textContent="Creators";
       const creatorGrid=document.createElement("div");creatorGrid.className="discover-creator-grid";
-      for(const profile of creatorMap.values())creatorGrid.append(creatorCard(profile));
+      for(const p of creatorMap.values())creatorGrid.append(creatorCard(p));
       creatorSection.append(creatorHeading,creatorGrid);
       if(!creatorMap.size){const empty=document.createElement("p");empty.className="discover-muted";empty.textContent="No matching creators.";creatorSection.append(empty);}
-
       const clipSection=document.createElement("section");clipSection.className="discover-result-section";
       const clipHeading=document.createElement("h3");clipHeading.textContent="Clips";
       const clipGrid=document.createElement("div");clipGrid.className="discover-clip-grid";
-      const clips=clipResult.data||[];
+      const clips=clipResult.error?[]:(clipResult.data||[]);
       if(clips.length){
-        const ids=[...new Set(clips.map(clip=>clip.user_id))];
-        const {data:profiles,error:profilesError}=await client.from("profiles").select("id,username,display_name").in("id",ids);
-        if(profilesError)throw profilesError;
-        const {data:roles,error:roleError}=await client.from("dimension_member_roles").select("user_id,role").in("user_id",ids);
-        if(roleError)throw roleError;
+        const ids=[...new Set(clips.map(c=>c.user_id))];
+        const [{data:profiles},{data:roles}]=await Promise.all([
+          client.from("profiles").select("id,username,display_name").in("id",ids),
+          client.from("dimension_member_roles").select("user_id,role").in("user_id",ids)
+        ]);
         if(requestId!==searchSequence)return;
-        const roleMap=new Map((roles||[]).map(row=>[row.user_id,row.role]));
-        const profileMap=new Map((profiles||[]).map(profile=>[profile.id,{...profile,role:roleMap.get(profile.id)||"member"}]));
+        const roleMap=new Map((roles||[]).map(r=>[r.user_id,r.role]));
+        const profileMap=new Map((profiles||[]).map(p=>[p.id,{...p,role:roleMap.get(p.id)||"member"}]));
         for(const clip of clips){
           const {data:signed,error:signedError}=await client.storage.from("darklands-clips").createSignedUrl(clip.storage_path,900);
-          if(requestId!==searchSequence)return;
-          if(signedError||!signed?.signedUrl)continue;
+          if(requestId!==searchSequence)return;if(signedError||!signed?.signedUrl)continue;
           const card=document.createElement("article");card.className="discover-clip-card";
           const video=document.createElement("video");video.src=signed.signedUrl;video.controls=true;video.muted=true;video.playsInline=true;video.preload="none";
           const details=document.createElement("div");details.className="discover-clip-details";
           const caption=document.createElement("p");caption.textContent=clip.caption||"A community clip";
-          const profile=profileMap.get(clip.user_id);
-          const creator=document.createElement("a");creator.className="discover-clip-creator";creator.textContent=profile?"@"+profile.username:"Dimension member";if(profile)creator.append(roleBadge(profile.role));
-          if(profile?.username)creator.href=page("profile.html")+"?u="+encodeURIComponent(profile.username);
+          const p=profileMap.get(clip.user_id);
+          const creator=document.createElement("a");creator.className="discover-clip-creator";creator.textContent=p?"@"+p.username:"Dimension member";
+          if(p){creator.append(roleBadge(p.role));creator.href=page("profile.html")+"?u="+encodeURIComponent(p.username);}
           details.append(caption,creator);card.append(video,details);clipGrid.append(card);
         }
       }
       clipSection.append(clipHeading,clipGrid);
-      if(!clipGrid.children.length){const empty=document.createElement("p");empty.className="discover-muted";empty.textContent="No matching clips.";clipSection.append(empty);}
+      if(!clipGrid.children.length){const empty=document.createElement("p");empty.className="discover-muted";empty.textContent=clipResult.error?"Clip search is temporarily unavailable.":"No matching clips.";clipSection.append(empty);}
       if(requestId===searchSequence)results.replaceChildren(creatorSection,clipSection);
     }catch(error){
       if(requestId!==searchSequence)return;
-      results.replaceChildren();
-      const failed=document.createElement("p");failed.className="discover-empty";failed.textContent="Search isn't available right now. Please try again.";
-      results.append(failed);
+      results.replaceChildren();const failed=document.createElement("p");failed.className="discover-empty";failed.textContent="Creator search isn't available right now. Please try again.";results.append(failed);
     }
   }
 
