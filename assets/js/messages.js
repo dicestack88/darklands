@@ -3,7 +3,7 @@
   const ready=config&&config.SUPABASE_URL&&config.SUPABASE_ANON_KEY&&window.supabase?.createClient;
   const db=ready?window.supabase.createClient(config.SUPABASE_URL,config.SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true}}):null;
   const $=id=>document.getElementById(id);
-  const el={status:$("messages-status"),list:$("conversation-list"),stream:$("message-stream"),empty:$("chat-empty"),active:$("chat-active"),workspace:document.querySelector(".messages-workspace"),tabs:[...document.querySelectorAll(".message-tab")],search:$("conversation-search"),requestCount:$("request-count"),presence:$("my-presence"),presenceDot:$("my-presence-dot"),chatName:$("chat-name"),chatAvatar:$("chat-avatar"),chatPresence:$("chat-presence"),requestBanner:$("request-banner"),composer:$("message-form"),input:$("message-input"),length:$("message-length"),emoji:$("emoji-picker"),dialog:$("new-message-dialog"),reportDialog:$("report-dialog")};
+  const el={status:$("messages-status"),list:$("conversation-list"),stream:$("message-stream"),empty:$("chat-empty"),active:$("chat-active"),workspace:document.querySelector(".messages-workspace"),tabs:[...document.querySelectorAll(".message-tab")],search:$("conversation-search"),requestCount:$("request-count"),presence:$("my-presence"),presenceDot:$("my-presence-dot"),chatName:$("chat-name"),chatAvatar:$("chat-avatar"),chatPresence:$("chat-presence"),requestBanner:$("request-banner"),composer:$("message-form"),input:$("message-input"),length:$("message-length"),emoji:$("emoji-picker"),dialog:$("new-message-dialog"),reportDialog:$("report-dialog"),wallpaperButton:$("chat-wallpaper-button"),wallpaperDialog:$("chat-wallpaper-dialog"),wallpaperGrid:$("wallpaper-options"),wallpaperUpload:$("wallpaper-upload"),wallpaperStatus:$("wallpaper-status")};
   let user=null,profiles=new Map(),conversations=[],current=null,folder="chats",channel=null,heartbeat=null,idleTimer=null,lastActivity=Date.now(),myProfile=null;
   const page=name=>new URL(name,config.SITE_URL).toString();
   const say=t=>{el.status.textContent=t;};
@@ -68,6 +68,71 @@
     }
     if(token===listRenderToken)el.list.replaceChildren(fragment);
   }
+
+  const CHAT_WALLPAPERS=[
+    ["Sunrise","assets/sunrise.png"],["Daylight","assets/noon.png"],["Midnight","assets/night.png"],
+    ["Fall Drop","assets/Minecraft_Fall_Drop_Campaign_Key_Art_DotNet_Downloadable_Wallpaper_2560x1440.png"],
+    ["The Garden","assets/Minecraft_TheGardenAwakens_DotNet_2560x1440.png"],
+    ["Wilderness","assets/Minecraft_WildernessBound_.Net_2560x1440.png"],
+    ["Shader world","assets/wp6005476-desktop-hd-minecraft-pc-wallpapers.jpg"],
+    ["Forest light","assets/wp5961371-aesthetic-minecraft-pc-wallpapers.jpg"],
+    ["Landscape 01","assets/wallpaper1.jpeg"],["Landscape 02","assets/wallpaper2.jpg"],
+    ["Landscape 03","assets/wallpaper3.jpeg"],["Landscape 04","assets/wallpaper4.jpeg"],
+    ["Landscape 05","assets/wallpaper5.png"]
+  ];
+  function paintChatWallpaper(url){
+    if(!url){el.stream.style.removeProperty("background-image");el.stream.classList.remove("has-chat-wallpaper");return;}
+    const safe=String(url).replace(/["\\\n\r]/g,"\\  let messageLoadToken=0;");
+    el.stream.style.backgroundImage='linear-gradient(rgba(5,13,8,.34),rgba(5,13,8,.48)),url("'+safe+'")';
+    el.stream.classList.add("has-chat-wallpaper");
+  }
+  async function loadChatWallpaper(){
+    if(!current)return;
+    paintChatWallpaper(null);
+    const {data,error}=await db.from("conversation_wallpapers").select("wallpaper_path").eq("conversation_id",current.id).maybeSingle();
+    if(error){say("Chat wallpaper settings couldn't be loaded.");return;}
+    if(!data?.wallpaper_path)return;
+    if(data.wallpaper_path.startsWith("builtin:")){paintChatWallpaper(data.wallpaper_path.slice(8));return;}
+    const {data:signed,error:signedError}=await db.storage.from("dimension-message-wallpapers").createSignedUrl(data.wallpaper_path,3600);
+    if(!signedError&&signed?.signedUrl)paintChatWallpaper(signed.signedUrl);
+  }
+  async function saveChatWallpaper(path){
+    if(!current)return;
+    el.wallpaperStatus.textContent="Saving wallpaper…";
+    const {error}=await db.from("conversation_wallpapers").upsert({conversation_id:current.id,wallpaper_path:path,updated_by:user.id},{onConflict:"conversation_id"});
+    if(error){el.wallpaperStatus.textContent=error.message||"Couldn't save this wallpaper.";return;}
+    el.wallpaperStatus.textContent="Wallpaper updated for this conversation.";
+    await loadChatWallpaper();
+  }
+  function renderWallpaperOptions(){
+    el.wallpaperGrid.replaceChildren();
+    const reset=document.createElement("button");reset.type="button";reset.className="wallpaper-option wallpaper-option-default";reset.textContent="Default";
+    reset.addEventListener("click",async()=>{
+      const {error}=await db.from("conversation_wallpapers").delete().eq("conversation_id",current.id);
+      if(error){el.wallpaperStatus.textContent="Couldn't reset this wallpaper.";return;}
+      paintChatWallpaper(null);el.wallpaperStatus.textContent="Back to the default chat background.";
+    });el.wallpaperGrid.append(reset);
+    CHAT_WALLPAPERS.forEach(([label,path])=>{
+      const button=document.createElement("button");button.type="button";button.className="wallpaper-option";
+      button.style.backgroundImage='linear-gradient(0deg,rgba(3,10,5,.7),rgba(3,10,5,.04)),url("'+path+'")';
+      button.setAttribute("aria-label",label);const name=document.createElement("span");name.textContent=label;button.append(name);
+      button.addEventListener("click",()=>saveChatWallpaper("builtin:"+path));el.wallpaperGrid.append(button);
+    });
+  }
+  el.wallpaperButton.addEventListener("click",()=>{if(!current)return;el.wallpaperStatus.textContent="";el.wallpaperUpload.value="";renderWallpaperOptions();el.wallpaperDialog.showModal();});
+  el.wallpaperUpload.addEventListener("change",async()=>{
+    const file=el.wallpaperUpload.files?.[0];if(!file||!current)return;
+    if(!["image/jpeg","image/png","image/webp"].includes(file.type)||file.size>5*1024*1024){el.wallpaperStatus.textContent="Choose a JPG, PNG or WebP image under 5 MB.";el.wallpaperUpload.value="";return;}
+    const extension=({"image/jpeg":"jpg","image/png":"png","image/webp":"webp"})[file.type];
+    const path=current.id+"/"+user.id+"/"+crypto.randomUUID()+"."+extension;
+    el.wallpaperStatus.textContent="Uploading image…";el.wallpaperUpload.disabled=true;
+    try{
+      const {error:uploadError}=await db.storage.from("dimension-message-wallpapers").upload(path,file,{contentType:file.type,upsert:false});
+      if(uploadError)throw uploadError;
+      await saveChatWallpaper(path);
+    }catch(error){el.wallpaperStatus.textContent=error?.message||"Image upload failed. Please try again.";}
+    finally{el.wallpaperUpload.disabled=false;}
+  });
   let messageLoadToken=0;
   async function loadMessages(){
     if(!current)return;
@@ -86,16 +151,16 @@
   }
   async function openConversation(id){
     current=conversations.find(c=>c.id===id);if(!current)return;window.dispatchEvent(new CustomEvent("dimension:conversation-opened",{detail:{id:current.id,otherUserId:otherId(current),status:current.status,displayName:profile(otherId(current))?.display_name||"Dimension member"}}));
-    const p=profile(otherId(current));el.empty.hidden=true;el.active.hidden=false;el.workspace.classList.add("chat-open");avatar(el.chatAvatar,p);el.chatName.textContent=p?.display_name||"Dimension member";el.chatName.append(roleBadge(p?.role));el.chatPresence.textContent=presence(p).toUpperCase();el.chatPresence.dataset.status=presence(p);
+    const p=profile(otherId(current));el.empty.hidden=true;el.active.hidden=false;el.workspace.classList.add("chat-open");el.wallpaperButton.hidden=current.status!=="accepted";avatar(el.chatAvatar,p);el.chatName.textContent=p?.display_name||"Dimension member";el.chatName.append(roleBadge(p?.role));el.chatPresence.textContent=presence(p).toUpperCase();el.chatPresence.dataset.status=presence(p);
     const incoming=current.status==="pending"&&current.requested_by!==user.id;el.requestBanner.hidden=!incoming;el.composer.hidden=current.status!=="accepted";
     if(current.status==="pending"&&current.requested_by===user.id){el.requestBanner.hidden=false;el.requestBanner.querySelector("strong").textContent="Request sent";el.requestBanner.querySelector("p").textContent="You can chat once this member accepts your request.";el.requestBanner.querySelector(".request-actions").hidden=true;}
     else el.requestBanner.querySelector(".request-actions").hidden=false;
-    await loadMessages();renderList();
+    await loadMessages();await loadChatWallpaper();renderList();
     if(channel)await db.removeChannel(channel);
     const openedId=current.id;
     channel=db.channel("dimension-chat-"+openedId).on("postgres_changes",{event:"*",schema:"public",table:"messages",filter:"conversation_id=eq."+openedId},async()=>{if(current?.id!==openedId)return;await loadMessages();await loadConversations();}).on("postgres_changes",{event:"UPDATE",schema:"public",table:"profiles",filter:"id=eq."+otherId(current)},async payload=>{profiles.set(payload.new.id,payload.new);el.chatPresence.textContent=presence(payload.new).toUpperCase();el.chatPresence.dataset.status=presence(payload.new);}).subscribe();
   }
-  function switchFolder(next){window.dispatchEvent(new Event("dimension:conversation-closed"));folder=next;el.tabs.forEach(t=>t.classList.toggle("active",t.dataset.folder===folder));current=null;el.empty.hidden=false;el.active.hidden=true;el.workspace.classList.remove("chat-open");renderList();}
+  function switchFolder(next){window.dispatchEvent(new Event("dimension:conversation-closed"));folder=next;el.tabs.forEach(t=>t.classList.toggle("active",t.dataset.folder===folder));current=null;el.empty.hidden=false;el.active.hidden=true;el.workspace.classList.remove("chat-open");el.wallpaperButton.hidden=true;paintChatWallpaper(null);renderList();}
   async function loadBlocked(){const {data,error}=await db.from("user_blocks").select("blocked_id,created_at").eq("blocker_id",user.id).order("created_at",{ascending:false});const box=$("blocked-list");box.replaceChildren();if(error)return;await refreshProfiles((data||[]).map(x=>x.blocked_id));if(!data?.length){const p=document.createElement("p");p.className="message-empty";p.textContent="You haven't blocked anyone.";box.append(p);return;}for(const b of data){const row=document.createElement("div");row.className="blocked-row";const name=document.createElement("span");name.textContent=profile(b.blocked_id)?.display_name||"Member";const btn=document.createElement("button");btn.className="unblock-button";btn.textContent="Unblock";btn.addEventListener("click",async()=>{const {error}=await db.rpc("dimension_unblock_member",{p_member:b.blocked_id});if(error){say("Couldn't unblock this member.");return;}await loadBlocked();say("Member unblocked.");});row.append(name,btn);box.append(row);}}
   async function updatePresence(value){el.presenceDot.dataset.status=value;const {error}=await db.rpc("dimension_touch_presence",{p_status:value});if(error)say("Couldn't update your status.");if(myProfile)myProfile.presence_status=value;}
   function resetIdle(){lastActivity=Date.now();if(myProfile?.presence_status==="online"||myProfile?.presence_status==="idle"){if(myProfile.presence_status!=="online"){updatePresence("online");el.presence.value="online";}clearTimeout(idleTimer);idleTimer=setTimeout(()=>{if(el.presence.value==="online"){el.presence.value="idle";updatePresence("idle");}},300000);}}
@@ -110,7 +175,7 @@
     resetIdle();
     db.channel("dimension-inbox-"+user.id).on("postgres_changes",{event:"*",schema:"public",table:"conversations"},async()=>{await loadConversations();if(current){const updated=conversations.find(c=>c.id===current.id);if(updated){current=updated;const incoming=current.status==="pending"&&current.requested_by!==user.id;el.requestBanner.hidden=!incoming;el.composer.hidden=current.status!=="accepted";if(current.status==="pending"&&current.requested_by===user.id){el.requestBanner.hidden=false;el.requestBanner.querySelector("strong").textContent="Request sent";el.requestBanner.querySelector("p").textContent="You can chat once this member accepts your request.";el.requestBanner.querySelector(".request-actions").hidden=true;}else{el.requestBanner.querySelector(".request-actions").hidden=false;}}else{current=null;el.active.hidden=true;el.empty.hidden=false;el.workspace.classList.remove("chat-open");}}}).subscribe();
   }
-  $("back-to-inbox")?.addEventListener("click",()=>{window.dispatchEvent(new Event("dimension:conversation-closed"));current=null;messageLoadToken++;el.active.hidden=true;el.empty.hidden=false;el.workspace.classList.remove("chat-open");});
+  $("back-to-inbox")?.addEventListener("click",()=>{window.dispatchEvent(new Event("dimension:conversation-closed"));current=null;messageLoadToken++;el.active.hidden=true;el.empty.hidden=false;el.workspace.classList.remove("chat-open");el.wallpaperButton.hidden=true;paintChatWallpaper(null);});
   el.tabs.forEach(t=>t.addEventListener("click",()=>switchFolder(t.dataset.folder)));
   el.search.addEventListener("input",renderList);
   $("new-message").addEventListener("click",()=>$("new-message-dialog").showModal());
