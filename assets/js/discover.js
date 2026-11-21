@@ -34,7 +34,7 @@
 
   async function search(term){
     const requestId=++searchSequence;
-    const query=term.trim().replace(/[^a-zA-Z0-9 _-]/g,"").replace(/\\s+/g," ").slice(0,60);
+    const query=term.trim().replace(/[^a-zA-Z0-9 _-]/g,"").replace(/\s+/g," ").slice(0,60);
     results.hidden=false;results.replaceChildren();
     if(query.length<2){results.hidden=true;return;}
     const loading=document.createElement("p");loading.className="discover-empty";loading.textContent="Searching creators and approved clips…";results.append(loading);
