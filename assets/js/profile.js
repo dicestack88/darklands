@@ -45,7 +45,7 @@
     const avatar=$("creator-avatar");
     if(profile.avatar_url&&/^https?:\/\//i.test(profile.avatar_url)){const img=document.createElement("img");img.src=profile.avatar_url;img.alt="";avatar.replaceChildren(img);}else avatar.textContent=initials(profile.display_name);
 
-    const creatorWallpapers=["Minecraft_Fall_Drop_Campaign_Key_Art_DotNet_Downloadable_Wallpaper_2560x1440.png","Minecraft_TheGardenAwakens_DotNet_2560x1440.png","Minecraft_WildernessBound_.Net_2560x1440.png","night.png","noon.png","sunrise.png","wallpaper1.jpeg","wallpaper2.jpg","wallpaper3.jpeg","wallpaper4.jpeg","wallpaper5.png","wp5961371-aesthetic-minecraft-pc-wallpapers.jpg","wp6005476-desktop-hd-minecraft-pc-wallpapers.jpg"];
+    const creatorWallpapers=["Minecraft_Fall_Drop_Campaign_Key_Art_DotNet_Downloadable_Wallpaper_2560x1440.png","Minecraft_TheGardenAwakens_DotNet_2560x1440.png","Minecraft_WildernessBound_.Net_2560x1440.png","night.png","noon.png","sunrise.png","wallpaper1.jpeg","wallpaper2.jpg","wallpaper3.jpeg","wallpaper4.jpeg","wallpaper5.png","wp5961371-aesthetic-minecraft-pc-wallpapers.jpg","wp6005476-desktop-hd-minecraft-shaders-wallpapers.jpg"];
     if(profile.banner_url&&/^https?:\/\//i.test(profile.banner_url)){
       $("creator-cover").style.setProperty("--creator-cover-image","url("+JSON.stringify(profile.banner_url)+")");
       $("creator-cover").classList.add("has-custom-banner");
