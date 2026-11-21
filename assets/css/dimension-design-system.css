@@ -1,0 +1,180 @@
+/* Dimension — Verdant design system foundation.
+   Stage 02: palette, atmosphere, material accents and shared component language.
+   Page layouts and feature behaviour intentionally remain unchanged. */
+
+:root {
+  color-scheme: dark;
+  --dimension-bg: #08120d;
+  --dimension-bg-raised: #0d1a12;
+  --dimension-panel: #102319;
+  --dimension-panel-raised: #173323;
+  --dimension-forest: #19452d;
+  --dimension-emerald: #287a49;
+  --dimension-jade: #59a878;
+  --dimension-moss: #9ab58a;
+  --dimension-lime: #c1d69a;
+  --dimension-text: #edf4eb;
+  --dimension-muted: #a0b1a2;
+  --dimension-line: rgba(174, 211, 181, .16);
+  --dimension-accent-a: #59a878;
+  --dimension-accent-b: #287a49;
+  --dimension-accent-c: #c1d69a;
+  --dimension-accent-glow: rgba(72, 160, 100, .2);
+  --dimension-accent-gradient: linear-gradient(112deg, #9acb9e 0%, #59a878 42%, #287a49 100%);
+  --bg: var(--dimension-bg);
+  --panel: rgba(16, 35, 25, .92);
+  --panel2: rgba(23, 51, 35, .88);
+  --line: var(--dimension-line);
+  --text: var(--dimension-text);
+  --muted: var(--dimension-muted);
+  --accent: #a8d2a9;
+  --accent2: #59a878;
+}
+
+/* A layered forest-night atmosphere replaces the old blue/violet ambient blobs. */
+html, body {
+  color-scheme: dark !important;
+  background-color: var(--dimension-bg) !important;
+}
+body {
+  color: var(--dimension-text);
+  background-image:
+    radial-gradient(ellipse at 12% 0%, rgba(39, 105, 61, .22), transparent 38%),
+    radial-gradient(ellipse at 92% 38%, rgba(34, 82, 49, .16), transparent 34%),
+    radial-gradient(ellipse at 48% 100%, rgba(18, 58, 34, .18), transparent 42%),
+    repeating-linear-gradient(132deg, transparent 0 54px, rgba(145, 190, 145, .018) 55px, transparent 56px 110px),
+    linear-gradient(180deg, #08120d 0%, #0a160f 48%, #08120d 100%) !important;
+}
+.ambient { display: none !important; }
+
+/* Shared typography and status accents. */
+:where(.eyebrow,.clips-kicker,.clips-section-kicker,.analytics-kicker,.moderation-kicker,
+  .notifications-kicker,.settings-status,.preview-tag,.coming-label,.locked-label,
+  .feature-number,.feature-status,.profile-summary-label,.settings-info-label,
+  .dimension-feedback-kicker) {
+  color: var(--dimension-jade) !important;
+}
+:where(.hero h1 span,.auth-aside h1 span,.settings-heading h1 span,
+  .analytics-heading h1 span,.moderation-heading h1 span,.notifications-heading h1 span) {
+  color: var(--dimension-moss) !important;
+}
+:where(.muted-link,.auth-switch a,.form-message,.settings-footnote a) {
+  color: #9dcc9e !important;
+}
+:where(.status-dot,.dimension-beta-label::before) {
+  background: #8acb91 !important;
+  box-shadow: 0 0 13px rgba(112, 202, 126, .65) !important;
+}
+
+/* Green replaces legacy blue, cyan and violet active states without changing layout. */
+:where(.dimension-unified-nav .dimension-nav-link[aria-current="page"],
+  .settings-nav.active,.settings-nav:hover,
+  .dimension-nav-open .dimension-unified-nav .dimension-nav-link[aria-current="page"]) {
+  color: #c5e8c4 !important;
+  background: rgba(77, 145, 89, .13) !important;
+  border-color: rgba(119, 184, 125, .2) !important;
+}
+.dimension-unified-nav .dimension-nav-link:hover { color: #e5f3e4 !important; }
+.dimension-unified-nav .brand-mark,
+.brand-mark {
+  color: #e8f4e7 !important;
+  border-color: rgba(137, 194, 139, .38) !important;
+  background: linear-gradient(145deg, rgba(88, 157, 96, .3), rgba(18, 44, 27, .5)) !important;
+}
+.dimension-ecosystem-switcher > summary {
+  border-color: rgba(112, 176, 119, .28) !important;
+  background: linear-gradient(110deg, rgba(75, 142, 83, .13), rgba(29, 79, 47, .16)) !important;
+}
+.ecosystem-switcher-mark,
+.ecosystem-switcher-panel > a > span:first-child,
+.ecosystem-switcher-panel b { color: #9bd3a0 !important; }
+
+/* Emerald action language. Explicit danger/destructive controls retain their own styling. */
+:where(.button,.dimension-unified-nav .dimension-logout,.dimension-feedback-submit,
+  .moderation-refresh,.analytics-owner-tools button):not(.button-danger):not(.danger-button):not(.delete-button):not(.reject-button) {
+  border-color: rgba(145, 205, 145, .48);
+  background: linear-gradient(112deg, #a8d2a9 0%, #69ad78 48%, #347c4b 100%);
+  color: #08150c;
+  box-shadow: 0 8px 26px rgba(42, 112, 59, .2), inset 0 1px rgba(255,255,255,.22);
+}
+:where(.button,.dimension-unified-nav .dimension-logout,.dimension-feedback-submit):not(.button-danger):not(.danger-button):not(.delete-button):hover {
+  filter: brightness(1.07);
+  box-shadow: 0 10px 30px rgba(54, 139, 73, .26), inset 0 1px rgba(255,255,255,.28);
+}
+:where(button,a,input,textarea,select,[role="button"]):focus-visible {
+  outline-color: rgba(145, 207, 146, .9) !important;
+  box-shadow: 0 0 0 4px rgba(91, 168, 105, .13) !important;
+}
+
+/* Forest-tinted glass surfaces; the shared Frosted/Liquid blur settings remain in control. */
+:where(.site-header,.dimension-unified-nav,.feature-card,.feature-large,.auth-card,
+  .settings-panel,.home-welcome,.join-strip,.profile-summary,.profile-preview,
+  .account-customize-form,.home-shortcut,.clip-card,.creator-card,.message-card,
+  .notification-card,.report-card,.moderation-card,.analytics-card,
+  .dimension-ecosystem-switcher .ecosystem-switcher-panel,
+  [class$="-panel"],[class$="-card"]) {
+  border-color: rgba(157, 202, 158, .17) !important;
+}
+:where(.feature-card,.feature-large,.auth-card,.settings-panel,.home-welcome,.join-strip,
+  .profile-summary,.profile-preview,.account-customize-form,.home-shortcut,
+  .clip-card,.creator-card,.message-card,.notification-card,.report-card,
+  .moderation-card,.analytics-card,[class$="-panel"],[class$="-card"]) {
+  background-color: rgba(12, 29, 18, .68) !important;
+}
+html[data-glass-mode="liquid"] :where(.site-header,.feature-card,.feature-large,.auth-card,
+  .settings-panel,.home-welcome,.join-strip,.clip-card,.creator-card,.message-card,
+  .notification-card,.report-card,.moderation-card,.analytics-card,
+  [class$="-panel"],[class$="-card"]) {
+  border-color: rgba(184, 224, 184, .25) !important;
+}
+
+/* Inputs use a dark evergreen well so bright wallpapers can be introduced later safely. */
+:where(input,textarea,select) {
+  color: var(--dimension-text) !important;
+  border-color: rgba(145, 190, 148, .22) !important;
+  background-color: rgba(5, 17, 9, .62) !important;
+}
+:where(input,textarea,select)::placeholder { color: #718875 !important; }
+:where(input,textarea,select):focus {
+  border-color: rgba(125, 194, 132, .7) !important;
+}
+
+/* Shared beta and feedback surfaces follow the new forest palette. */
+.dimension-beta-label,.dimension-feedback-trigger {
+  border-color: rgba(139, 193, 142, .23) !important;
+  background: rgba(8, 24, 13, .86) !important;
+  color: #dceedd !important;
+}
+.dimension-beta-label { color: #a8d6aa !important; }
+.dimension-feedback-trigger:hover { border-color: rgba(139, 205, 144, .55) !important; }
+.dimension-feedback-dialog {
+  border-color: rgba(139, 193, 142, .25) !important;
+  background: linear-gradient(145deg, rgba(20, 48, 29, .98), rgba(7, 19, 11, .98)) !important;
+}
+.dimension-feedback-submit {
+  background: var(--dimension-accent-gradient) !important;
+  color: #08150c !important;
+}
+
+/* Loading and page transitions now belong to the same forest-night environment. */
+.dimension-page-loader {
+  background:
+    radial-gradient(ellipse at 18% 8%, rgba(42, 120, 62, .24), transparent 42%),
+    radial-gradient(ellipse at 90% 92%, rgba(24, 74, 40, .2), transparent 44%),
+    rgba(5, 14, 8, .97) !important;
+}
+.dimension-loader-mark {
+  border-color: rgba(154, 204, 155, .32) !important;
+  background: linear-gradient(145deg, rgba(89, 168, 120, .24), rgba(40, 122, 73, .16), rgba(193, 214, 154, .12)) !important;
+  box-shadow: 0 0 34px rgba(72, 160, 100, .17), inset 0 1px 0 rgba(255,255,255,.16) !important;
+}
+.dimension-loader-mark::after {
+  border-top-color: #9acb9e !important;
+  border-right-color: #287a49 !important;
+}
+.dimension-loader-caption { color: #a8c2a8 !important; }
+
+/* Reduced transparency and motion preferences continue to be respected. */
+@media (prefers-reduced-transparency: reduce) {
+  body { background-image: linear-gradient(180deg, #08120d, #0a160f 48%, #08120d) !important; }
+}
