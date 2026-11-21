@@ -66,3 +66,15 @@ using (bucket_id='dimension-message-wallpapers'
   and exists (select 1 from public.conversations c where c.id::text=(storage.foldername(name))[1]
     and (select auth.uid()) in (c.user_one,c.user_two)
 ));
+
+-- Keep both participants' open chat views synchronized when the shared theme changes.
+do $$
+begin
+  if exists (select 1 from pg_publication where pubname='supabase_realtime')
+     and not exists (
+       select 1 from pg_publication_tables
+       where pubname='supabase_realtime' and schemaname='public' and tablename='conversation_wallpapers'
+     ) then
+    alter publication supabase_realtime add table public.conversation_wallpapers;
+  end if;
+end $$;
