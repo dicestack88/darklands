@@ -70,16 +70,16 @@ body.creator-page {
 body.auth-page:not(.discover-page):not(.clips-feed-page):not(.messages-page):not(.notifications-page):not(.moderation-page):not(.creator-page) {
   --dimension-world-background: url("../Minecraft_TheGardenAwakens_DotNet_2560x1440.png");
 }
-body.auth-page.register-layout {
+body.auth-page:has(.register-layout) {
   --dimension-world-background: url("../sunrise.png");
 }
-body.auth-page:has(#complete-profile-form) {
+body.auth-page:has(#profile-setup-form) {
   --dimension-world-background: url("../noon.png");
 }
 body.auth-page:has(#set-password-form) {
   --dimension-world-background: url("../night.png");
 }
-body.auth-page:has(#connection-test) {
+body.auth-page:has(#connection-status) {
   --dimension-world-background: url("../wallpaper1.jpeg");
 }
 
@@ -144,4 +144,24 @@ body.auth-page:has(#connection-test) {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
+}
+
+/* Keep the landing and discovery mastheads tied to the page's selected world. */
+.home-page .verdant-hero .hero-art {
+  background-image:
+    linear-gradient(90deg,rgba(4,15,8,.88),rgba(4,15,8,.42) 52%,rgba(4,15,8,.16)),
+    linear-gradient(0deg,rgba(4,15,8,.58),transparent 46%),
+    var(--dimension-world-background) !important;
+}
+.home-page .home-member .verdant-member-hero {
+  background-image:
+    linear-gradient(90deg,rgba(4,16,8,.88),rgba(4,16,8,.5) 54%,rgba(4,16,8,.18)),
+    linear-gradient(0deg,rgba(4,16,8,.55),transparent),
+    var(--dimension-world-background) !important;
+}
+.discover-page .discover-page-heading {
+  background-image:
+    linear-gradient(90deg,rgba(4,16,8,.9),rgba(4,16,8,.56) 60%,rgba(4,16,8,.18)),
+    linear-gradient(0deg,rgba(4,16,8,.34),transparent),
+    var(--dimension-world-background) !important;
 }
