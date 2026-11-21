@@ -1,0 +1,147 @@
+/* Stage 05 — Dimension world environments.
+   The uploaded Minecraft wallpapers are the actual page canvas, not thumbnail decoration.
+   Interface surfaces remain legible through the existing Frosted/Liquid Glass system. */
+
+html { background: #07110b; }
+body {
+  position: relative;
+  isolation: isolate;
+  background: transparent !important;
+  min-height: 100vh;
+  --dimension-world-background: url("../Minecraft_TheGardenAwakens_DotNet_2560x1440.png");
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background-image:
+    linear-gradient(90deg, rgba(3,10,6,.62), rgba(3,10,6,.22) 48%, rgba(3,10,6,.48)),
+    linear-gradient(180deg, rgba(3,10,6,.25), transparent 28%, rgba(3,10,6,.52)),
+    var(--dimension-world-background);
+  background-position: center, center, center;
+  background-size: cover, cover, cover;
+  background-repeat: no-repeat;
+  transform: translateZ(0);
+}
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: .23;
+  background:
+    radial-gradient(ellipse at 50% 38%, transparent 10%, rgba(0,0,0,.42) 100%),
+    linear-gradient(180deg, rgba(2,8,4,.12), transparent 35%, rgba(2,8,4,.24));
+}
+body > main, body > .site-footer { position: relative; }
+main { background: transparent !important; }
+
+/* Each destination has its own world and visual temperature. */
+body.home-page {
+  --dimension-world-background: url("../Minecraft_Fall_Drop_Campaign_Key_Art_DotNet_Downloadable_Wallpaper_2560x1440.png");
+}
+body.discover-page {
+  --dimension-world-background: url("../wp6005476-desktop-hd-minecraft-shaders-wallpapers.jpg");
+}
+body.clips-feed-page {
+  --dimension-world-background: url("../wallpaper2.jpg");
+}
+body.messages-page {
+  --dimension-world-background: url("../wallpaper1.jpeg");
+}
+body.notifications-page {
+  --dimension-world-background: url("../wallpaper3.jpeg");
+}
+body.settings-page {
+  --dimension-world-background: url("../wallpaper4.jpeg");
+}
+body.analytics-page {
+  --dimension-world-background: url("../wallpaper5.png");
+}
+body.moderation-page {
+  --dimension-world-background: url("../wp5961371-aesthetic-minecraft-pc-wallpapers.jpg");
+}
+body.creator-page {
+  --dimension-world-background: url("../Minecraft_WildernessBound_.Net_2560x1440.png");
+}
+body.auth-page:not(.discover-page):not(.clips-feed-page):not(.messages-page):not(.notifications-page):not(.moderation-page):not(.creator-page) {
+  --dimension-world-background: url("../Minecraft_TheGardenAwakens_DotNet_2560x1440.png");
+}
+body.auth-page.register-layout {
+  --dimension-world-background: url("../sunrise.png");
+}
+body.auth-page:has(#complete-profile-form) {
+  --dimension-world-background: url("../noon.png");
+}
+body.auth-page:has(#set-password-form) {
+  --dimension-world-background: url("../night.png");
+}
+body.auth-page:has(#connection-test) {
+  --dimension-world-background: url("../wallpaper1.jpeg");
+}
+
+/* Let the landscape read around and through the interface.
+   Keep each page's own layout; only the material treatment changes here. */
+:where(
+  .site-header, .dimension-unified-nav,
+  .auth-card, .home-welcome, .home-bottom-panel, .home-shortcut,
+  .discover-search-panel, .discover-intro,
+  .clips-feed, .clips-panel, .clips-side-note,
+  .messages-sidebar, .chat-panel, .message-composer,
+  .creator-profile, .settings-profile-preview,
+  .analytics-stat, .analytics-owner-tools,
+  .moderation-reports > *, .moderation-grid > *,
+  .dimension-ecosystem-switcher .ecosystem-switcher-panel
+) {
+  -webkit-backdrop-filter: blur(22px) saturate(125%);
+  backdrop-filter: blur(22px) saturate(125%);
+}
+:where(
+  .auth-card, .home-welcome, .home-bottom-panel, .home-shortcut,
+  .discover-search-panel, .discover-intro,
+  .clips-feed, .clips-panel,
+  .messages-sidebar, .chat-panel, .message-composer,
+  .creator-profile, .settings-profile-preview,
+  .analytics-stat, .analytics-owner-tools,
+  .moderation-reports > *, .moderation-grid > *
+) {
+  background-color: rgba(7, 19, 11, .58) !important;
+  border-color: rgba(220, 239, 211, .22) !important;
+  box-shadow: 0 18px 65px rgba(0,0,0,.19), inset 0 1px rgba(255,255,255,.055);
+}
+
+/* Navigation remains readable without turning into an opaque banner. */
+.site-header, .dimension-unified-nav {
+  background: rgba(5, 14, 8, .58) !important;
+  border-color: rgba(220,239,211,.2) !important;
+}
+
+/* Wallpaper-backed headings get a reliable text scrim, not another solid card. */
+:where(.discover-page-heading, .clips-feed-heading, .notifications-heading, .analytics-heading) {
+  text-shadow: 0 2px 24px rgba(0,0,0,.42);
+}
+:where(.discover-page-heading, .clips-side-note) {
+  box-shadow: 0 20px 70px rgba(0,0,0,.2);
+}
+
+/* The page canvas remains fixed while content scrolls; mobile browsers use a
+   normal fixed viewport layer to avoid background-attachment performance costs. */
+@media (max-width: 700px) {
+  body::before { background-position: center, center, 58% center; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  :where(
+    .auth-card, .home-welcome, .home-bottom-panel, .home-shortcut,
+    .discover-search-panel, .discover-intro, .clips-feed, .clips-panel,
+    .messages-sidebar, .chat-panel, .message-composer, .creator-profile,
+    .settings-profile-preview, .analytics-stat, .analytics-owner-tools,
+    .moderation-reports > *, .moderation-grid > *
+  ) {
+    background-color: rgba(5, 14, 8, .94) !important;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
