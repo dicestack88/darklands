@@ -58,3 +58,13 @@
       url("../wallpaper3.jpeg") !important;
   }
 }
+
+/* Runtime-selected creator banners and user-owned custom banners take precedence
+   over the static fallback cover, while keeping the same readable scrim. */
+.creator-page .creator-cover.has-random-wallpaper:not(.has-custom-banner),
+.creator-page .creator-cover.has-custom-banner {
+  background-image: linear-gradient(90deg,rgba(4,15,7,.24),rgba(4,15,7,.04)),var(--creator-cover-image) !important;
+  background-size:cover !important;
+  background-position:center 46% !important;
+  background-repeat:no-repeat !important;
+}
