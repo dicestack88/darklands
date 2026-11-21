@@ -45,8 +45,8 @@
     const avatar=$("creator-avatar");
     if(profile.avatar_url&&/^https?:\/\//i.test(profile.avatar_url)){const img=document.createElement("img");img.src=profile.avatar_url;img.alt="";avatar.replaceChildren(img);}else avatar.textContent=initials(profile.display_name);
 
-    if(profile.banner_url&&/^https?:\/\//i.test(profile.banner_url)){
-      $("creator-cover").style.backgroundImage="linear-gradient(90deg,rgba(5,8,15,.18),rgba(5,8,15,.05)),url("+JSON.stringify(profile.banner_url)+")";
+    if(profile.banner_url&&/^https?:\\/\\//i.test(profile.banner_url)){
+      $("creator-cover").style.setProperty("--creator-cover-image","url("+JSON.stringify(profile.banner_url)+")");
       $("creator-cover").classList.add("has-custom-banner");
     }
     const ownProfile=auth.user.id===profile.id;
