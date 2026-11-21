@@ -18,3 +18,19 @@
 .discover-search-panel .clips-search-results::-webkit-scrollbar{width:8px}
 .discover-search-panel .clips-search-results::-webkit-scrollbar-thumb{border-radius:8px;background:rgba(166,184,255,.25)}
 @media(max-width:620px){.discover-search-panel .clips-search-results{left:12px;right:12px;padding:13px;max-height:65vh}}
+
+/* Search results must escape the glass panel rather than being clipped at its edge. */
+.discover-page .discover-search-panel{
+  position:relative;
+  z-index:20;
+  overflow:visible;
+}
+.discover-page .discover-search-panel .clips-search-results{
+  top:calc(100% + 8px);
+  left:clamp(12px,3vw,32px);
+  right:clamp(12px,3vw,32px);
+  z-index:50;
+  max-height:min(68vh,560px);
+  overflow:auto;
+}
+.discover-page .discover-intro{position:relative;z-index:1}
